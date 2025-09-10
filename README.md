@@ -50,7 +50,7 @@ C:\xampp\php\php.exe generate_hash.php <password>
 VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi'); 
 ```
 5. **Importa il file ``schema.sql`` nel tuo database MySQL**
-6. **Modifica il file ``db.php`` cambiando l'host, il nome utente e la password**
+6. **Modifica il file ``db.php`` cambiando l'host, il nome utente e la password (necessari per la connessione al database MySQL)**
 - Esempio:
 ```php
 $host = "localhost";
