@@ -28,6 +28,7 @@ if ($res->num_rows === 0) {
 <html>
 <head>
   <title>Orario <?php echo htmlspecialchars($room); ?></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/timetable.css">
   <link rel="stylesheet" href="css/navbar.css">
 </head>
