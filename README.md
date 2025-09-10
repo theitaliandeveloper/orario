@@ -43,7 +43,7 @@ php generate_hash.php <password>
 - Windows:
 ```batch
 cd C:\xampp\htdocs\utils
-C:\xampp\php\php.exe
+C:\xampp\php\php.exe generate_hash.php <password>
 ```
 - Modifica quindi questa linea nel file ``schema.sql``, sostituendo l'hash predefinito con quello generato prima:
 ```sql
