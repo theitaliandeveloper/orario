@@ -24,7 +24,7 @@ if (!isset($_SESSION['admin'])) {
 
   <!-- Contenuto Dashboard -->
   <div class="dashboard">
-    <h1>Benvenuto nel pannello di amministrazione!</h1>
+    <h1>Benvenuto, <?php echo $_SESSION['admin']; ?>!</h1>
     <p>
       <a href="classes.php">Gestisci Classi</a>
       <a href="subjects.php">Gestisci Materie</a>

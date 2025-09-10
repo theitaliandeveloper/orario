@@ -63,7 +63,7 @@ $pass = "password123";
 $oidc = new OpenIDConnectClient(
     'https://keycloak.local/realms/<REALM>/',
     'orario',
-    'abcdefghijklmnop' // opzionale se public client
+    'abcdefghijklmnop'
 );
 $oidc->setRedirectURL('https://orario.local/admin/login.php');
 ```

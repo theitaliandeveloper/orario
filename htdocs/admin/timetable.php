@@ -131,7 +131,7 @@ $res = $conn->query("SELECT timetable.id, classes.name AS class_name, timetable.
         ?></span></td>
             <td data-label="Azione"><span>
                 <a href="timetable.php?delete=<?php echo $row['id']; ?>" 
-                   onclick="return confirm('Sei sicuro di voler eliminare questa voce?');">
+                   onclick="return confirm('Sei sicuro di voler eliminare questa voce?');" class='delete-link'>
                    Elimina
                 </a>
             </span></td>

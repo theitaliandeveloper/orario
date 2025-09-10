@@ -6,7 +6,7 @@ session_start();
 $oidc = new OpenIDConnectClient(
     'https://<KEYCLOAK_URL>/realms/<REALM>/',
     '<CLIENT_ID>',
-    '<CLIENT_SECRET>' // opzionale se public client
+    '<CLIENT_SECRET>'
 );
 // Redirect post-login
 $oidc->setRedirectURL('https://<APP_DOMAIN>/admin/login.php');
