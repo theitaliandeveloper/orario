@@ -1,3 +1,6 @@
+## AVVISO IMPORTANTE
+Questo è il ramo di SVILUPPO. È inteso per testare le ultime funzionalità e aiutarmi nello sviluppo. La stabilità e il funzionamento del codice non sono garantiti. Usare a proprio rischio e pericolo.
+
 # Orario Scuola
 Una piattaforma web per visualizzare gli orari scolastici delle classi, degli insegnanti e dei vari laboratori (se presenti)
 
