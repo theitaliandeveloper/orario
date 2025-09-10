@@ -58,16 +58,16 @@ $user = "utente";
 $pass = "password123";
 ```
 7. **Modifica ``admin/login.php`` e ``admin/logout.php`` con i dati di un'istanza keycloak. In caso tu voglia usare l'autenticazione via nome utente e password (e non keycloak), cancella quei due file e rinomina ``admin/login.php.backup`` in ``login.php`` e ``admin/logout.php.backup`` in ``logout.php``**
-- Esempio (``login.php``):
+- Esempio (``login.php`` con keycloak):
 ```php
 $oidc = new OpenIDConnectClient(
-    'https://keycloak.local/realms/<REALM>/',
+    'https://keycloak.local/realms/master/',
     'orario',
     'abcdefghijklmnop'
 );
 $oidc->setRedirectURL('https://orario.local/admin/login.php');
 ```
-- Esempio (``logout.php``):
+- Esempio (``logout.php`` con keycloak):
 ```php
 header('Location: https://keycloak.local/realms/master/protocol/openid-connect/logout?post_logout_redirect_uri=https://orario.local&client_id=orario');
 ```
