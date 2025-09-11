@@ -41,7 +41,7 @@ include("db.php");
     <?php
     $res = $conn->query("SELECT DISTINCT teacher FROM subjects ORDER BY teacher");
     while($row = $res->fetch_assoc()){
-      if ($row['teacher'] != "No Lezione") {
+      if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {
 	$teacher_name = htmlspecialchars($row['teacher']);
       	echo "<ul><li><b>$teacher_name</b></li>";
       	echo "<li><a href='docenti.php?teacher=".urlencode($teacher_name)."'>Visualizza orario</a></li>";
