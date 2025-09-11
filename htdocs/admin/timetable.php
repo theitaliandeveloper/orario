@@ -100,7 +100,7 @@ if ($class_id > 0) {
         </select>
 
         <br><br>
-
+        <?php if ($class_id > 0): ?> 
         <table>
             <thead>
                 <tr>
@@ -147,7 +147,7 @@ if ($class_id > 0) {
 
         <br>
         <button type="submit">Salva orario</button>
-
+        <?php endif; ?>
         <?php if (isset($_GET['saved'])): ?>
             <p class="saved-message">✅ Orario salvato con successo!</p>
         <?php endif; ?>
