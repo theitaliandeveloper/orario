@@ -10,9 +10,9 @@ $hours = [
   5 => "Quinta ora<br>11:55 - 12:50",
   6 => "Sesta ora<br>12:50 - 13:50"
 ];
-if ($teacher == "No Lezione") {
-	header("Location: index.php");
-    	exit;
+if ($teacher == "No Lezione" || $teacher == "sconosciuto") {
+	  header("Location: index.php");
+    exit;
 }
 else if (!isset($_GET['teacher'])) {
     header("Location: index.php");
@@ -23,7 +23,6 @@ $teacher = $conn->real_escape_string($_GET['teacher']);
 $res = $conn->query("SELECT DISTINCT teacher FROM subjects WHERE teacher = '$teacher' LIMIT 1");
 
 if ($res->num_rows === 0) {
-    // Insegnante non trovato
     header("Location: index.php");
     exit;
 }
