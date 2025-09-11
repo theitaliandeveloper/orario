@@ -66,6 +66,6 @@ if ($res->num_rows === 0) {
     }
     ?>
   </table>
-<p style="text-align: center;">Copyright (C) 2025 EmmeV. All rights reserved.</p>
+<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
