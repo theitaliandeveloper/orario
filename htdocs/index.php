@@ -15,6 +15,7 @@ include("db.php");
     <div class="links">
       <a href="index.php">Home</a>
       <a href="admin/index.php">Admin</a>
+      <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank">Codice sorgente</a>
     </div>
   </div>
   <h1>Orario - a.s. 2025/26</h1>
