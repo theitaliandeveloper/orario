@@ -62,10 +62,10 @@ $pass = "password123";
 ```php
 $oidc = new OpenIDConnectClient(
     'https://keycloak.local/realms/master/',
-    'orario',
-    'abcdefghijklmnop'
+    'orario', // Client ID Keycloak
+    'abcdefghijklmnop' // Client secret Keycloak
 );
-$oidc->setRedirectURL('https://orario.local/admin/login.php');
+$oidc->setRedirectURL('https://orario.local/admin/login.php'); // orario.local è il dominio base di questa piattaforma
 ```
 - Esempio (``logout.php`` con keycloak):
 ```php
