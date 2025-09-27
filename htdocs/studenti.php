@@ -54,10 +54,33 @@ if ($res->num_rows === 0) {
                            FROM timetable 
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id 
                            WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
-        if($row = $q->fetch_assoc()){
-          echo "<td data-label='$d'><div class='subject'>{$row['name']}</div>
-                     <div class='teacher'>{$row['teacher']}</div>
-                     <div class='room'>{$row['room']}</div></td>";
+
+        if($q->num_rows > 0){
+          $row = $q->fetch_assoc();
+          $subject = $row['name'];
+          $room = $row['room'];
+          
+          // metto il primo docente
+          $teachers = [$row['teacher']];
+          
+          // aggiungo eventuali altri docenti
+          while($row = $q->fetch_assoc()){
+            $teachers[] = $row['teacher'];
+          }
+
+          // se più docenti -> unisci con virgola e "e" finale
+          if(count($teachers) > 1){
+            $last = array_pop($teachers);
+            $teachers_list = implode(", ", $teachers) . " e " . $last;
+          } else {
+            $teachers_list = $teachers[0];
+          }
+
+          echo "<td data-label='$d'>
+                  <div class='subject'>$subject</div>
+                  <div class='teacher'>$teachers_list</div>
+                  <div class='room'>$room</div>
+                </td>";
         } else {
           echo "<td data-label='$d'></td>";
         }

@@ -106,62 +106,115 @@ td:hover {
   td { padding-left: 50%; }
 }
 */
+
+/* --- tuoi stili desktop (questi restano uguali) --- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+th, td {
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 10px;
+  vertical-align: top;
+}
+
+th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+td {
+  transition: background-color 0.2s;
+}
+
+td:hover {
+  background-color: #f7f7f7;
+}
+
+.subject {
+  font-weight: bold;
+  color: #1f618d;
+}
+
+.teacher {
+  font-size: 0.9em;
+  color: #2c3e50;
+}
+
+.room {
+  font-size: 0.8em;
+  color: #666;
+}
+
+/* --- qui sostituisci con la versione migliorata --- */
 @media (max-width: 768px) {
-  table, thead, tbody, th, td, tr {
-    display: block;
-    width: 100%;
+  table {
+    box-shadow: none;
+    border-radius: 0;
   }
 
   tr {
-    margin-bottom: 15px;
-    padding: 0;
-    border-bottom: 2px solid #ddd;
-  }
-
-  th {
-    display: none;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    overflow: hidden;
+    padding: 10px;
   }
 
   td {
-    position: relative;
-    padding-left: 50%;
-    text-align: left;
+    padding: 8px 8px 8px 50%;
     border: none;
     border-bottom: 1px solid #eee;
-    min-height: 50px; /* ensures consistent vertical spacing */
-    box-sizing: border-box;
+    font-size: 0.9em;
   }
 
   td::before {
     position: absolute;
     top: 10px;
     left: 10px;
-    width: 40%;
-    font-weight: bold;
-    white-space: nowrap;
+    color: #1f618d;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     content: attr(data-label);
   }
 
-  /* make content stack nicely */
-  td > .subject,
-  td > .teacher,
+  td > .subject {
+    font-weight: 600;
+    font-size: 1em;
+    margin-bottom: 2px;
+  }
+
+  td > .teacher {
+    font-size: 0.85em;
+    color: #555;
+  }
+
   td > .room {
-    display: block;
-    margin: 2px 0;
+    font-size: 0.75em;
+    color: #888;
   }
 
   td:last-child {
-    border-bottom: 0;
+    border-bottom: none;
   }
 }
 
-/* Extra small screens */
 @media (max-width: 480px) {
   td {
-    padding-left: 55%;
+    padding-left: 45%;
   }
   td::before {
-    width: 45%;
+    width: 40%;
+    font-size: 0.8em;
   }
 }
-
