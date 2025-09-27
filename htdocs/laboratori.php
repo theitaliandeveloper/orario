@@ -60,11 +60,31 @@ if ($res->num_rows === 0) {
           WHERE subjects.room='". $conn->real_escape_string($room) ."' 
             AND timetable.day='$d' AND timetable.hour=$hnum
         ");
-        if($row = $q->fetch_assoc()){
+
+        if($q->num_rows > 0){
+          $subject = null;
+          $entries = [];
+
+          while($row = $q->fetch_assoc()){
+            // salvo materia (prendo la prima, di solito è la stessa per tutti)
+            if($subject === null) {
+              $subject = $row['subject_name'];
+            }
+            // accumulo classi + docente
+            $entries[] = $row['class_name'] . " (" . $row['teacher'] . ")";
+          }
+
+          // unisci le classi con " e " se sono 2, altrimenti virgole + "e" finale
+          if(count($entries) > 1){
+            $last = array_pop($entries);
+            $entries_list = implode(", ", $entries) . " e " . $last;
+          } else {
+            $entries_list = $entries[0];
+          }
+
           echo "<td data-label='$d'>
-                  <div class='subject'>{$row['subject_name']}</div>
-                  <div class='teacher'>{$row['teacher']}</div>
-                  <div class='room'>{$row['class_name']}</div>
+                  <div class='subject'>$subject</div>
+                  <div class='room'>$entries_list</div>
                 </td>";
         } else {
           echo "<td data-label='$d'></td>";

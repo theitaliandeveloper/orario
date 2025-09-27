@@ -47,7 +47,44 @@ if (isset($_GET['delete'])) {
     <input type="text" name="room" placeholder="Laboratorio (opzionale)">
     <button type="submit">Aggiungi</button>
   </form>
+  <?php
+// 1. Aggiornamento dati
+if(isset($_POST['update'])){
+    $id = intval($_POST['id']);
+    $name = $conn->real_escape_string($_POST['name']);
+    $teacher = $conn->real_escape_string($_POST['teacher']);
+    $room = $conn->real_escape_string($_POST['room']);
 
+    $conn->query("UPDATE subjects 
+                  SET name='$name', teacher='$teacher', room='$room' 
+                  WHERE id=$id");
+}
+// 2. Mostrare il form se edit richiesto
+if(isset($_GET['edit'])){
+    $id = intval($_GET['edit']);
+    $res = $conn->query("SELECT * FROM subjects WHERE id=$id");
+    if($res->num_rows > 0){
+        $subject = $res->fetch_assoc();
+        ?>
+        <h3>Modifica materia</h3>
+        <form method="post" action="subjects.php">
+            <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
+            
+            <label>Materia:</label>
+            <input type="text" name="name" value="<?php echo htmlspecialchars($subject['name']); ?>"><br>
+            
+            <label>Docente:</label>
+            <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>"><br>
+            
+            <label>Aula:</label>
+            <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>"><br>
+            
+            <button type="submit" name="update">Salva modifiche</button>
+        </form>
+        <?php
+    }
+}
+?>
   <table>
     <tr>
       <th>ID</th>
@@ -64,7 +101,10 @@ if (isset($_GET['delete'])) {
               <td>{$row['name']}</td>
               <td>{$row['teacher']}</td>
               <td>{$row['room']}</td>
-              <td><a href='subjects.php?delete={$row['id']}' class='delete-link'>Elimina</a></td>
+              <td>
+                <a href='subjects.php?edit={$row['id']}' class='edit-link'>Modifica</a> | 
+                <a href='subjects.php?delete={$row['id']}' class='delete-link'>Elimina</a>
+              </td>
             </tr>";
     }
     ?>
