@@ -14,5 +14,6 @@ $oidc->setRedirectURL('https://<APP_DOMAIN>/admin/login.php');
 $oidc->authenticate();
 $userinfo = $oidc->getVerifiedClaims();
 $_SESSION['admin'] = $userinfo->preferred_username;
+$_SESSION['auth_type'] = 'keycloak';
 header("Location: index.php");
 exit;

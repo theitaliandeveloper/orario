@@ -29,6 +29,11 @@ if (!isset($_SESSION['admin'])) {
       <a href="classes.php">Gestisci Classi</a>
       <a href="subjects.php">Gestisci Materie</a>
       <a href="timetable.php">Gestisci Orario</a>
+      <?php
+      if ($_SESSION['auth_type'] === 'local') {
+        echo '<a href="changepassword.php">Cambia Password</a>';
+      }
+      ?>
       <!--<a href="logout.php">Logout</a>-->
     </p>
     <p>

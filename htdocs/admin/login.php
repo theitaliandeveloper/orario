@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($row = $res->fetch_assoc()) {
         if (password_verify($password, $row['password'])) {
             $_SESSION['admin'] = $row['username'];
+            $_SESSION['auth_type'] = 'local';
             header("Location: index.php");
             exit;
         }
