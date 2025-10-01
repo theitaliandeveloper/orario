@@ -84,6 +84,8 @@ curl -fsSL https://get.docker.com | bash
 ```
 2. Compila e crea il container:
 ```bash
+git clone https://git.vichingo455.freeddns.org/emmev-code/orario
+cd orario
 docker compose up -d
 ```
 3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
