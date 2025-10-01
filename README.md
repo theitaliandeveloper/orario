@@ -87,7 +87,7 @@ curl -fsSL https://get.docker.com | bash
 git clone https://git.vichingo455.freeddns.org/emmev-code/orario
 cd orario
 git checkout dev # richiesto per passare alla versione di sviluppo
-docker compose up -d
+docker compose up -d --build
 ```
 3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
 
