@@ -60,8 +60,8 @@ $host = "localhost";
 $user = "utente";
 $pass = "password123";
 ```
-7. **Modifica ``admin/login.php`` e ``admin/logout.php`` con i dati di un'istanza keycloak. In caso tu voglia usare l'autenticazione via nome utente e password (e non keycloak), cancella quei due file e rinomina ``admin/login.php.backup`` in ``login.php`` e ``admin/logout.php.backup`` in ``logout.php``**
-- Esempio (``login.php`` con keycloak):
+7. **(Opzionale) Modifica ``admin/login.php.keycloak`` e ``admin/logout.php.keycloak`` con i dati di un'istanza keycloak, in caso tu voglia usare Keycloak e non l'autenticazione integrata. Cancella poi i file ``login.php`` e ``logout.php`` e rinomina ``admin/login.php.keycloak`` in ``login.php`` e ``admin/logout.php.keycloak`` in ``logout.php``**
+- Esempio (``login.php.keycloak``):
 ```php
 $oidc = new OpenIDConnectClient(
     'https://keycloak.local/realms/master/',
@@ -70,7 +70,7 @@ $oidc = new OpenIDConnectClient(
 );
 $oidc->setRedirectURL('https://orario.local/admin/login.php'); // orario.local è il dominio base di questa piattaforma
 ```
-- Esempio (``logout.php`` con keycloak):
+- Esempio (``logout.php.keycloak``):
 ```php
 header('Location: https://keycloak.local/realms/master/protocol/openid-connect/logout?post_logout_redirect_uri=https://orario.local&client_id=orario');
 ```
