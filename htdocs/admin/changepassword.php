@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $message = "Le nuove password non coincidono.";
     } else {
         // Recupera hash password attuale
-        $stmt = $conn->prepare("SELECT password FROM admins WHERE username = ?");
+        $stmt = $conn->prepare("SELECT password FROM admin WHERE username = ?");
         $stmt->bind_param("s", $user);
         $stmt->execute();
         $res = $stmt->get_result();
