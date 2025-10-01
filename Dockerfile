@@ -6,5 +6,7 @@ RUN chown -R www-data:www-data /var/www/html
 # For now remove OpenID files from container, OpenID integration will come soon.
 RUN rm /var/www/html/admin/login.php.keycloak
 RUN rm /var/www/html/admin/logout.php.keycloak
+RUN rm /var/www/html/admin/composer.json
+RUN rm /var/www/html/admin/composer.lock
 RUN a2enmod rewrite
 EXPOSE 80

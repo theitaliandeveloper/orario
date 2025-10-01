@@ -76,6 +76,18 @@ header('Location: https://keycloak.local/realms/master/protocol/openid-connect/l
 ```
 8. **Apri ``http://localhost`` e goditi il sito**
 
+## Installazione con Docker
+NOTA: L'installazione con Docker è in fase di sviluppo attivo, quindi potrebbe non funzionare.
+1. Installa Docker
+```bash
+curl -fsSL https://get.docker.com | bash
+```
+2. Compila e crea il container:
+```bash
+docker compose up -d
+```
+3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
+
 ## Licenza
 **Orario Scuola, Copyright (C) 2025 EmmeV.**
 
