@@ -56,9 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <div class="admin-container">
     <h1>Cambia Password</h1>
-    <?php if ($message): ?>
-        <p style="color:<?php echo strpos($message,'successo')!==false ? 'green':'red'; ?>;"><?php echo $message; ?></p>
-    <?php endif; ?>
+    <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
     <form method="POST">
         <label>Password attuale:<br>
@@ -75,6 +73,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <button type="submit">Cambia password</button>
     </form>
+        <?php if ($message): ?>
+        <p style="color:<?php echo strpos($message,'successo')!==false ? 'green':'red'; ?>;"><?php echo $message; ?></p>
+    <?php endif; ?>
 </div>
 
 </body>

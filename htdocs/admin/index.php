@@ -34,7 +34,6 @@ if (!isset($_SESSION['admin'])) {
         echo '<a href="changepassword.php">Cambia Password</a>';
       }
       ?>
-      <!--<a href="logout.php">Logout</a>-->
     </p>
     <p>
       Nota: Questa pagina si vede meglio da computer desktop. Se sei da computer, puoi ignorare questo messaggio.
