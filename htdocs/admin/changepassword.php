@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($row && password_verify($old, $row['password'])) {
             $newHash = password_hash($new, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("UPDATE admins SET password = ? WHERE username = ?");
+            $stmt = $conn->prepare("UPDATE admin SET password = ? WHERE username = ?");
             $stmt->bind_param("ss", $newHash, $user);
             $stmt->execute();
             $message = "Password cambiata con successo.";
