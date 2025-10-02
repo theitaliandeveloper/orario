@@ -104,7 +104,8 @@ body {
   text-align: center;
 }
 
-.admin-container input[type="text"] {
+.admin-container input[type="text"],
+.admin-container input[type="password"] {
   padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -336,6 +337,7 @@ body {
 
   .admin-container form select,
   .admin-container form input[type="text"],
+  .admin-container input[type="password"],
   .admin-container form button {
     width: 100%;
     margin: 5px 0;
@@ -409,6 +411,7 @@ body {
 
   .admin-container form select,
   .admin-container form input[type="text"],
+  .admin-container input[type="password"],
   .admin-container form button {
     font-size: 0.95em;
   }
