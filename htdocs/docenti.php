@@ -38,7 +38,7 @@ if ($res->num_rows === 0) {
 </head>
 <body>
   <div class="navbar">
-    <div class="logo">Orario Scuola 2025/26</div>
+    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
     </div>

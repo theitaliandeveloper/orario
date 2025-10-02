@@ -3,7 +3,7 @@ session_start();
 include("../lib/db.php");
 include("../config/config.php");
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE === 'local') {
     $username = $_POST['username'];
     $password = $_POST['password'];
     $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
@@ -20,8 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $error = "Credenziali non valide";
 }
-?>
-<!DOCTYPE html>
+if (AUTH_TYPE === 'local') {
+  echo ```<!DOCTYPE html>
 <html>
 <head>
   <title>Login Admin</title>
@@ -49,4 +49,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </div>
 <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
-</html>
+</html>```;
+}
+else if (AUTH_TYPE === 'keycloak') {
+  require 'vendor/autoload.php';
+  use Jumbojett\OpenIDConnectClient;
+  session_start();
+  // Configura il client Keycloak
+  $oidc = new OpenIDConnectClient(
+    'https://' + KEYCLOAK_DOMAIN + '/realms/' + KEYCLOAK_REALM + '/',
+    KEYCLOAK_CLIENT_ID,
+    KEYCLOAK_CLIENT_SECRET
+  );
+  // Redirect post-login
+  $oidc->setRedirectURL('https://' + APP_DOMAIN + '/admin/login.php');
+  $oidc->authenticate();
+  $userinfo = $oidc->getVerifiedClaims();
+  $_SESSION['admin'] = $userinfo->preferred_username;
+  $_SESSION['auth_type'] = 'keycloak';
+  header("Location: index.php");
+  exit;
+}
+?>

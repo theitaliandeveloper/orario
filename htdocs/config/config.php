@@ -12,5 +12,6 @@ define('AUTH_TYPE','local'); // Può essere keycloak o local (integrata)
 define('KEYCLOAK_DOMAIN','');
 define('KEYCLOAK_REALM','');
 define('KEYCLOAK_CLIENT_ID','');
-define('KEYCLOAK_CLIENT_SECRET','')
+define('KEYCLOAK_CLIENT_SECRET','');
+define('APP_DOMAIN','');
 ?>
