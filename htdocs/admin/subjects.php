@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
-include("../db.php");
+include("../lib/db.php");
+include("../config/config.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name'])) {
     $name = $_POST['name']; 

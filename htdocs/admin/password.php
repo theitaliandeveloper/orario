@@ -1,6 +1,7 @@
 <?php
 session_start();
-include("../db.php");
+include("../lib/db.php");
+include("../config/config.php");
 
 if (!isset($_SESSION['admin']) || $_SESSION['auth_type'] != 'local') {
     header("Location: login.php");

@@ -1,24 +1,25 @@
 <?php
-include("db.php");
+include("lib/db.php");
+include("config/config.php");
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Orario - A.S. 2025/26</title>
+  <title><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/navbar.css">
 </head>
 <body>
 <div class="navbar">
-    <div class="logo">Orario Scuola 2025/26</div>
+    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
       <a href="admin/index.php">Admin</a>
       <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank">Codice sorgente</a>
     </div>
   </div>
-  <h1>Orario - a.s. 2025/26</h1>
+  <h1><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></h1>
 
   <!-- Sezione Classi -->
   <h2>Classi</h2>
