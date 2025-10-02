@@ -1,9 +1,9 @@
 <?php
+use Jumbojett\OpenIDConnectClient;
+require 'vendor/autoload.php';
 session_start();
 include("../lib/db.php");
-include("../config/config.php");
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE === 'local') {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
     $username = $_POST['username'];
     $password = $_POST['password'];
     $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
@@ -20,8 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE === 'local') {
     }
     $error = "Credenziali non valide";
 }
-if (AUTH_TYPE === 'local') {
-  echo ```<!DOCTYPE html>
+if (AUTH_TYPE == 'local') {
+echo <<<HTML
+<!DOCTYPE html>
 <html>
 <head>
   <title>Login Admin</title>
@@ -45,16 +46,16 @@ if (AUTH_TYPE === 'local') {
       <input type="password" name="password" placeholder="Password" required><br>
       <button type="submit">Login</button>
     </form>
-    <?php if(isset($error)) echo "<br><div class='error'>$error</div>"; ?>
-  </div>
+HTML;
+if(isset($error)) echo "<br><div class='error'>$error</div>";
+echo <<<HTML
+</div>
 <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
-</html>```;
+</html>
+HTML;
 }
 else if (AUTH_TYPE === 'keycloak') {
-  require 'vendor/autoload.php';
-  use Jumbojett\OpenIDConnectClient;
-  session_start();
   // Configura il client Keycloak
   $oidc = new OpenIDConnectClient(
     'https://' + KEYCLOAK_DOMAIN + '/realms/' + KEYCLOAK_REALM + '/',

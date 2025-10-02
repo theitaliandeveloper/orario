@@ -1,6 +1,5 @@
 <?php
 include("lib/db.php");
-include("config/config.php");
 $class_id = intval($_GET['class_id']);
 $class = $conn->query("SELECT * FROM classes WHERE id=$class_id")->fetch_assoc();
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];

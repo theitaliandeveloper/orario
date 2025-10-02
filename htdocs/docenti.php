@@ -1,6 +1,5 @@
 <?php
 include("lib/db.php");
-include("config/config.php");
 $teacher = $_GET['teacher'];
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
 $hours = [

@@ -1,12 +1,16 @@
 FROM php:8.2-apache
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 COPY htdocs/ /var/www/html/
-COPY docker/php/db.php /var/www/html/db.php
+COPY docker/php/config.php /var/www/html/config/config.php
+RUN apt-get update && apt-get install -y \
+    unzip \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer --version
+WORKDIR /var/www/html/admin
+RUN composer install --no-interaction
 RUN chown -R www-data:www-data /var/www/html
-# For now remove OpenID files from container, OpenID integration will come soon.
-RUN rm /var/www/html/admin/login.php.keycloak
-RUN rm /var/www/html/admin/logout.php.keycloak
-RUN rm /var/www/html/admin/composer.json
-RUN rm /var/www/html/admin/composer.lock
 RUN a2enmod rewrite
 EXPOSE 80

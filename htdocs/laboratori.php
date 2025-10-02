@@ -1,6 +1,5 @@
 <?php
 include("lib/db.php");
-include("config/config.php");
 $room = $_GET['room']; // aula selezionata
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
 $hours = [

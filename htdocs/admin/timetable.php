@@ -2,7 +2,6 @@
 session_start();
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 include("../lib/db.php");
-include("../config/config.php");
 
 // --- Recupera tutte le materie ---
 $subjects = [];

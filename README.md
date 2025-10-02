@@ -53,28 +53,52 @@ C:\xampp\php\php.exe generate_hash.php <password>
 VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi'); 
 ```
 5. **Importa il file ``schema.sql`` nel tuo database MySQL**
-6. **Modifica il file ``db.php`` cambiando l'host, il nome utente e la password (necessari per la connessione al database MySQL)**
-- Esempio:
+6. **Modifica il file ``config/config.php`` inserendo i valori richiesti**
+- Esempio file ``config/config.php``:
 ```php
-$host = "localhost";
-$user = "utente";
-$pass = "password123";
+<?php
+// Impostazioni Database
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'db');
+}
+if (!defined('DB_USER')) {
+    define('DB_USER', 'orario');
+}
+if (!defined('DB_PASS')) {
+    define('DB_PASS', 'orario');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'school_timetable');
+}
+// Impostazioni sito generali
+if (!defined('APP_NAME')) {
+    define('APP_NAME', 'Orario Scuola');
+}
+if (!defined('YEAR')) {
+    define('YEAR', '2025/26');
+}
+// Impostazioni autenticazione dashboard amministrativa
+if (!defined('AUTH_TYPE')) {
+    define('AUTH_TYPE','local'); // Può essere keycloak o local (integrata)
+}
+if (!defined('KEYCLOAK_DOMAIN')) {
+    define('KEYCLOAK_DOMAIN','');
+}
+if (!defined('KEYCLOAK_REALM')) {
+    define('KEYCLOAK_REALM','');
+}
+if (!defined('KEYCLOAK_CLIENT_ID')) {
+    define('KEYCLOAK_CLIENT_ID','');
+}
+if (!defined('KEYCLOAK_CLIENT_SECRET')) {
+    define('KEYCLOAK_CLIENT_SECRET','');
+}
+if (!defined('APP_DOMAIN')) {
+    define('APP_DOMAIN','');
+}
+?>
 ```
-7. **(Opzionale) Modifica ``admin/login.php.keycloak`` e ``admin/logout.php.keycloak`` con i dati di un'istanza keycloak, in caso tu voglia usare Keycloak e non l'autenticazione integrata. Cancella poi i file ``login.php`` e ``logout.php`` e rinomina ``admin/login.php.keycloak`` in ``login.php`` e ``admin/logout.php.keycloak`` in ``logout.php``**
-- Esempio (``login.php.keycloak``):
-```php
-$oidc = new OpenIDConnectClient(
-    'https://keycloak.local/realms/master/',
-    'orario', // Client ID Keycloak
-    'abcdefghijklmnop' // Client secret Keycloak
-);
-$oidc->setRedirectURL('https://orario.local/admin/login.php'); // orario.local è il dominio base di questa piattaforma
-```
-- Esempio (``logout.php.keycloak``):
-```php
-header('Location: https://keycloak.local/realms/master/protocol/openid-connect/logout?post_logout_redirect_uri=https://orario.local&client_id=orario');
-```
-8. **Apri ``http://localhost`` e goditi il sito**
+7. **Apri ``http://localhost`` e goditi il sito**
 
 ## Installazione con Docker
 NOTA: L'installazione con Docker è in fase di sviluppo attivo, quindi potrebbe non funzionare.
@@ -90,6 +114,10 @@ git checkout dev # richiesto per passare alla versione di sviluppo
 docker compose up -d --build
 ```
 3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
+
+### Per utenti Docker avanzati
+Se sei un utente Docker avanzato e vuoi personalizzare puoi modificare la configurazione di docker nei file ``docker/php/config.php``, ``docker-compose.yml`` e ``Dockerfile`` per adattare tutto al tuo ambiente.
+Per la maggior parte degli utenti consigliamo di usare la configurazione per Docker predefinita.
 
 ## Licenza
 **Orario Scuola, Copyright (C) 2025 EmmeV.**
