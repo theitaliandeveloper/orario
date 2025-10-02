@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_user'])) {
 
     if (!empty($username) && !empty($password)) {
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO admins (username, password) VALUES (?, ?)");
+        $stmt = $conn->prepare("INSERT INTO admin (username, password) VALUES (?, ?)");
         $stmt->bind_param("ss", $username, $hash);
         if ($stmt->execute()) {
             $message = "Utente admin aggiunto con successo.";
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_user'])) {
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     if ($id != 1) { // proteggi super admin
-        $stmt = $conn->prepare("DELETE FROM admins WHERE id = ?");
+        $stmt = $conn->prepare("DELETE FROM admin WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $message = "Utente admin rimosso.";
@@ -42,7 +42,7 @@ if (isset($_GET['delete'])) {
 }
 
 // Fetch admins
-$result = $conn->query("SELECT id, username FROM admins ORDER BY id ASC");
+$result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
 ?>
 <!DOCTYPE html>
 <html>
