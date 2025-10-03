@@ -19,6 +19,9 @@ if (!defined('APP_NAME')) {
 if (!defined('YEAR')) {
     define('YEAR', '2025/26'); // Anno Scolastico Corrente
 }
+if (!defined('DEV_MODE')) {
+    define('DEV_MODE', false); // Modalita' di sviluppo: abilita messaggi di debug aggiuntivi. Imposta su false se sei in produzione
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
     define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak, google

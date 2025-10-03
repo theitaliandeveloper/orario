@@ -7,6 +7,9 @@ $dbname = DB_NAME;
 
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    if (DEV_MODE)
+        die("[DEBUG] Connessione al database fallita: " . $conn->connect_error);
+    else
+        die("Connessione al database fallita!");
 }
 ?>

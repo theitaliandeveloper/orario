@@ -156,6 +156,11 @@ if ($class_id > 0) {
       Nota: Questa pagina si vede meglio da computer desktop. Se sei da computer, puoi ignorare questo messaggio.
     </p>
     <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+    <?php
+      if (DEV_MODE) {
+        echo "<p>[DEBUG] Tipo di autenticazione: " . $_SESSION['auth_type'] . "</p>";
+      }
+    ?>
 </div>
 
 <script>

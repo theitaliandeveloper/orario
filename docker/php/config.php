@@ -19,6 +19,9 @@ if (!defined('APP_NAME')) {
 if (!defined('YEAR')) {
     define('YEAR', '2025/26');
 }
+if (!defined('DEV_MODE')) {
+    define('DEV_MODE', false); // Modalita' di sviluppo
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
     define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak, google

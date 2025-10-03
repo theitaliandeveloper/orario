@@ -16,13 +16,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
           if (password_verify($password, $row['password'])) {
             $_SESSION['admin'] = $row['username'];
             $_SESSION['auth_type'] = 'local';
-            header("Location: index.php");
+            if (DEV_MODE) {
+              echo "[DEBUG] Password " . $password . " trovata con l'hash " . $row['password'] . '. <a href="index.php">Vai al panello amministrativo</a>';
+            }
+            else {
+              header("Location: index.php");
+            }
             exit;
+          } else if (DEV_MODE) {
+              echo "[DEBUG] Password " . $password . " non trovata nel database.";
           }
       }
       $error = "Credenziali non valide";
-    } catch {
-      $error = "Errore durante l'autenticazione. Potrebbe essere un problema con PHP oppure col database.";
+    } catch (Exception $e) {
+      $error = "Errore durante l'autenticazione. Potrebbe essere un problema con PHP oppure col database. Ulteriori dettagli: " . $e;
     }
 }
 if (AUTH_TYPE == 'local') {
@@ -76,7 +83,7 @@ else if (AUTH_TYPE === 'keycloak') {
   $_SESSION['auth_type'] = 'keycloak';
   header("Location: index.php");
   exit;
-  } catch {
+  } catch (Exception $e) {
     http_response_code(500);
       echo <<<HTML
 <!DOCTYPE html>
@@ -99,7 +106,11 @@ else if (AUTH_TYPE === 'keycloak') {
   <div class="login-container">
     <h1>Login Admin</h1>
 HTML;
-echo "<br><div class='error'>Errore durante l'autenticazione con Keycloak. Assicurati di avere impostato i vari parametri correttamente.</div>";
+if (DEV_MODE) {
+  echo "<br><div class='error'>Errore durante l'autenticazione con Keycloak. Assicurati di avere impostato i vari parametri correttamente. Ulteriori dettagli: " . $e . "</div>";
+} else {
+  echo "<br><div class='error'>Errore durante l'autenticazione con Keycloak. Contatta l'amministratore del sito.</div>";
+}
 echo <<<HTML
 </div>
 <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
@@ -165,7 +176,7 @@ HTML;
     exit;
     }
   }
-  } catch {
+  } catch (Exception $e) {
     http_response_code(500);
       echo <<<HTML
 <!DOCTYPE html>
@@ -188,7 +199,11 @@ HTML;
   <div class="login-container">
     <h1>Login Admin</h1>
 HTML;
-echo "<br><div class='error'>Errore durante l'autenticazione con Google. Assicurati di avere impostato i vari parametri correttamente.</div>";
+if (DEV_MODE) {
+  echo "<br><div class='error'>Errore durante l'autenticazione con Google. Assicurati di avere impostato i vari parametri correttamente. Ulteriori dettagli: " . $e . "</div>";
+} else {
+  echo "<br><div class='error'>Errore durante l'autenticazione con Google. Contatta l'amministratore del sito.</div>";
+}
 echo <<<HTML
 </div>
 <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
