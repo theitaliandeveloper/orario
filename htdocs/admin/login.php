@@ -16,15 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
           if (password_verify($password, $row['password'])) {
             $_SESSION['admin'] = $row['username'];
             $_SESSION['auth_type'] = 'local';
-            if (DEV_MODE) {
-              echo "[DEBUG] Password " . $password . " trovata con l'hash " . $row['password'] . '. <a href="index.php">Vai al panello amministrativo</a>';
-            }
-            else {
-              header("Location: index.php");
-            }
+            header("Location: index.php");
             exit;
-          } else if (DEV_MODE) {
-              echo "[DEBUG] Password " . $password . " non trovata nel database.";
           }
       }
       $error = "Credenziali non valide";
