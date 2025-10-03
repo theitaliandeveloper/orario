@@ -3,22 +3,27 @@ use Jumbojett\OpenIDConnectClient;
 require 'vendor/autoload.php';
 session_start();
 include("../lib/db.php");
+if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    if ($row = $res->fetch_assoc()) {
-        if (password_verify($password, $row['password'])) {
+    try {
+      $username = $_POST['username'];
+      $password = $_POST['password'];
+      $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+      $stmt->bind_param("s", $username);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      if ($row = $res->fetch_assoc()) {
+          if (password_verify($password, $row['password'])) {
             $_SESSION['admin'] = $row['username'];
             $_SESSION['auth_type'] = 'local';
             header("Location: index.php");
             exit;
-        }
+          }
+      }
+      $error = "Credenziali non valide";
+    } catch {
+      $error = "Errore durante l'autenticazione. Potrebbe essere un problema con PHP oppure col database.";
     }
-    $error = "Credenziali non valide";
 }
 if (AUTH_TYPE == 'local') {
 echo <<<HTML
@@ -56,7 +61,8 @@ echo <<<HTML
 HTML;
 }
 else if (AUTH_TYPE === 'keycloak') {
-  // Configura il client Keycloak
+  try {
+    // Configura il client Keycloak
   $oidc = new OpenIDConnectClient(
     'https://' + KEYCLOAK_DOMAIN + '/realms/' + KEYCLOAK_REALM + '/',
     KEYCLOAK_CLIENT_ID,
@@ -70,5 +76,126 @@ else if (AUTH_TYPE === 'keycloak') {
   $_SESSION['auth_type'] = 'keycloak';
   header("Location: index.php");
   exit;
+  } catch {
+    http_response_code(500);
+      echo <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo">Admin Dashboard</div>
+    <div class="links">
+      <a href="/">Torna al sito</a>
+    </div>
+  </div>
+
+  <!-- Container login -->
+  <div class="login-container">
+    <h1>Login Admin</h1>
+HTML;
+echo "<br><div class='error'>Errore durante l'autenticazione con Keycloak. Assicurati di avere impostato i vari parametri correttamente.</div>";
+echo <<<HTML
+</div>
+<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+</body>
+</html>
+HTML;
+    exit;
+  }
+}
+else if (AUTH_TYPE === 'google') {
+  try {
+    $oidc = new OpenIDConnectClient(
+     'https://accounts.google.com',
+      GOOGLE_CLIENT_ID,
+      GOOGLE_CLIENT_SECRET
+  );
+
+  $oidc->setRedirectURL(GOOGLE_REDIRECT_URI);
+  $oidc->addScope(['openid', 'email', 'profile']);
+
+  // Callback da Google
+  if (isset($_GET['code'])) {
+    $oidc->authenticate();
+    $email = $oidc->requestUserInfo('email');
+
+    $domain = substr(strrchr($email, "@"), 1);
+
+    if (!GOOGLE_ONLY_ALLOWED_DOMAINS || in_array($domain, GOOGLE_ALLOWED_DOMAINS)) {
+      $_SESSION['admin'] = $email;
+      $_SESSION['auth_type'] = 'google';
+      header("Location: index.php");
+      exit;
+    } else {
+      http_response_code(403);
+      echo <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo">Admin Dashboard</div>
+    <div class="links">
+      <a href="/">Torna al sito</a>
+    </div>
+  </div>
+
+  <!-- Container login -->
+  <div class="login-container">
+    <h1>Login Admin</h1>
+HTML;
+echo "<br><div class='error'>Non sei autorizzato ad accedere a questa pagina</div>";
+echo <<<HTML
+</div>
+<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+</body>
+</html>
+HTML;
+    exit;
+    }
+  }
+  } catch {
+    http_response_code(500);
+      echo <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo">Admin Dashboard</div>
+    <div class="links">
+      <a href="/">Torna al sito</a>
+    </div>
+  </div>
+
+  <!-- Container login -->
+  <div class="login-container">
+    <h1>Login Admin</h1>
+HTML;
+echo "<br><div class='error'>Errore durante l'autenticazione con Google. Assicurati di avere impostato i vari parametri correttamente.</div>";
+echo <<<HTML
+</div>
+<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+</body>
+</html>
+HTML;
+    exit;
+  }
 }
 ?>
