@@ -154,67 +154,61 @@ td:hover {
   color: #666;
 }
 
-/* --- qui sostituisci con la versione migliorata --- */
+/* Mostra solo la tabella su desktop */
+.desktop-schedule { display: table; width: 100%; border-collapse: collapse; }
+.mobile-schedule { display: none; }
+
+/* Mobile: nasconde tabella, mostra card */
 @media (max-width: 768px) {
-  table {
-    box-shadow: none;
-    border-radius: 0;
+  .desktop-schedule { display: none; }
+  .mobile-schedule { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .mobile-schedule .day {
+    background: #f8f8f8;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1rem;
   }
 
-  tr {
-    margin-bottom: 20px;
+  .mobile-schedule h2 {
+    margin-top: 0;
+    margin-bottom: .8rem;
+    font-size: 1.2rem;
+    color: #111;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: .3rem;
+  }
+
+  .lesson {
     background: #fff;
+    border: 1px solid #eee;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    overflow: hidden;
-    padding: 10px;
+    padding: .6rem .8rem;
+    margin-bottom: .6rem;
   }
 
-  td {
-    padding: 8px 8px 8px 50%;
-    border: none;
-    border-bottom: 1px solid #eee;
-    font-size: 0.9em;
+  .lesson.empty {
+    opacity: .6;
   }
 
-  td::before {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #1f618d;
-    font-size: 0.85em;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    content: attr(data-label);
+  .hour {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 3px;
   }
 
-  td > .subject {
+  .subject {
     font-weight: 600;
-    font-size: 1em;
-    margin-bottom: 2px;
+    color: #222;
   }
 
-  td > .teacher {
-    font-size: 0.85em;
+  .teacher {
+    font-size: 0.85rem;
     color: #555;
   }
 
-  td > .room {
-    font-size: 0.75em;
-    color: #888;
-  }
-
-  td:last-child {
-    border-bottom: none;
-  }
-}
-
-@media (max-width: 480px) {
-  td {
-    padding-left: 45%;
-  }
-  td::before {
-    width: 40%;
-    font-size: 0.8em;
+  .room {
+    font-size: 0.8rem;
+    color: #777;
   }
 }

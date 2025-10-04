@@ -1,5 +1,5 @@
 <?php
-include("lib/db.php");
+#include("lib/db.php");
 $class_id = intval($_GET['class_id']);
 $class = $conn->query("SELECT * FROM classes WHERE id=$class_id")->fetch_assoc();
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
@@ -89,6 +89,50 @@ if ($res->num_rows === 0) {
     }
     ?>
   </table>
+  <div class="mobile-schedule">
+  <?php foreach($days as $d): ?>
+    <div class="day">
+      <h2><?= $d ?></h2>
+      <?php
+      foreach($hours as $hnum => $hlabel):
+        $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
+                           FROM timetable 
+                           LEFT JOIN subjects ON timetable.subject_id = subjects.id 
+                           WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
+
+        if($q->num_rows > 0):
+          $row = $q->fetch_assoc();
+          $subject = $row['name'];
+          $room = $row['room'];
+
+          $teachers = [$row['teacher']];
+          while($row = $q->fetch_assoc()){
+            $teachers[] = $row['teacher'];
+          }
+
+          if(count($teachers) > 1){
+            $last = array_pop($teachers);
+            $teachers_list = implode(", ", $teachers) . " e " . $last;
+          } else {
+            $teachers_list = $teachers[0];
+          }
+      ?>
+          <div class="lesson">
+            <div class="hour"><?= $hlabel ?></div>
+            <div class="subject"><?= $subject ?></div>
+            <div class="teacher"><?= $teachers_list ?></div>
+            <?php if($room): ?><div class="room"><?= $room ?></div><?php endif; ?>
+          </div>
+      <?php else: ?>
+          <div class="lesson empty">
+            <div class="hour"><?= $hlabel ?></div>
+            <div class="subject">—</div>
+          </div>
+      <?php endif; ?>
+      <?php endforeach; ?>
+    </div>
+  <?php endforeach; ?>
+  </div>
 <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
