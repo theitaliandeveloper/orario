@@ -73,6 +73,9 @@ header('Location: https://keycloak.local/realms/master/protocol/openid-connect/l
 ```
 8. **Apri ``http://localhost`` e goditi il sito**
 
+## Reporting an issue
+The issues reporting has been moved from GitHub to [Bugzilla](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Safe%20Exam%20Browser%20Patch). Click [here](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Safe%20Exam%20Browser%20Patch) to go to Bugzilla.
+
 ## Licenza
 **Orario Scuola, Copyright (C) 2025 EmmeV.**
 
