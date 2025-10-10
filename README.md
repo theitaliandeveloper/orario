@@ -122,6 +122,9 @@ docker compose up -d --build
 Se sei un utente Docker avanzato e vuoi personalizzare puoi modificare la configurazione di docker nei file ``docker/php/config.php``, ``docker-compose.yml`` e ``Dockerfile`` per adattare tutto al tuo ambiente.
 Per la maggior parte degli utenti consigliamo di usare la configurazione per Docker predefinita.
 
+## Segnalare un problema
+Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
+
 ## Licenza
 **Orario Scuola, Copyright (C) 2025 EmmeV.**
 
