@@ -3,20 +3,47 @@ session_start();
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 include("../lib/db.php");
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name'])) {
+// FIX: Usa prepared statements per sicurezza
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && !isset($_POST['update'])) {
     $name = $_POST['name']; 
     $teacher = $_POST['teacher']; 
     $room = $_POST['room'];
-    if (!empty($name)) { 
-        $conn->query("INSERT INTO subjects (name,teacher,room) VALUES ('$name','$teacher','$room')"); 
+    
+    if (!empty($name)) {
+        $stmt = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $name, $teacher, $room);
+        $stmt->execute();
+        $stmt->close();
     }
-    header("Location: subjects.php"); exit;
+    header("Location: subjects.php"); 
+    exit;
 }
 
+// FIX: Aggiunto redirect dopo update
+if(isset($_POST['update'])){
+    $id = intval($_POST['id']);
+    $name = $_POST['name'];
+    $teacher = $_POST['teacher'];
+    $room = $_POST['room'];
+
+    $stmt = $conn->prepare("UPDATE subjects SET name=?, teacher=?, room=? WHERE id=?");
+    $stmt->bind_param("sssi", $name, $teacher, $room, $id);
+    $stmt->execute();
+    $stmt->close();
+    
+    header("Location: subjects.php");
+    exit;
+}
+
+// FIX: Usa prepared statement anche per delete
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
-    $conn->query("DELETE FROM subjects WHERE id=$id");
-    header("Location: subjects.php"); exit;
+    $stmt = $conn->prepare("DELETE FROM subjects WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: subjects.php"); 
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -41,50 +68,50 @@ if (isset($_GET['delete'])) {
   <h1>Gestisci Materie</h1>
   <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
+  <?php
+  // Mostra form di modifica solo se richiesto
+  if(isset($_GET['edit'])){
+      $id = intval($_GET['edit']);
+      $stmt = $conn->prepare("SELECT * FROM subjects WHERE id=?");
+      $stmt->bind_param("i", $id);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      
+      if($res->num_rows > 0){
+          $subject = $res->fetch_assoc();
+          ?>
+          <h3>Modifica materia</h3>
+          <form method="post" action="subjects.php">
+              <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
+              
+              <label>Materia:</label>
+              <input type="text" name="name" value="<?php echo htmlspecialchars($subject['name']); ?>" required><br>
+              
+              <label>Docente:</label>
+              <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>" required><br>
+              
+              <label>Aula (opzionale):</label>
+              <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>"><br>
+              
+              <button type="submit" name="update">Salva modifiche</button>
+              <a href="subjects.php" style="margin-left: 10px;">Annulla</a>
+          </form>
+          <hr>
+          <?php
+      }
+      $stmt->close();
+  }
+  ?>
+
+  <h2>Aggiungi Nuova Materia</h2>
   <form method="POST">
     <input type="text" name="name" placeholder="Materia" required>
     <input type="text" name="teacher" placeholder="Docente" required>
     <input type="text" name="room" placeholder="Laboratorio (opzionale)">
     <button type="submit">Aggiungi</button>
   </form>
-  <?php
-// 1. Aggiornamento dati
-if(isset($_POST['update'])){
-    $id = intval($_POST['id']);
-    $name = $conn->real_escape_string($_POST['name']);
-    $teacher = $conn->real_escape_string($_POST['teacher']);
-    $room = $conn->real_escape_string($_POST['room']);
 
-    $conn->query("UPDATE subjects 
-                  SET name='$name', teacher='$teacher', room='$room' 
-                  WHERE id=$id");
-}
-// 2. Mostrare il form se edit richiesto
-if(isset($_GET['edit'])){
-    $id = intval($_GET['edit']);
-    $res = $conn->query("SELECT * FROM subjects WHERE id=$id");
-    if($res->num_rows > 0){
-        $subject = $res->fetch_assoc();
-        ?>
-        <h3>Modifica materia</h3>
-        <form method="post" action="subjects.php">
-            <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
-            
-            <label>Materia:</label>
-            <input type="text" name="name" value="<?php echo htmlspecialchars($subject['name']); ?>"><br>
-            
-            <label>Docente:</label>
-            <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>"><br>
-            
-            <label>Aula:</label>
-            <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>"><br>
-            
-            <button type="submit" name="update">Salva modifiche</button>
-        </form>
-        <?php
-    }
-}
-?>
+  <h2>Elenco Materie</h2>
   <table>
     <tr>
       <th>ID</th>
@@ -98,12 +125,12 @@ if(isset($_GET['edit'])){
     while($row=$res->fetch_assoc()){
       echo "<tr>
               <td>{$row['id']}</td>
-              <td>{$row['name']}</td>
-              <td>{$row['teacher']}</td>
-              <td>{$row['room']}</td>
+              <td>" . htmlspecialchars($row['name']) . "</td>
+              <td>" . htmlspecialchars($row['teacher']) . "</td>
+              <td>" . htmlspecialchars($row['room']) . "</td>
               <td>
                 <a href='subjects.php?edit={$row['id']}' class='edit-link'>Modifica</a> | 
-                <a href='subjects.php?delete={$row['id']}' class='delete-link'>Elimina</a>
+                <a href='subjects.php?delete={$row['id']}' class='delete-link' onclick='return confirm(\"Sei sicuro di voler eliminare questa materia?\")'>Elimina</a>
               </td>
             </tr>";
     }

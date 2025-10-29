@@ -1,5 +1,5 @@
 <?php
-#include("lib/db.php");
+include("lib/db.php");  // FIX: Decommentato
 $class_id = intval($_GET['class_id']);
 $class = $conn->query("SELECT * FROM classes WHERE id=$class_id")->fetch_assoc();
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
@@ -11,16 +11,17 @@ $hours = [
   5 => "Quinta ora<br>11:55 - 12:50",
   6 => "Sesta ora<br>12:50 - 13:50"
 ];
+
+// FIX: Validazione classe prima di tutto
 if (!isset($_GET['class_id'])) {
     header("Location: index.php");
     exit;
 }
 
-$class_id = intval($_GET['class_id']); // sicurezza
+$class_id = intval($_GET['class_id']);
 $res = $conn->query("SELECT id FROM classes WHERE id = $class_id LIMIT 1");
 
 if ($res->num_rows === 0) {
-    // Classe non trovata
     header("Location: index.php");
     exit;
 }
@@ -28,7 +29,7 @@ if ($res->num_rows === 0) {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Orario <?php echo $class['name']; ?></title>
+  <title>Orario <?php echo htmlspecialchars($class['name']); ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/timetable.css">
   <link rel="stylesheet" href="css/navbar.css">
@@ -40,8 +41,10 @@ if ($res->num_rows === 0) {
       <a href="index.php">Home</a>
     </div>
   </div>
-  <h1>Orario della classe <?php echo $class['name']; ?></h1>
-  <table>
+  <h1>Orario della classe <?php echo htmlspecialchars($class['name']); ?></h1>
+  
+  <!-- Visualizzazione Desktop -->
+  <table class="desktop-schedule">
     <tr>
       <th></th>
       <?php foreach($days as $d) echo "<th>$d</th>"; ?>
@@ -56,31 +59,34 @@ if ($res->num_rows === 0) {
                            WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
 
         if($q->num_rows > 0){
-          $row = $q->fetch_assoc();
-          $subject = $row['name'];
-          $room = $row['room'];
+          // FIX: Gestione corretta di multipli docenti/materie
+          $entries = [];
+          $subject = null;
+          $room = null;
           
-          // metto il primo docente
-          $teachers = [$row['teacher']];
-          
-          // aggiungo eventuali altri docenti
           while($row = $q->fetch_assoc()){
-            $teachers[] = $row['teacher'];
+            if($subject === null) {
+              $subject = $row['name'];
+              $room = $row['room'];
+            }
+            $entries[] = $row['teacher'];
           }
 
-          // se più docenti -> unisci con virgola e "e" finale
-          if(count($teachers) > 1){
-            $last = array_pop($teachers);
-            $teachers_list = implode(", ", $teachers) . " e " . $last;
+          // Unisci i docenti correttamente
+          if(count($entries) > 1){
+            $last = array_pop($entries);
+            $teachers_list = implode(", ", $entries) . " e " . $last;
           } else {
-            $teachers_list = $teachers[0];
+            $teachers_list = $entries[0];
           }
 
           echo "<td data-label='$d'>
-                  <div class='subject'>$subject</div>
-                  <div class='teacher'>$teachers_list</div>
-                  <div class='room'>$room</div>
-                </td>";
+                  <div class='subject'>" . htmlspecialchars($subject) . "</div>
+                  <div class='teacher'>" . htmlspecialchars($teachers_list) . "</div>";
+          if(!empty($room)) {
+            echo "<div class='room'>" . htmlspecialchars($room) . "</div>";
+          }
+          echo "</td>";
         } else {
           echo "<td data-label='$d'></td>";
         }
@@ -89,10 +95,12 @@ if ($res->num_rows === 0) {
     }
     ?>
   </table>
+
+  <!-- Visualizzazione Mobile -->
   <div class="mobile-schedule">
   <?php foreach($days as $d): ?>
     <div class="day">
-      <h2><?= $d ?></h2>
+      <h2><?= htmlspecialchars($d) ?></h2>
       <?php
       foreach($hours as $hnum => $hlabel):
         $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
@@ -101,31 +109,35 @@ if ($res->num_rows === 0) {
                            WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
 
         if($q->num_rows > 0):
-          $row = $q->fetch_assoc();
-          $subject = $row['name'];
-          $room = $row['room'];
-
-          $teachers = [$row['teacher']];
+          // FIX: Stessa logica corretta anche per mobile
+          $entries = [];
+          $subject = null;
+          $room = null;
+          
           while($row = $q->fetch_assoc()){
-            $teachers[] = $row['teacher'];
+            if($subject === null) {
+              $subject = $row['name'];
+              $room = $row['room'];
+            }
+            $entries[] = $row['teacher'];
           }
 
-          if(count($teachers) > 1){
-            $last = array_pop($teachers);
-            $teachers_list = implode(", ", $teachers) . " e " . $last;
+          if(count($entries) > 1){
+            $last = array_pop($entries);
+            $teachers_list = implode(", ", $entries) . " e " . $last;
           } else {
-            $teachers_list = $teachers[0];
+            $teachers_list = $entries[0];
           }
       ?>
           <div class="lesson">
-            <div class="hour"><?= $hlabel ?></div>
-            <div class="subject"><?= $subject ?></div>
-            <div class="teacher"><?= $teachers_list ?></div>
-            <?php if($room): ?><div class="room"><?= $room ?></div><?php endif; ?>
+            <div class="hour"><?= strip_tags($hlabel) ?></div>
+            <div class="subject"><?= htmlspecialchars($subject) ?></div>
+            <div class="teacher"><?= htmlspecialchars($teachers_list) ?></div>
+            <?php if(!empty($room)): ?><div class="room"><?= htmlspecialchars($room) ?></div><?php endif; ?>
           </div>
       <?php else: ?>
           <div class="lesson empty">
-            <div class="hour"><?= $hlabel ?></div>
+            <div class="hour"><?= strip_tags($hlabel) ?></div>
             <div class="subject">—</div>
           </div>
       <?php endif; ?>
@@ -133,6 +145,7 @@ if ($res->num_rows === 0) {
     </div>
   <?php endforeach; ?>
   </div>
+
 <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>

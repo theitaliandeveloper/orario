@@ -1,6 +1,5 @@
 <?php
 include("lib/db.php");
-$room = $_GET['room']; // aula selezionata
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
 $hours = [
   1 => "Prima ora<br>7:50 - 8:50",
@@ -10,6 +9,7 @@ $hours = [
   5 => "Quinta ora<br>11:55 - 12:50",
   6 => "Sesta ora<br>12:50 - 13:50"
 ];
+
 if (!isset($_GET['room'])) {
     header("Location: index.php");
     exit;
@@ -19,7 +19,6 @@ $room = $conn->real_escape_string($_GET['room']);
 $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room = '$room' LIMIT 1");
 
 if ($res->num_rows === 0) {
-    // Aula non trovata
     header("Location: index.php");
     exit;
 }
@@ -42,7 +41,8 @@ if ($res->num_rows === 0) {
 
   <h1>Orario <?php echo htmlspecialchars($room); ?></h1>
 
-  <table>
+  <!-- Visualizzazione Desktop -->
+  <table class="desktop-schedule">
     <tr>
       <th></th>
       <?php foreach($days as $d) echo "<th>$d</th>"; ?>
@@ -66,15 +66,13 @@ if ($res->num_rows === 0) {
           $entries = [];
 
           while($row = $q->fetch_assoc()){
-            // salvo materia (prendo la prima, di solito è la stessa per tutti)
             if($subject === null) {
               $subject = $row['subject_name'];
             }
-            // accumulo classi + docente
             $entries[] = $row['class_name'] . " (" . $row['teacher'] . ")";
           }
 
-          // unisci le classi con " e " se sono 2, altrimenti virgole + "e" finale
+          // FIX: Gestione corretta di multiple classi
           if(count($entries) > 1){
             $last = array_pop($entries);
             $entries_list = implode(", ", $entries) . " e " . $last;
@@ -83,8 +81,8 @@ if ($res->num_rows === 0) {
           }
 
           echo "<td data-label='$d'>
-                  <div class='subject'>$subject</div>
-                  <div class='room'>$entries_list</div>
+                  <div class='subject'>" . htmlspecialchars($subject) . "</div>
+                  <div class='room'>" . htmlspecialchars($entries_list) . "</div>
                 </td>";
         } else {
           echo "<td data-label='$d'></td>";
@@ -94,6 +92,57 @@ if ($res->num_rows === 0) {
     }
     ?>
   </table>
-  <p style="text-align: center;">Copyright (C) 2025 EmmeV. All rights reserved.</p>
+
+  <!-- FIX: Visualizzazione Mobile aggiunta -->
+  <div class="mobile-schedule">
+  <?php foreach($days as $d): ?>
+    <div class="day">
+      <h2><?= htmlspecialchars($d) ?></h2>
+      <?php
+      foreach($hours as $hnum => $hlabel):
+        $q = $conn->query("
+          SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
+          FROM timetable
+          LEFT JOIN subjects ON timetable.subject_id = subjects.id
+          LEFT JOIN classes ON timetable.class_id = classes.id
+          WHERE subjects.room='". $conn->real_escape_string($room) ."' 
+            AND timetable.day='$d' AND timetable.hour=$hnum
+        ");
+
+        if($q->num_rows > 0):
+          $subject = null;
+          $entries = [];
+
+          while($row = $q->fetch_assoc()){
+            if($subject === null) {
+              $subject = $row['subject_name'];
+            }
+            $entries[] = $row['class_name'] . " (" . $row['teacher'] . ")";
+          }
+
+          if(count($entries) > 1){
+            $last = array_pop($entries);
+            $entries_list = implode(", ", $entries) . " e " . $last;
+          } else {
+            $entries_list = $entries[0];
+          }
+      ?>
+          <div class="lesson">
+            <div class="hour"><?= strip_tags($hlabel) ?></div>
+            <div class="subject"><?= htmlspecialchars($subject) ?></div>
+            <div class="room"><?= htmlspecialchars($entries_list) ?></div>
+          </div>
+      <?php else: ?>
+          <div class="lesson empty">
+            <div class="hour"><?= strip_tags($hlabel) ?></div>
+            <div class="subject">—</div>
+          </div>
+      <?php endif; ?>
+      <?php endforeach; ?>
+    </div>
+  <?php endforeach; ?>
+  </div>
+
+  <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
