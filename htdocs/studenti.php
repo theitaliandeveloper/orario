@@ -4,12 +4,12 @@ $class_id = intval($_GET['class_id']);
 $class = $conn->query("SELECT * FROM classes WHERE id=$class_id")->fetch_assoc();
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
 $hours = [
-  1 => "Prima ora<br>7:50 - 8:50",
-  2 => "Seconda ora<br>8:50 - 9:45",
-  3 => "Terza ora<br>9:55 - 10:50",
-  4 => "Quarta ora<br>10:50 - 11:45",
-  5 => "Quinta ora<br>11:55 - 12:50",
-  6 => "Sesta ora<br>12:50 - 13:50"
+  1 => "Prima ora<br> 7:50 - 8:50",
+  2 => "Seconda ora<br> 8:50 - 9:45",
+  3 => "Terza ora<br> 9:55 - 10:50",
+  4 => "Quarta ora<br> 10:50 - 11:45",
+  5 => "Quinta ora<br> 11:55 - 12:50",
+  6 => "Sesta ora<br> 12:50 - 13:50"
 ];
 
 // FIX: Validazione classe prima di tutto
