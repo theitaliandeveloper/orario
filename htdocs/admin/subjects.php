@@ -94,7 +94,7 @@ if (isset($_GET['delete'])) {
               <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>"><br>
               
               <button type="submit" name="update">Salva modifiche</button>
-              <a id="cancel-edit" href="subjects.php" style="margin-left: 10px;">Annulla</a>
+              <a class="cancel-edit" href="subjects.php" style="margin-left: 10px;">Annulla</a>
           </form>
           <hr>
           <?php
