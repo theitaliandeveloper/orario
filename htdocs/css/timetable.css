@@ -1,214 +1,145 @@
+/* Base styles */
 body {
-  font-family: Arial, sans-serif;
-  padding: 15px;
-  background-color: #f0f2f5;
-  color: #333;
-  margin: 0;
+    font-family: Arial, sans-serif;
+    padding: 15px;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
 }
 
 h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #2c3e50;
-  font-size: 1.8em;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 1.8em;
 }
 
 /* Table styles */
 table {
-  border-collapse: collapse;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-th, td {
-  border: 1px solid #ccc;
-  text-align: center;
-  padding: 10px;
-  vertical-align: top;
-}
-
-th {
-  background-color: #e0e0e0;
-  font-weight: bold;
-}
-
-td {
-  transition: background-color 0.2s;
-}
-
-td:hover {
-  background-color: #f7f7f7;
-}
-
-.subject {
-  font-weight: bold;
-  color: #1f618d;
-}
-
-.teacher {
-  font-size: 0.9em;
-  color: #2c3e50;
-}
-
-.room {
-  font-size: 0.8em;
-  color: #666;
-}
-
-/*
-@media (max-width: 768px) {
-  table, thead, tbody, th, td, tr {
-    display: block;
+    border-collapse: collapse;
     width: 100%;
-  }
-
-  tr {
-    margin-bottom: 15px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 10px;
-  }
-
-  th {
-    display: none;
-  }
-
-  td {
-    text-align: left;
-    padding: 10px 10px 10px 45%;
-    position: relative;
-    border: none;
-    border-bottom: 1px solid #eee;
-  }
-
-  td::before {
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    width: 40%;
-    white-space: nowrap;
-    font-weight: bold;
-    content: attr(data-label);
-  }
-
-  td:last-child {
-    border-bottom: 0;
-  }
-}
-@media (max-width: 480px) {
-  body { padding: 10px; }
-  h1 { font-size: 1.5em; }
-  td::before { font-size: 0.9em; }
-  td { padding-left: 50%; }
-}
-*/
-
-/* --- tuoi stili desktop (questi restano uguali) --- */
-table {
-  border-collapse: collapse;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 th, td {
-  border: 1px solid #ccc;
-  text-align: center;
-  padding: 10px;
-  vertical-align: top;
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 10px;
+    vertical-align: top;
 }
 
 th {
-  background-color: #e0e0e0;
-  font-weight: bold;
+    background-color: #e0e0e0;
+    font-weight: bold;
 }
 
 td {
-  transition: background-color 0.2s;
+    transition: background-color 0.2s;
 }
 
 td:hover {
-  background-color: #f7f7f7;
+    background-color: #f7f7f7;
 }
 
 .subject {
-  font-weight: bold;
-  color: #1f618d;
+    font-weight: bold;
+    color: #1f618d;
 }
 
 .teacher {
-  font-size: 0.9em;
-  color: #2c3e50;
+    font-size: 0.9em;
+    color: #2c3e50;
 }
 
 .room {
-  font-size: 0.8em;
-  color: #666;
+    font-size: 0.8em;
+    color: #666;
 }
 
-/* Mostra solo la tabella su desktop */
-.desktop-schedule { display: table; width: 100%; border-collapse: collapse; }
-.mobile-schedule { display: none; }
+/* Desktop/Mobile layout control */
+.desktop-schedule {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
 
-/* Mobile: nasconde tabella, mostra card */
+.mobile-schedule {
+    display: none;
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
-  .desktop-schedule { display: none; }
-  .mobile-schedule { display: flex; flex-direction: column; gap: 1.5rem; }
+    .desktop-schedule {
+        display: none;
+    }
+    
+    .mobile-schedule {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
 
-  .mobile-schedule .day {
-    background: #f8f8f8;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    padding: 1rem;
-  }
+    .mobile-schedule .day {
+        background: #f8f8f8;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+    }
 
-  .mobile-schedule h2 {
-    margin-top: 0;
-    margin-bottom: .8rem;
-    font-size: 1.2rem;
-    color: #111;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: .3rem;
-  }
+    .mobile-schedule h2 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: #111;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.3rem;
+    }
 
-  .lesson {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: .6rem .8rem;
-    margin-bottom: .6rem;
-  }
+    .lesson {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 0.6rem 0.8rem;
+        margin-bottom: 0.6rem;
+    }
 
-  .lesson.empty {
-    opacity: .6;
-  }
+    .lesson.empty {
+        opacity: 0.6;
+    }
 
-  .hour {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 3px;
-  }
+    .hour {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 3px;
+    }
 
-  .subject {
-    font-weight: 600;
-    color: #222;
-  }
+    .subject {
+        font-weight: 600;
+        color: #222;
+    }
 
-  .teacher {
-    font-size: 0.85rem;
-    color: #555;
-  }
+    .teacher {
+        font-size: 0.85rem;
+        color: #555;
+    }
 
-  .room {
-    font-size: 0.8rem;
-    color: #777;
-  }
+    .room {
+        font-size: 0.8rem;
+        color: #777;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+    }
 }
