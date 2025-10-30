@@ -90,7 +90,7 @@ if (isset($_GET['delete'])) {
               <label>Docente:</label>
               <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>" required><br>
               
-              <label>Aula (opzionale):</label>
+              <label>Laboratorio (opzionale):</label>
               <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>"><br>
               
               <button type="submit" name="update">Salva modifiche</button>
@@ -117,7 +117,7 @@ if (isset($_GET['delete'])) {
       <th>ID</th>
       <th>Materia</th>
       <th>Docente</th>
-      <th>Aula</th>
+      <th>Laboratorio</th>
       <th>Azione</th>
     </tr>
     <?php
