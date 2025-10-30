@@ -29,7 +29,7 @@ sudo apt install -y composer php-cli curl php-mysql php-curl php-mbstring php-xm
 3. **Installa le dipendenze del pannello d'amministrazione**
 - Debian:
 ```bash
-cd /var/www/orario/admin
+cd /var/www/html/admin
 composer install
 ```
 - Windows (con XAMPP):
@@ -40,26 +40,31 @@ composer install
 4. **(opzionale) Genera una password hashata**
 - Debian
 ```bash
-cd /var/www/orario/utils
+cd orario/utils
 php generate_hash.php <password>
 ```
 - Windows:
 ```batch
-cd C:\xampp\htdocs\utils
+cd orario\utils
 C:\xampp\php\php.exe generate_hash.php <password>
 ```
 - Modifica quindi questa linea nel file ``schema.sql``, sostituendo l'hash predefinito con quello generato prima:
 ```sql
-VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi'); 
+VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi');
 ```
 5. **Importa il file ``schema.sql`` nel tuo database MySQL**
+- Esempio Debian:
+```bash
+mysql -u root -p < orario/schema.sql
+```
+
 6. **Modifica il file ``config/config.php`` inserendo i valori richiesti**
 - Esempio file ``config/config.php``:
 ```php
 <?php
 // Impostazioni Database
 if (!defined('DB_HOST')) {
-    define('DB_HOST', 'db'); // Host del database (ad esempio localhost)
+    define('DB_HOST', 'localhost'); // Host del database (ad esempio localhost)
 }
 if (!defined('DB_USER')) {
     define('DB_USER', 'orario'); // Utente del database (ad esempio orario)
