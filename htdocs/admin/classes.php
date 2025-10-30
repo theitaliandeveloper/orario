@@ -49,7 +49,7 @@ if (isset($_GET['delete'])) {
         echo "<tr>
                 <td>{$row['id']}</td>
                 <td>{$row['name']}</td>
-                <td><a href='classes.php?delete={$row['id']}' class='delete-link' onclick='return confirm(\"Sei sicuro di voler eliminare questa classe?\")>Elimina</a></td>
+                <td><a href='classes.php?delete={$row['id']}' class='delete-link' onclick='return confirm(\"Sei sicuro di voler eliminare questa classe?\")'>Elimina</a></td>
               </tr>";
       }
       ?>
