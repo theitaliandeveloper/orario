@@ -170,17 +170,19 @@ body {
 }
 
 .admin-container form a.cancel-edit {
-  padding: 8px 15px;
-  border: none;
+  display: inline-block;
+  margin: 10px;
+  padding: 12px 25px;
   background-color: #1f618d;
   color: #fff;
-  border-radius: 6px;
-  cursor: pointer;
+  text-decoration: none;
+  border-radius: 8px;
   transition: background-color 0.2s;
 }
 
 .admin-container form a.cancel-edit:hover {
   background-color: #f39c12;
+  color: #fff;
 }
 
 
