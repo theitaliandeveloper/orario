@@ -169,7 +169,7 @@ body {
   color: #3a2bc0;
 }
 
-.admin-container a.form.cancel-edit {
+.admin-container form a.cancel-edit {
   padding: 8px 15px;
   border: none;
   background-color: #1f618d;
@@ -179,7 +179,7 @@ body {
   transition: background-color 0.2s;
 }
 
-.admin-container a.form.cancel-edit:hover {
+.admin-container form a.cancel-edit:hover {
   background-color: #f39c12;
 }
 
