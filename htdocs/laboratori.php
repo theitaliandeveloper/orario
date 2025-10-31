@@ -63,16 +63,21 @@ if ($res->num_rows === 0) {
 
         if($q->num_rows > 0){
           $subject = null;
-          $entries = [];
+          // FIX: Uso array associativo per evitare duplicati classe+docente
+          $class_teacher_pairs = [];
 
           while($row = $q->fetch_assoc()){
             if($subject === null) {
               $subject = $row['subject_name'];
             }
-            $entries[] = $row['class_name'] . " (" . $row['teacher'] . ")";
+            // Creo una coppia unica classe-docente
+            $pair = $row['class_name'] . " (" . $row['teacher'] . ")";
+            $class_teacher_pairs[$pair] = true; // Uso chiave per evitare duplicati
           }
 
-          // FIX: Gestione corretta di multiple classi
+          // Converto in array e unisco
+          $entries = array_keys($class_teacher_pairs);
+          
           if(count($entries) > 1){
             $last = array_pop($entries);
             $entries_list = implode(", ", $entries) . " e " . $last;
@@ -93,7 +98,7 @@ if ($res->num_rows === 0) {
     ?>
   </table>
 
-  <!-- FIX: Visualizzazione Mobile aggiunta -->
+  <!-- Visualizzazione Mobile -->
   <div class="mobile-schedule">
   <?php foreach($days as $d): ?>
     <div class="day">
@@ -111,15 +116,18 @@ if ($res->num_rows === 0) {
 
         if($q->num_rows > 0):
           $subject = null;
-          $entries = [];
+          $class_teacher_pairs = [];
 
           while($row = $q->fetch_assoc()){
             if($subject === null) {
               $subject = $row['subject_name'];
             }
-            $entries[] = $row['class_name'] . " (" . $row['teacher'] . ")";
+            $pair = $row['class_name'] . " (" . $row['teacher'] . ")";
+            $class_teacher_pairs[$pair] = true;
           }
 
+          $entries = array_keys($class_teacher_pairs);
+          
           if(count($entries) > 1){
             $last = array_pop($entries);
             $entries_list = implode(", ", $entries) . " e " . $last;

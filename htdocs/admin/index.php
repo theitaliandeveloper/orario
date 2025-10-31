@@ -25,11 +25,12 @@ if (!isset($_SESSION['admin'])) {
 
   <!-- Contenuto Dashboard -->
   <div class="dashboard">
-    <h1>Benvenuto, <?php echo $_SESSION['admin']; ?>!</h1>
+    <h1>Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
     <p>
       <a href="classes.php">Gestisci Classi</a>
       <a href="subjects.php">Gestisci Materie</a>
       <a href="timetable.php">Gestisci Orario</a>
+      <a href="importer.php" style="background: #28a745;">🔄 Importa Orario</a>
       <?php
       if ($_SESSION['auth_type'] === 'local') {
         echo '<a href="password.php">Cambia Password</a>';
@@ -48,4 +49,3 @@ if (!isset($_SESSION['admin'])) {
   </div>
 </body>
 </html>
-
