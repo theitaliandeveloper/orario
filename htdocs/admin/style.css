@@ -1,0 +1,348 @@
+/* ===== BASE ===== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  background-color: #2c3e50;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  border-radius: 0 0 10px 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.navbar.text-center {
+  justify-content: center;
+}
+
+.navbar .logo {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.navbar a {
+  color: #fff;
+  text-decoration: none;
+  margin-left: 15px;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.navbar a:hover {
+  color: #f39c12;
+}
+
+/* ===== CONTAINERS ===== */
+.dashboard,
+.admin-container,
+.login-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 80px auto;
+  text-align: center;
+}
+
+.dashboard {
+  text-align: center;
+}
+
+/* ===== HEADINGS ===== */
+.dashboard h1,
+.admin-container h1,
+.login-container h1 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+  text-align: center;
+}
+
+/* ===== LINKS ===== */
+.dashboard a {
+  display: inline-block;
+  margin: 10px;
+  padding: 12px 25px;
+  background-color: #1f618d;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.dashboard a:hover {
+  background-color: #f39c12;
+}
+
+.admin-container a.back-link {
+  display: inline-block;
+  margin-bottom: 15px;
+  text-decoration: none;
+  color: #1f618d;
+  font-weight: bold;
+}
+
+.admin-container a.back-link:hover {
+  color: #f39c12;
+}
+
+.admin-container a.delete-link {
+  color: #e74c3c;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.admin-container a.delete-link:hover {
+  color: #c0392b;
+}
+
+.admin-container a.edit-link {
+  color: #4d5cdb;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.admin-container a.edit-link:hover {
+  color: #3a2bc0;
+}
+
+.admin-container form a.cancel-edit {
+  display: inline-block;
+  margin: 10px;
+  padding: 12px 25px;
+  background-color: #1f618d;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.admin-container form a.cancel-edit:hover {
+  background-color: #f39c12;
+}
+
+/* ===== FORMS ===== */
+.admin-container form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-container input[type="text"],
+.admin-container input[type="password"],
+.login-container input[type="text"],
+.login-container input[type="password"] {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1em;
+}
+
+.admin-container input[type="text"],
+.admin-container input[type="password"] {
+  width: 200px;
+  margin: 5px;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+  width: 90%;
+  margin: 10px 0;
+}
+
+.admin-container form select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 120px;
+}
+
+.admin-container button,
+.login-container button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #1f618d;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 1em;
+}
+
+.admin-container button:hover,
+.login-container button:hover {
+  background-color: #f39c12;
+}
+
+/* ===== TABLES ===== */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-container table,
+.responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.admin-container th,
+.admin-container td,
+.responsive-table th,
+.responsive-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.responsive-table th,
+.responsive-table td {
+  text-align: left;
+  padding: 8px;
+}
+
+.admin-container th,
+.responsive-table th {
+  background-color: #eee;
+}
+
+.admin-container tr:hover td {
+  background-color: #f7f7f7;
+}
+
+/* ===== MESSAGES ===== */
+.login-container .error {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  /* Form responsive */
+  .admin-container form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-container form select,
+  .admin-container form input[type="text"],
+  .admin-container input[type="password"],
+  .admin-container form button {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  /* Tabelle responsive */
+  .admin-container table,
+  .responsive-table {
+    display: block;
+  }
+
+  .admin-container thead,
+  .responsive-table thead {
+    display: none;
+  }
+
+  .admin-container tbody,
+  .responsive-table tbody,
+  .admin-container tr,
+  .responsive-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-container tr,
+  .responsive-table tr {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+  }
+
+  .admin-container td,
+  .responsive-table td {
+    display: block;
+    text-align: left;
+    padding: 8px 10px;
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid #eee;
+    word-wrap: break-word;
+    white-space: normal;
+    max-width: 100%;
+  }
+
+  .admin-container td:last-child,
+  .responsive-table td:last-child {
+    border-bottom: none;
+  }
+
+  .admin-container td::before,
+  .responsive-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    width: 45%;
+    font-weight: bold;
+    white-space: normal;
+    color: #333;
+  }
+
+  .responsive-table td span {
+    display: block;
+  }
+
+  .admin-container a.delete-link {
+    padding: 4px 8px;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-container td::before,
+  .responsive-table td::before {
+    width: 50%;
+    font-size: 0.9em;
+  }
+
+  .admin-container td,
+  .responsive-table td {
+    font-size: 0.9em;
+    padding: 6px 8px;
+  }
+
+  .admin-container form select,
+  .admin-container form input[type="text"],
+  .admin-container input[type="password"],
+  .admin-container form button {
+    font-size: 0.95em;
+  }
+}

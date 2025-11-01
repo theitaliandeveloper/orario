@@ -1,0 +1,1 @@
+These files are used by docker compose builder to create a working image in one command.
