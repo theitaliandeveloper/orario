@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                             
                             // Cerca/crea materia
                             $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                            $stmt->bind_param("sss", $materiaCompleta, $docente, $laboratorio);
+                            $stmt->bind_param("sss", $materia, $docente, $laboratorio);
                             $stmt->execute();
                             $result = $stmt->get_result();
                             
@@ -81,11 +81,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                                 $subject_id = $result->fetch_assoc()['id'];
                             } else {
                                 $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                $stmt2->bind_param("sss", $materiaCompleta, $docente, $laboratorio);
+                                $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
                                 $stmt2->execute();
                                 $subject_id = $conn->insert_id;
                                 $stmt2->close();
-                                $materie_create[] = "$materiaCompleta ($docente - $laboratorio)";
+                                $materie_create[] = "$materia ($docente - $laboratorio)";
                             }
                             $stmt->close();
                             
@@ -105,10 +105,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                             // Cerca/crea materia
                             if ($laboratorio) {
                                 $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                                $stmt->bind_param("sss", $materiaCompleta, $docente, $laboratorio);
+                                $stmt->bind_param("sss", $materia, $docente, $laboratorio);
                             } else {
                                 $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND (room IS NULL OR room = '')");
-                                $stmt->bind_param("ss", $materiaCompleta, $docente);
+                                $stmt->bind_param("ss", $materia, $docente);
                             }
                             
                             $stmt->execute();
@@ -118,11 +118,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                                 $subject_id = $result->fetch_assoc()['id'];
                             } else {
                                 $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                $stmt2->bind_param("sss", $materiaCompleta, $docente, $laboratorio);
+                                $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
                                 $stmt2->execute();
                                 $subject_id = $conn->insert_id;
                                 $stmt2->close();
-                                $materie_create[] = "$materiaCompleta ($docente" . ($laboratorio ? " - $laboratorio" : "") . ")";
+                                $materie_create[] = "$materia ($docente" . ($laboratorio ? " - $laboratorio" : "") . ")";
                             }
                             $stmt->close();
                             
@@ -140,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                         
                         foreach ($docenti as $docente) {
                             $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                            $stmt->bind_param("sss", $materiaCompleta, $docente, $laboratorio);
+                            $stmt->bind_param("sss", $materia, $docente, $laboratorio);
                             $stmt->execute();
                             $result = $stmt->get_result();
                             
@@ -148,11 +148,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                                 $subject_id = $result->fetch_assoc()['id'];
                             } else {
                                 $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                $stmt2->bind_param("sss", $materiaCompleta, $docente, $laboratorio);
+                                $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
                                 $stmt2->execute();
                                 $subject_id = $conn->insert_id;
                                 $stmt2->close();
-                                $materie_create[] = "$materiaCompleta ($docente - $laboratorio)";
+                                $materie_create[] = "$materia ($docente - $laboratorio)";
                             }
                             $stmt->close();
                             
