@@ -64,12 +64,12 @@ else if (AUTH_TYPE === 'keycloak') {
   try {
     // Configura il client Keycloak
   $oidc = new OpenIDConnectClient(
-    'https://' + KEYCLOAK_DOMAIN + '/realms/' + KEYCLOAK_REALM + '/',
+    'https://' . KEYCLOAK_DOMAIN . '/realms/' . KEYCLOAK_REALM . '/',
     KEYCLOAK_CLIENT_ID,
     KEYCLOAK_CLIENT_SECRET
   );
   // Redirect post-login
-  $oidc->setRedirectURL('https://' + APP_DOMAIN + '/admin/login.php');
+  $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
   $oidc->authenticate();
   $userinfo = $oidc->getVerifiedClaims();
   $_SESSION['admin'] = $userinfo->preferred_username;
