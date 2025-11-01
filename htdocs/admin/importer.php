@@ -57,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                     
                     $ora = $oraData['ora'];
                     $materia = $oraData['materia'];
-                    $materiaCompleta = $oraData['materiaCompleta'];
                     $docenti = $oraData['docenti'];
                     $laboratori = $oraData['laboratori']; // Ora è un array
                     
