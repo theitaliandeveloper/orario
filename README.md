@@ -106,6 +106,9 @@ if (AUTH_TYPE === 'keycloak') {
     if (!defined('KEYCLOAK_CLIENT_SECRET')) {
         define('KEYCLOAK_CLIENT_SECRET',''); // Client Secret per Keycloak (ad esempio abcdefghijklm)
     }
+    if (!defined('KEYCLOAK_ALLOWED_USERS')) {
+        define('KEYCLOAK_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti autorizzati ad accedere all'amministrazione
+    }
 }
 ?>
 ```
