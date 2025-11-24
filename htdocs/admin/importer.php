@@ -2,7 +2,7 @@
 session_start();
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 include("../lib/db.php");
-
+include("../config/config.php");
 $message = "";
 $messageType = "";
 
@@ -10,7 +10,6 @@ $messageType = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
     $classe_codice = trim($_POST['classe_codice']);
     $classe_id = intval($_POST['classe_id']);
-    $api_url = trim($_POST['api_url']);
     
     if (empty($classe_codice) || $classe_id === 0) {
         $message = "Compila tutti i campi obbligatori.";
@@ -18,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
     } else {
         try {
             // Chiama l'API Node.js
-            $url = $api_url . "?classe=" . urlencode($classe_codice);
+            $url = API_URL . "?classe=" . urlencode($classe_codice);
             
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
@@ -290,13 +289,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                 <input type="text" name="classe_codice" id="classe_codice" 
                        placeholder="es: 1A, 2B, 3BIN..." required>
                 <small>Codice della classe nel sistema esterno</small>
-            </div>
-
-            <div class="form-group">
-                <label for="api_url">URL API Node.js</label>
-                <input type="text" name="api_url" id="api_url" 
-                       value="http://localhost:3006/classe" required>
-                <small>Endpoint dell'API Node.js per lo scraping</small>
             </div>
 
             <button type="submit" name="import" style="width: 100%; padding: 12px; font-size: 16px;">

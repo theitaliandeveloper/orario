@@ -19,6 +19,9 @@ if (!defined('APP_NAME')) {
 if (!defined('YEAR')) {
     define('YEAR', '2025/26');
 }
+if (!defined('API_URL')) {
+    define('API_URL', 'http://localhost:3006/classe');
+}
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', false); // Modalita' di sviluppo
 }
