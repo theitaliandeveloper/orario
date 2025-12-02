@@ -1,53 +1,131 @@
 <?php
 // Impostazioni Database
 if (!defined('DB_HOST')) {
-    define('DB_HOST', 'db');
+    $val = getenv('DB_HOST');
+    if ($val !== false && $val !== '') {
+        define('DB_HOST', $val);
+    } else {
+        define('DB_HOST', 'db');
+    }
 }
 if (!defined('DB_USER')) {
-    define('DB_USER', 'orario');
+    $val = getenv('DB_USER');
+    if ($val !== false && $val !== '') {
+        define('DB_USER', $val);
+    } else {
+        define('DB_USER', 'orario');
+    }
 }
 if (!defined('DB_PASS')) {
-    define('DB_PASS', 'orario');
+    $val = getenv('DB_PASS');
+    if ($val !== false && $val !== '') {
+        define('DB_PASS', $val);
+    } else {
+        define('DB_PASS', 'orario');
+    }
 }
 if (!defined('DB_NAME')) {
-    define('DB_NAME', 'school_timetable');
+    $val = getenv('DB_NAME');
+    if ($val !== false && $val !== '') {
+        define('DB_NAME', $val);
+    } else {
+        define('DB_NAME', 'school_timetable');
+    }
 }
 // Impostazioni sito generali
 if (!defined('APP_NAME')) {
-    define('APP_NAME', 'Orario Scuola');
+    $val = getenv('APP_NAME');
+    if ($val !== false && $val !== '') {
+        define('APP_NAME', $val);
+    } else {
+        define('APP_NAME', 'Orario Scuola');
+    }
 }
 if (!defined('YEAR')) {
-    define('YEAR', '2025/26');
+    $val = getenv('YEAR');
+    if ($val !== false && $val !== '') {
+        define('YEAR', $val);
+    } else {
+        define('YEAR', '2025/26');
+    }
 }
 if (!defined('API_URL')) {
-    define('API_URL', 'http://localhost:3006/classe');
+    $val = getenv('API_URL');
+    if ($val !== false && $val !== '') {
+        define('API_URL', $val);
+    } else {
+        define('API_URL', '');
+    }
 }
 if (!defined('DEV_MODE')) {
-    define('DEV_MODE', false); // Modalita' di sviluppo
+    $val = getenv('DEV_MODE');
+    if ($val !== false && $val !== '') {
+        define('DEV_MODE', $val);
+    } else {
+        define('DEV_MODE', false);
+    }
 }
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
-    define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak, google
+    $val = getenv('AUTH_TYPE');
+    if ($val !== false && $val !== '') {
+        define('AUTH_TYPE', $val);
+    } else {
+        define('AUTH_TYPE','local');
+    }
 }
 if (!defined('APP_DOMAIN')) {
-    define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
+    $val = getenv('APP_DOMAIN');
+    if ($val !== false && $val !== '') {
+        define('APP_DOMAIN', $val);
+    } else {
+        define('APP_DOMAIN','');
+    }
 }
 // Impostazioni autenticazione via Keycloak (richiesto solo se AUTH_TYPE sta impostato su keycloak)
 if (AUTH_TYPE === 'keycloak') {
     if (!defined('KEYCLOAK_DOMAIN')) {
-        define('KEYCLOAK_DOMAIN',''); // Dominio di Keycloak (ad esempio auth.yourdomain.com)
+        $val = getenv('KEYCLOAK_DOMAIN');
+        if ($val !== false && $val !== '') {
+            define('KEYCLOAK_DOMAIN', $val);
+        } else {
+            define('KEYCLOAK_DOMAIN','');
+        }
     }
     if (!defined('KEYCLOAK_REALM')) {
-        define('KEYCLOAK_REALM',''); // Realm di Keycloak (ad esempio master)
+        $val = getenv('KEYCLOAK_REALM');
+        if ($val !== false && $val !== '') {
+            define('KEYCLOAK_REALM', $val);
+        } else {
+            define('KEYCLOAK_REALM','');
+        }
     }
     if (!defined('KEYCLOAK_CLIENT_ID')) {
-        define('KEYCLOAK_CLIENT_ID',''); // Client ID per Keycloak (ad esempio orario)
+        $val = getenv('KEYCLOAK_CLIENT_ID');
+        if ($val !== false && $val !== '') {
+            define('DB_USER', $val);
+        } else {
+            define('KEYCLOAK_CLIENT_ID','');
+        }
     }
     if (!defined('KEYCLOAK_CLIENT_SECRET')) {
-        define('KEYCLOAK_CLIENT_SECRET',''); // Client Secret per Keycloak (ad esempio abcdefghijklm)
+        $val = getenv('KEYCLOAK_CLIENT_SECRET');
+        if ($val !== false && $val !== '') {
+            define('KEYCLOAK_CLIENT_SECRET', $val);
+        } else {
+            define('KEYCLOAK_CLIENT_SECRET','');
+        }
     }
     if (!defined('KEYCLOAK_ALLOWED_USERS')) {
-        define('KEYCLOAK_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti autorizzati ad accedere all'amministrazione
+        $json = getenv('USERS');
+        if ($json === false || trim($json) === '') {
+            define('KEYCLOAK_ALLOWED_USERS',[]);
+        }
+        $users = json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            define('KEYCLOAK_ALLOWED_USERS',[]);
+        }
+        define('KEYCLOAK_ALLOWED_USERS',$users);
     }
 }
 ?>

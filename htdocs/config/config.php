@@ -20,7 +20,7 @@ if (!defined('YEAR')) {
     define('YEAR', '2025/26'); // Anno Scolastico Corrente
 }
 if (!defined('API_URL')) {
-    define('API_URL', 'http://localhost:3006/classe');
+    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
 }
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', false); // Modalita' di sviluppo: abilita messaggi di debug aggiuntivi. Imposta su false se sei in produzione

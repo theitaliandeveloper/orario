@@ -7,6 +7,29 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    environment:
+      # --- Configuratione Database ---
+      DB_HOST: db # Host database
+      DB_USER: orario # Utente database
+      DB_PASS: orario # Password dell'utente del database
+      DB_NAME: school_timetable # Nome del database
+
+      # --- Impostazioni sito ---
+      APP_NAME: "Orario Scuola"
+      YEAR: "2025/26"
+      API_URL: ""
+      DEV_MODE: "false"
+
+      # --- Impostazioni Autenticazione ---
+      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
+      APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
+
+      # --- Impostazioni di Keycloak (solo se il tipo di autenticazione è Keycloak) ---
+      KEYCLOAK_DOMAIN: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
+      KEYCLOAK_REALM: "" # Realm di Keycloak, ad esempio master
+      KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
+      KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      KEYCLOAK_ALLOWED_USERS: '["admin","prof","segreteria"]'
   db:
     image: mariadb:11
     container_name: orario-db

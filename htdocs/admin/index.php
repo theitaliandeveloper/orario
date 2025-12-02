@@ -30,7 +30,11 @@ if (!isset($_SESSION['admin'])) {
       <a href="classes.php">Gestisci Classi</a>
       <a href="subjects.php">Gestisci Materie</a>
       <a href="timetable.php">Gestisci Orario</a>
-      <a href="importer.php" style="background: #28a745;">🔄 Importa Orario</a>
+      <?php
+          if (defined(API_URL) || API_URL != "") {
+            echo '<a href="importer.php" style="background: #28a745;">🔄 Importa Orario</a>';
+          }
+      ?>
       <?php
       if ($_SESSION['auth_type'] === 'local') {
         echo '<a href="password.php">Cambia Password</a>';

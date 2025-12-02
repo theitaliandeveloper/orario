@@ -1,6 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
+else if (!defined(API_URL) || API_URL == "") { header("Location: index.php"); exit; }
 include("../lib/db.php");
 $message = "";
 $messageType = "";
