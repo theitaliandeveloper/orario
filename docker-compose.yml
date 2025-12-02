@@ -15,10 +15,10 @@ services:
       DB_NAME: school_timetable # Nome del database
 
       # --- Impostazioni sito ---
-      APP_NAME: "Orario Scuola"
-      YEAR: "2025/26"
-      API_URL: ""
-      DEV_MODE: "false"
+      APP_NAME: "Orario Scuola" # Nome del sito
+      YEAR: "2025/26" # Anno scolastico corrente
+      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
+      DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
 
       # --- Impostazioni Autenticazione ---
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
@@ -29,16 +29,16 @@ services:
       KEYCLOAK_REALM: "" # Realm di Keycloak, ad esempio master
       KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
       KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
-      KEYCLOAK_ALLOWED_USERS: '["admin","prof","segreteria"]'
+      KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
   db:
     image: mariadb:11
     container_name: orario-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: P@ssw0rd
-      MYSQL_DATABASE: school_timetable
-      MYSQL_USER: orario
-      MYSQL_PASSWORD: orario
+      MYSQL_ROOT_PASSWORD: P@ssw0rd # Password dell'utente root del database
+      MYSQL_DATABASE: school_timetable # Nome del database, da impostare in DB_NAME
+      MYSQL_USER: orario # Utente del database, da impostare in DB_USER
+      MYSQL_PASSWORD: orario # Password del database, da impostare in DB_PASS
     volumes:
       - db_data:/var/lib/mysql
       - ./schema.sql:/docker-entrypoint-initdb.d/init.sql:ro

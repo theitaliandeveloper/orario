@@ -132,9 +132,33 @@ docker compose up -d --build
 ```
 3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
 
-### Per utenti Docker avanzati
-Se sei un utente Docker avanzato e vuoi personalizzare puoi modificare la configurazione di docker nei file ``docker/php/config.php``, ``docker-compose.yml`` e ``Dockerfile`` per adattare tutto al tuo ambiente.
-Per la maggior parte degli utenti consigliamo di usare la configurazione per Docker predefinita.
+### Personalizzare l'istanza
+Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` con un editor di testo e modificare le variabili d'ambiente:
+```yaml
+    environment:
+      # --- Configuratione Database ---
+      DB_HOST: db # Host database
+      DB_USER: orario # Utente database
+      DB_PASS: orario # Password dell'utente del database
+      DB_NAME: school_timetable # Nome del database
+
+      # --- Impostazioni sito ---
+      APP_NAME: "Orario Scuola" # Nome del sito
+      YEAR: "2025/26" # Anno scolastico corrente
+      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
+      DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
+
+      # --- Impostazioni Autenticazione ---
+      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
+      APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
+
+      # --- Impostazioni di Keycloak (solo se il tipo di autenticazione è Keycloak) ---
+      KEYCLOAK_DOMAIN: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
+      KEYCLOAK_REALM: "" # Realm di Keycloak, ad esempio master
+      KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
+      KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+```
 
 ## Segnalare un problema
 Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
