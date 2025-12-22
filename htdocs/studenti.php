@@ -41,6 +41,62 @@ if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
+
+if (isset($_GET['json']) && $_GET['json'] == '1') {
+    header('Content-Type: application/json; charset=utf-8');
+    
+    $timetable = [];
+    
+    foreach($days as $d) {
+        $timetable[$d] = [];
+        
+        foreach($hours as $hnum => $hlabel) {
+            $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
+                               FROM timetable 
+                               LEFT JOIN subjects ON timetable.subject_id = subjects.id 
+                               WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
+            
+            if($q->num_rows > 0) {
+                $teachers = [];
+                $subject = null;
+                $room = null;
+                
+                while($row = $q->fetch_assoc()) {
+                    if($subject === null) {
+                        $subject = $row['name'];
+                        $room = $row['room'];
+                    }
+                    $teachers[] = $row['teacher'];
+                }
+                
+                $timetable[$d][$hnum] = [
+                    'hour' => $hnum,
+                    'time' => strip_tags($hlabel),
+                    'subject' => $subject,
+                    'teachers' => $teachers,
+                    'room' => $room ?? ''
+                ];
+            } else {
+                $timetable[$d][$hnum] = [
+                    'hour' => $hnum,
+                    'time' => strip_tags($hlabel),
+                    'subject' => null,
+                    'teachers' => [],
+                    'room' => null
+                ];
+            }
+        }
+    }
+    
+    $response = [
+        'class_id' => $class_id,
+        'class_name' => $class['name'],
+        'timetable' => $timetable
+    ];
+    
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html>

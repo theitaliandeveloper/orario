@@ -44,6 +44,50 @@ if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
+
+if (isset($_GET['json']) && $_GET['json'] == '1') {
+    header('Content-Type: application/json; charset=utf-8');
+    
+    $timetable = [];
+    
+    foreach($days as $d) {
+        $timetable[$d] = [];
+        
+        foreach($hours as $hnum => $hlabel) {
+            $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+                               FROM timetable 
+                               LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                               LEFT JOIN classes ON timetable.class_id = classes.id
+                               WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
+            
+            if($row = $q->fetch_assoc()) {
+                $timetable[$d][$hnum] = [
+                    'hour' => $hnum,
+                    'time' => strip_tags($hlabel),
+                    'subject' => $row['name'],
+                    'class' => $row['class_name'],
+                    'room' => $row['room'] ?? ''
+                ];
+            } else {
+                $timetable[$d][$hnum] = [
+                    'hour' => $hnum,
+                    'time' => strip_tags($hlabel),
+                    'subject' => null,
+                    'class' => null,
+                    'room' => null
+                ];
+            }
+        }
+    }
+    
+    $response = [
+        'teacher' => $teacher,
+        'timetable' => $timetable
+    ];
+    
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html>
