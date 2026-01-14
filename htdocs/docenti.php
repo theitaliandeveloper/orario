@@ -1,6 +1,6 @@
 <?php
 /*
-Orario Scuola, Copyright (C) 2025 EmmeV.
+Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -173,6 +173,6 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
   <?php endforeach; ?>
   </div>
 
-<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+<p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
