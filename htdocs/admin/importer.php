@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 session_start();
 include("../lib/db.php");
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
-else if (!defined(API_URL) || API_URL == "") { header("Location: index.php"); exit; }
+else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); exit; }
 $message = "";
 $messageType = "";
 
