@@ -33,7 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
     } else {
         try {
             // Chiama l'API Node.js
-            $url = API_URL . "?classe=" . urlencode($classe_codice);
+            $baseUrl = rtrim(API_URL, '/');
+            $url = $baseUrl . "?classe=" . urlencode($classe_codice);
             
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
@@ -65,58 +66,47 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
             // Giorni della settimana (0 = Lunedì, 1 = Martedì, ..., 5 = Sabato)
             foreach ($data as $dayIndex => $dayData) {
                 foreach ($dayData as $hourIndex => $lessonData) {
-                    if (empty($lessonData)) continue; // Se non ci sono ore, salta
+                    if (empty($lessonData)) continue;
 
-                    // Estrazione dei docenti e delle aule
-                    $docenti = array_keys($lessonData[0]['docenti']);  // Estrai i docenti
-                    $aule = $lessonData[0]['aule'];  // Aule come array
+                    // Estrai materia
+                    $materia = $lessonData[0]['materia_short'];
 
-                    // Se non ci sono docenti, salta l'ora
-                    if (empty($docenti)) {
-                        continue;
-                    }
-
-                    // Ora da associare
-                    $ora = $hourIndex;
-
-                    // Gestione dell'associazione di aule e docenti per l'orario
-                    foreach ($docenti as $docente) {
-                        foreach ($aule as $laboratorio) {
-                            // Cerca o crea la materia
-                            $materia = $lessonData[0]['materia_short'];  // La materia abbreviata
-                            $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ?");
-                            $stmt->bind_param("s", $materia);
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            
-                            if ($result->num_rows > 0) {
-                                $subject_id = $result->fetch_assoc()['id'];
-                            } else {
-                                // Creazione materia
-                                $stmt2 = $conn->prepare("INSERT INTO subjects (name) VALUES (?)");
-                                $stmt2->bind_param("s", $materia);
-                                $stmt2->execute();
-                                $subject_id = $conn->insert_id;
-                                $stmt2->close();
-                                $materie_create[] = $materia;
-                            }
-                            $stmt->close();
-
-                            // Inserisci l'orario
-                            $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                            $stmt3->bind_param("isii", $classe_id, $dayIndex, $ora, $subject_id);
-                            $stmt3->execute();
-                            $stmt3->close();
-                            $inserimenti++;
+                    // Cerca o crea la materia
+                    $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ?");
+                    $stmt->bind_param("s", $materia);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    
+                    if ($result->num_rows > 0) {
+                        $subject_id = $result->fetch_assoc()['id'];
+                    } else {
+                        // Creazione materia
+                        $stmt2 = $conn->prepare("INSERT INTO subjects (name) VALUES (?)");
+                        $stmt2->bind_param("s", $materia);
+                        $stmt2->execute();
+                        $subject_id = $conn->insert_id;
+                        $stmt2->close();
+                        
+                        // Aggiungi alla lista solo se non è già presente
+                        if (!in_array($materia, $materie_create)) {
+                            $materie_create[] = $materia;
                         }
                     }
+                    $stmt->close();
+
+                    // Inserisci l'orario UNA SOLA VOLTA per questa lezione
+                    $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
+                    $stmt3->bind_param("iiii", $classe_id, $dayIndex, $hourIndex, $subject_id);
+                    $stmt3->execute();
+                    $stmt3->close();
+                    $inserimenti++;
                 }
             }
 
             $message = "Importazione completata con successo!<br>";
             $message .= "- Inserite $inserimenti ore di lezione<br>";
             if (count($materie_create) > 0) {
-                $message .= "- Create " . count($materie_create) . " nuove materie";
+                $message .= "- Create " . count($materie_create) . " nuove materie: " . implode(", ", $materie_create);
             }
             $messageType = "success";
             
@@ -256,12 +246,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
             <li>Il sistema cancellerà l'orario esistente e importerà i nuovi dati</li>
         </ol>
 
-        <h3>Gestione casi speciali</h3>
+        <h3>Note tecniche</h3>
         <ul>
-            <li><strong>Più docenti, più laboratori</strong>: Associazione 1:1 (docente1→lab1, docente2→lab2)</li>
-            <li><strong>Più docenti, un laboratorio</strong>: Stesso laboratorio per tutti i docenti</li>
-            <li><strong>Più docenti, nessun laboratorio</strong>: Nessun laboratorio per tutti</li>
-            <li><strong>Un docente, più laboratori</strong>: Viene usato il primo laboratorio</li>
+            <li>Ogni slot orario viene inserito UNA SOLA VOLTA nella tabella timetable</li>
+            <li>Le informazioni su docenti e aule dall'API vengono estratte ma non salvate (la tabella timetable contiene solo: class_id, day, hour, subject_id)</li>
+            <li>Le materie vengono create automaticamente se non esistono già</li>
+            <li>Gli slot vuoti nell'orario vengono saltati</li>
         </ul>
     </div>
 
