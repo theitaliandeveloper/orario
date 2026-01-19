@@ -1,6 +1,6 @@
 services:
   web:
-    build: .
+    image: vichingo455/orario:latest
     container_name: orario-web
     ports:
       - "8080:80"
