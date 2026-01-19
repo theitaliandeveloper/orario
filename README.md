@@ -160,7 +160,7 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
 Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
 
 ## Licenza
-**Orario Scuola, Copyright (C) 2025 EmmeV.**
+**Orario Scuola, Copyright (C) 2025-2026 EmmeV.**
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
