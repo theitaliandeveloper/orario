@@ -28,7 +28,6 @@ include("lib/db.php");
 <body>
 <div class="navbar">
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
-    <div style="color: orange;">ATTENZIONE: Orario valido fino al 17/01/2026</div>
     <div class="links">
       <a href="index.php">Home</a>
       <a href="admin/index.php">Admin</a>
