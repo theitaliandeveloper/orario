@@ -1,6 +1,6 @@
 <?php
 /*
-Orario Scuola, Copyright (C) 2025 EmmeV.
+Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -71,7 +71,7 @@ HTML;
 if(isset($error)) echo "<br><div class='error'>$error</div>";
 echo <<<HTML
 </div>
-<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+<p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
 HTML;
@@ -88,10 +88,41 @@ else if (AUTH_TYPE === 'keycloak') {
   $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
   $oidc->authenticate();
   $userinfo = $oidc->getVerifiedClaims();
-  $_SESSION['admin'] = $userinfo->preferred_username;
-  $_SESSION['auth_type'] = 'keycloak';
-  header("Location: index.php");
-  exit;
+  if (in_array($userinfo->preferred_username, KEYCLOAK_ALLOWED_USERS, true) || empty(KEYCLOAK_ALLOWED_USERS)) {
+    $_SESSION['admin'] = $userinfo->preferred_username;
+    $_SESSION['auth_type'] = 'keycloak';
+    header("Location: index.php");
+    exit;
+  } else {
+    http_response_code(403);
+    echo <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo">Admin Dashboard</div>
+    <div class="links">
+      <a href="/">Torna al sito</a>
+    </div>
+  </div>
+
+  <!-- Container login -->
+  <div class="login-container">
+    <h1>Login Admin</h1>
+<br><div class='error'>Non sei autorizzato ad accedere a questa parte del sito.</div>
+</div>
+<p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+</body>
+</html>
+HTML;
+    exit;
+  }
   } catch (Exception $e) {
     http_response_code(500);
       echo <<<HTML
@@ -122,7 +153,7 @@ if (DEV_MODE) {
 }
 echo <<<HTML
 </div>
-<p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+<p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
 HTML;

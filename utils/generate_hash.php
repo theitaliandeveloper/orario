@@ -1,6 +1,6 @@
 <?php
 /*
-Orario Scuola, Copyright (C) 2025 EmmeV.
+Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -15,7 +15,6 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-
 if ($argc > 1) {
     $primoArgomento = $argv[1];
     $password = password_hash($primoArgomento, PASSWORD_DEFAULT);

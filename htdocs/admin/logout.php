@@ -1,6 +1,6 @@
 <?php
 /*
-Orario Scuola, Copyright (C) 2025 EmmeV.
+Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -21,5 +21,5 @@ session_destroy();
 if (AUTH_TYPE === 'local')
     header("Location: /index.php");
 else if (AUTH_TYPE === 'keycloak')
-    header('Location: https://' . KEYCLOAK_DOMAIN . '/realms/' . KEYCLOAK_REALM . '/protocol/openid-connect/logout?post_logout_redirect_uri=https://' . APP_DOMAIN . '&client_id=' . KEYCLOAK_CLIENT_ID);
+    header('Location: https://' . KEYCLOAK_DOMAIN . '/realms/' . KEYCLOAK_REALM . '/protocol/openid-connect/logout?post_logout_redirect_uri=https://' . APP_DOMAIN + '&client_id=' . KEYCLOAK_CLIENT_ID);
 ?>

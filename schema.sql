@@ -1,5 +1,5 @@
 -- Orario Scuola
--- Copyright (C) 2025 EmmeV. All rights reserved.
+-- Copyright (C) 2025-2026 EmmeV. All rights reserved.
 -- Esegui questo script nel tuo database MySQL prima di usare il progetto.
 
 -- Database: school_timetable

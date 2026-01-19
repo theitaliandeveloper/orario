@@ -1,6 +1,6 @@
 <?php
 /*
-Orario Scuola, Copyright (C) 2025 EmmeV.
+Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -36,6 +36,64 @@ $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room = '$room' LIM
 
 if ($res->num_rows === 0) {
     header("Location: index.php");
+    exit;
+}
+
+if (isset($_GET['json']) && $_GET['json'] == '1') {
+    header('Content-Type: application/json; charset=utf-8');
+    
+    $timetable = [];
+    
+    foreach($days as $d) {
+        $timetable[$d] = [];
+        
+        foreach($hours as $hnum => $hlabel) {
+            $q = $conn->query("
+              SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
+              FROM timetable
+              LEFT JOIN subjects ON timetable.subject_id = subjects.id
+              LEFT JOIN classes ON timetable.class_id = classes.id
+              WHERE subjects.room='". $conn->real_escape_string($room) ."' 
+                AND timetable.day='$d' AND timetable.hour=$hnum
+            ");
+            
+            if($q->num_rows > 0) {
+                $subject = null;
+                $class_teacher_pairs = [];
+                
+                while($row = $q->fetch_assoc()) {
+                    if($subject === null) {
+                        $subject = $row['subject_name'];
+                    }
+                    $class_teacher_pairs[] = [
+                        'class' => $row['class_name'],
+                        'teacher' => $row['teacher']
+                    ];
+                }
+                
+                $timetable[$d][$hnum] = [
+                    'hour' => $hnum,
+                    'time' => strip_tags($hlabel),
+                    'subject' => $subject,
+                    'classes' => $class_teacher_pairs
+                ];
+            } else {
+                $timetable[$d][$hnum] = [
+                    'hour' => $hnum,
+                    'time' => strip_tags($hlabel),
+                    'subject' => null,
+                    'classes' => []
+                ];
+            }
+        }
+    }
+    
+    $response = [
+        'room' => $room,
+        'timetable' => $timetable
+    ];
+    
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
 }
 ?>
@@ -167,6 +225,6 @@ if ($res->num_rows === 0) {
   <?php endforeach; ?>
   </div>
 
-  <p style="text-align: center;">Copyright (C) 2025 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+  <p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>
