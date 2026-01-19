@@ -32,9 +32,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
         $messageType = "error";
     } else {
         try {
+            // Controlli vari a prova di ignorante
+            $baseUrl = rtrim(API_URL, '/');
+            $suffix = str_ends_with($baseUrl, "/classe") ? "" : "/classe";
+            $url = $baseUrl . $suffix . "?classe=" . urlencode($classe_codice);
             // Chiama l'API Node.js
-            $url = API_URL . "?classe=" . urlencode($classe_codice);
-            
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
