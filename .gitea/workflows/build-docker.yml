@@ -45,6 +45,7 @@ jobs:
         if: always()
         run: docker logout ${{ vars.DEFAULT_REGISTRY }}
   build-arm64:
+    needs: build-amd64
     runs-on: ubuntu-latest-arm64
     steps:
       - name: Checkout Repository
