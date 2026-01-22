@@ -29,7 +29,8 @@ jobs:
           docker build --build-arg BUILD_IDENTIFIER=${SHORT_HASH:0:5} -t ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} .
 
           # Tag the same image as "latest"
-          docker tag ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest
+          docker tag ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}
+          docker tag ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest
 
       - name: Push Docker Images
         env:
