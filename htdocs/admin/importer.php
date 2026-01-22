@@ -295,6 +295,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
     <h1>Importa Orario da Sistema Esterno</h1>
     <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
+    <div class="warning-box">
+        <strong>ATTENZIONE! ATTENZIONE! ATTENZIONE!</strong> Questa funzionalità è ancora in beta!
+        Aspettati instabilità nel suo uso. Usala solo a tuo rischio e pericolo!
+    </div>
+
     <?php if ($message): ?>
         <div class="message <?php echo $messageType; ?>">
             <?php echo $message; ?>

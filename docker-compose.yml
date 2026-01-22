@@ -17,7 +17,6 @@ services:
       # --- Impostazioni sito ---
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
-      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
       DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
 
       # --- Impostazioni Autenticazione ---
@@ -30,6 +29,9 @@ services:
       KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
       KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
       KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+
+      # --- Labs: funzionalità ancora in beta ---
+      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
   db:
     image: mariadb:11
     container_name: orario-db

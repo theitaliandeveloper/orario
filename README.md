@@ -79,9 +79,6 @@ if (!defined('APP_NAME')) {
 if (!defined('YEAR')) {
     define('YEAR', '2025/26'); // Anno Scolastico Corrente
 }
-if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
-}
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', false); // Modalita' di sviluppo: abilita messaggi di debug aggiuntivi. Imposta su false se sei in produzione
 }
@@ -141,7 +138,6 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       # --- Impostazioni sito ---
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
-      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare. Esempio: http://192.168.70.3:3006
       DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
 
       # --- Impostazioni Autenticazione ---

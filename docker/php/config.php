@@ -65,14 +65,6 @@ if (!defined('YEAR')) {
         define('YEAR', '2025/26');
     }
 }
-if (!defined('API_URL')) {
-    $val = getenv('API_URL');
-    if ($val !== false && $val !== '') {
-        define('API_URL', $val);
-    } else {
-        define('API_URL', '');
-    }
-}
 if (!defined('DEV_MODE')) {
     $val = getenv('DEV_MODE');
     if ($val !== false && $val !== '') {
@@ -142,6 +134,15 @@ if (AUTH_TYPE === 'keycloak') {
             define('KEYCLOAK_ALLOWED_USERS',[]);
         }
         define('KEYCLOAK_ALLOWED_USERS',$users);
+    }
+}
+// LABS: Funzionalità in beta
+if (!defined('API_URL')) {
+    $val = getenv('API_URL');
+    if ($val !== false && $val !== '') {
+        define('API_URL', $val);
+    } else {
+        define('API_URL', '');
     }
 }
 ?>
