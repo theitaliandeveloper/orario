@@ -28,19 +28,19 @@ jobs:
           SHORT_HASH: ${{ github.sha }}
         run: |
           # Build the image with the commit hash tag
-          docker build --build-arg BUILD_IDENTIFIER=${SHORT_HASH:0:5} -t ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} .
+          docker build -t ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} .
 
           # Tag the same image as "latest"
-          docker tag ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:${BRANCH_NAME} ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:latest
+          docker tag ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest
 
       - name: Push Docker Images
         env:
           BRANCH_NAME: ${{ github.ref_name }}
           SHORT_HASH: ${{ github.sha }}
         run: |
-          docker push ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}
-          docker push ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:${BRANCH_NAME}
-          docker push ${{ vars.DEFAULT_REGISTRY }}/${{ secrets.REGISTRY_USER }}/orario:latest
+          docker push ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}
+          docker push ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}
+          docker push ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest
 
       - name: Log out from registry
         if: always()
