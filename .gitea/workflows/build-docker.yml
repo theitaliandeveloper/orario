@@ -7,7 +7,7 @@ on:
   workflow-dispatch:
 
 jobs:
-  build-x64:
+  build-amd64:
     runs-on: ubuntu-latest
     container:
       image: catthehacker/ubuntu:act-latest
