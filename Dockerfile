@@ -1,4 +1,4 @@
-FROM php:8.5-apache
+FROM php:8.2-apache
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 COPY htdocs/ /var/www/html/
 COPY docker/php/config.php /var/www/html/config/config.php
