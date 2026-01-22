@@ -20,6 +20,39 @@ include("../lib/db.php");
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); exit; }
 
+// Funzione helper per gestire la creazione materia e l'inserimento orario
+function inserisciOra($conn, $classe_id, $giorno, $ora, $materia, $docente, $laboratorio, &$materie_create, &$inserimenti) {
+    // 1. Cerca o crea la materia
+    if ($laboratorio) {
+        $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
+        $stmt->bind_param("sss", $materia, $docente, $laboratorio);
+    } else {
+        $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND (room IS NULL OR room = '')");
+        $stmt->bind_param("ss", $materia, $docente);
+    }
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($row = $result->fetch_assoc()) {
+        $subject_id = $row['id'];
+    } else {
+        $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
+        $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
+        $stmt2->execute();
+        $subject_id = $conn->insert_id;
+        $materie_create[] = "$materia ($docente - $laboratorio)";
+    }
+    $stmt->close();
+
+    // 2. Inserisci in timetable
+    $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
+    $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
+    $stmt3->execute();
+    $stmt3->close();
+    $inserimenti++;
+}
+
 $message = "";
 $messageType = "";
 
@@ -72,113 +105,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                     if ($oraData['materia'] === null) {
                         continue;
                     }
-                    
+
                     $ora = $oraData['ora'];
                     $materia = $oraData['materia'];
-                    $docenti = $oraData['docenti'];
-                    $laboratori = $oraData['laboratori']; // Ora è un array
-                    
-                    // Se non ci sono docenti, salta (situazione anomala)
-                    if (count($docenti) === 0) {
-                        continue;
-                    }
-                    
-                    // Caso 1: Stesso numero di docenti e laboratori → associazione 1:1
-                    if (count($docenti) === count($laboratori) && count($laboratori) > 0) {
-                        foreach ($docenti as $idx => $docente) {
-                            $laboratorio = $laboratori[$idx];
-                            
-                            // Cerca/crea materia
-                            $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                            $stmt->bind_param("sss", $materia, $docente, $laboratorio);
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            
-                            if ($result->num_rows > 0) {
-                                $subject_id = $result->fetch_assoc()['id'];
-                            } else {
-                                $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
-                                $stmt2->execute();
-                                $subject_id = $conn->insert_id;
-                                $stmt2->close();
-                                $materie_create[] = "$materia ($docente - $laboratorio)";
-                            }
-                            $stmt->close();
-                            
-                            // Inserisci in timetable
-                            $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                            $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
-                            $stmt3->execute();
-                            $stmt3->close();
-                            $inserimenti++;
-                        }
-                    }
-                    // Caso 2: Più docenti, un laboratorio (o nessuno) → stesso laboratorio per tutti
-                    else if (count($laboratori) <= 1) {
-                        $laboratorio = count($laboratori) > 0 ? $laboratori[0] : null;
-                        
-                        foreach ($docenti as $docente) {
-                            // Cerca/crea materia
-                            if ($laboratorio) {
-                                $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                                $stmt->bind_param("sss", $materia, $docente, $laboratorio);
-                            } else {
-                                $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND (room IS NULL OR room = '')");
-                                $stmt->bind_param("ss", $materia, $docente);
-                            }
-                            
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            
-                            if ($result->num_rows > 0) {
-                                $subject_id = $result->fetch_assoc()['id'];
-                            } else {
-                                $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
-                                $stmt2->execute();
-                                $subject_id = $conn->insert_id;
-                                $stmt2->close();
-                                $materie_create[] = "$materia ($docente" . ($laboratorio ? " - $laboratorio" : "") . ")";
-                            }
-                            $stmt->close();
-                            
-                            // Inserisci in timetable
-                            $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                            $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
-                            $stmt3->execute();
-                            $stmt3->close();
-                            $inserimenti++;
-                        }
-                    }
-                    // Caso 3: Più laboratori che docenti → usa il primo laboratorio per tutti
-                    else {
-                        $laboratorio = $laboratori[0];
-                        
-                        foreach ($docenti as $docente) {
-                            $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                            $stmt->bind_param("sss", $materia, $docente, $laboratorio);
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            
-                            if ($result->num_rows > 0) {
-                                $subject_id = $result->fetch_assoc()['id'];
-                            } else {
-                                $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
-                                $stmt2->execute();
-                                $subject_id = $conn->insert_id;
-                                $stmt2->close();
-                                $materie_create[] = "$materia ($docente - $laboratorio)";
-                            }
-                            $stmt->close();
-                            
-                            $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                            $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
-                            $stmt3->execute();
-                            $stmt3->close();
-                            $inserimenti++;
-                        }
+                    $docenti = $oraData['docenti']; 
+                    $laboratori = $oraData['laboratori'];
+
+                    if (count($docenti) === 0) continue;
+
+                    // Caso 4: Gestione N docenti su M laboratori
+                    // Calcoliamo quanti record dobbiamo creare (il massimo tra le due liste)
+                    $max_records = max(count($docenti), count($laboratori));
+
+                    for ($i = 0; $i < $max_records; $i++) {
+                        // Se esiste il docente i-esimo lo prendiamo, altrimenti usiamo il primo
+                        $docente_corrente = isset($docenti[$i]) ? $docenti[$i] : $docenti[0];
+    
+                        // Se esiste il laboratorio i-esimo lo prendiamo, altrimenti usiamo il primo (se esiste)
+                        $lab_corrente = isset($laboratori[$i]) ? $laboratori[$i] : ($laboratori[0] ?? null);
+
+                        // Chiamata alla funzione di inserimento (vedi sotto)
+                        inserisciOra($conn, $classe_id, $giorno, $ora, $materia, $docente_corrente, $lab_corrente, $materie_create, $inserimenti);
                     }
                 }
             }
