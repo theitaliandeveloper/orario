@@ -78,41 +78,6 @@ jobs:
           docker push ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}-arm64
           docker push ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-arm64
           docker push ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest-arm64
-      
-      - name: Create and Push Image Manifest
-        env:
-          BRANCH_NAME: ${{ github.ref_name }}
-          SHORT_HASH: ${{ github.sha }}
-        run: |
-          # --- Defines ---
-          # 1. Version Tag (e.g., dev-a1b2c)
-          VERSION_TAG="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}"
-          VERSION_AMD="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}-amd64"
-          VERSION_ARM="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}-arm64"
-
-          # 2. Branch Tag (e.g., dev)
-          BRANCH_TAG="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}"
-          BRANCH_AMD="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-amd64"
-          BRANCH_ARM="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-arm64"
-
-          # 3. Latest Tag (e.g., latest)
-          LATEST_TAG="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest"
-          LATEST_AMD="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest-amd64"
-          LATEST_ARM="${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest-arm64"
-
-          # --- Execution ---
-
-          # Create/Push Manifest for Version
-          docker manifest create $VERSION_TAG --amend $VERSION_AMD --amend $VERSION_ARM
-          docker manifest push --purge $VERSION_TAG
-
-          # Create/Push Manifest for Branch (THIS WAS THE MISSING ONE)
-          docker manifest create $BRANCH_TAG --amend $BRANCH_AMD --amend $BRANCH_ARM
-          docker manifest push --purge $BRANCH_TAG
-
-          # Create/Push Manifest for Latest
-          docker manifest create $LATEST_TAG --amend $LATEST_AMD --amend $LATEST_ARM
-          docker manifest push --purge $LATEST_TAG
 
       - name: Log out from registry
         if: always()
