@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer --version
-WORKDIR /var/www/html/admin
+WORKDIR /var/www/html
 RUN composer install --no-interaction
 RUN chown -R www-data:www-data /var/www/html
 RUN a2enmod rewrite
