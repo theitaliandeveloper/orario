@@ -44,8 +44,7 @@ if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
-
-if (isset($_GET['json']) && $_GET['json'] == '1') {
+else if (isset($_GET['json']) && $_GET['json'] == '1') {
     header('Content-Type: application/json; charset=utf-8');
     
     $timetable = [];
@@ -88,6 +87,10 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
     echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
 }
+else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
+    require_once 'lib/pdf_export.php';
+    exportTimetablePDF($conn, 'teacher', $_GET['teacher']);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -102,6 +105,7 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
+      <a href="?teacher=<?= $teacher ?>&pdf=1">Esporta PDF</a>
     </div>
   </div>
   
