@@ -30,51 +30,71 @@ h1 {
     font-size: 1.8em;
 }
 
-/* Table styles */
+/* ===== TABLE STYLES (DESKTOP ONLY) ===== */
 table {
-    border-collapse: collapse;
+    table-layout: fixed; 
     width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
+    /* Rispettiamo il limite del contenitore genitore */
+    max-width: 100%; 
+    margin: 15px 0;
+    border-collapse: separate; 
+    border-spacing: 0;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #d1d9e0;
+    font-size: 0.9em; /* Riduzione globale per guadagnare spazio */
 }
 
 th, td {
-    border: 1px solid #ccc;
+    /* Padding ridotto: 8px sopra/sotto, 4px ai lati */
+    padding: 8px 4px; 
     text-align: center;
-    padding: 10px;
-    vertical-align: top;
+    vertical-align: middle;
+    border-bottom: 1px solid #e1e8ed;
+    border-right: 1px solid #e1e8ed;
+    /* Forza il testo ad andare a capo se troppo lungo */
+    word-break: break-word; 
+    overflow-wrap: break-word;
 }
 
 th {
-    background-color: #e0e0e0;
-    font-weight: bold;
+    background-color: #f4f7f9;
+    font-size: 0.8em;
+    padding: 10px 4px;
 }
 
-td {
-    transition: background-color 0.2s;
-}
-
-td:hover {
-    background-color: #f7f7f7;
-}
-
+/* Classi specifiche per gestire gli spazi interni */
 .subject {
+    display: block;
     font-weight: bold;
     color: #1f618d;
+    line-height: 1.1;
+    margin-bottom: 2px;
 }
 
 .teacher {
+    display: block;
     font-size: 0.9em;
-    color: #2c3e50;
+    color: #34495e;
 }
 
 .room {
+    margin-top: 4px;
+    font-size: 0.7em;
+    padding: 1px 5px;
+}
+
+/* Colonna orario/ID: la rendiamo il più stretta possibile */
+th:first-child, td:first-child {
+    width: 50px; 
+    background-color: #fcfdfe;
     font-size: 0.8em;
-    color: #666;
+}
+
+/* Rimuove l'ultimo bordo a destra */
+th:last-child, td:last-child {
+    border-right: none;
 }
 
 /* Desktop/Mobile layout control */
