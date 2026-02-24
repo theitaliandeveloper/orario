@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
-require_once __DIR__ . '../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
  * Esporta un orario in PDF.
@@ -233,7 +233,7 @@ class _OrarioPDF extends Fpdf\Fpdf
 
 
 /**
- * Disegna il PDF e lo invia al browser come download.
+ * Disegna il PDF e lo invia al browser.
  */
 function _renderPDF(string $title, string $filename, array $days, array $hours, array $data): void
 {
@@ -255,9 +255,9 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     $pdf->SetFillColor(44, 62, 80);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetDrawColor(200, 200, 200);
-
+    $giorni = mb_convert_encoding($days, 'Windows-1252');
     $pdf->Cell($hourColW, $headerH, '', 1, 0, 'C', true);
-    foreach ($days as $d) {
+    foreach ($giorni as $d) {
         $pdf->Cell($dayColW, $headerH, $d, 1, 0, 'C', true);
     }
     $pdf->Ln();
@@ -323,7 +323,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
         $pdf->Ln($rowH);
     }
 
-    // Output come download
-    $pdf->Output('D', $filename);
+    // Output
+    $pdf->Output('I', $filename);
     exit;
 }
