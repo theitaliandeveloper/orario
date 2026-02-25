@@ -15,6 +15,7 @@ Una piattaforma web per visualizzare gli orari scolastici delle classi, degli in
 - Esempio (Debian):
 ```bash
 git clone https://git.vichingo455.freeddns.org/emmev-code/orario
+git checkout dev # Per cambiare al ramo di sviluppo
 cp -r orario/htdocs/* /var/www/html/
 ```
 
@@ -29,12 +30,12 @@ sudo apt install -y composer php-cli curl php-mysql php-curl php-mbstring php-xm
 3. **Installa le dipendenze del pannello d'amministrazione**
 - Debian:
 ```bash
-cd /var/www/html/admin
+cd /var/www/html
 composer install
 ```
 - Windows (con XAMPP):
 ```batch
-cd C:\xampp\htdocs\admin
+cd C:\xampp\htdocs
 composer install
 ```
 4. **(opzionale) Genera una password hashata**

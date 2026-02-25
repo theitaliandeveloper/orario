@@ -84,6 +84,8 @@ if (isset($_GET['delete'])) {
   </div>
 
   <div class="admin-container">
+    <h1>Gestisci Materie</h1>
+    <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
     <?php
     // --- PARTE MODIFICA (FORM CONDIZIONALE) ---
     if (isset($_GET['edit'])) {
