@@ -1,6 +1,6 @@
 services:
   web:
-    image: git.vichingo455.qzz.io/emmev-code/orario:latest-amd64
+    image: git.vichingo455.qzz.io/emmev-code/orario:latest-arm64
     container_name: orario-web
     ports:
       - "8080:80"

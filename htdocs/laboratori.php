@@ -97,7 +97,7 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
 }
 else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
     require_once 'lib/pdf.php';
-    exportTimetablePDF($conn, 'room', $_GET['room']);
+    exportTimetablePDF($conn, 'room', $room);
 }
 ?>
 <!DOCTYPE html>

@@ -124,14 +124,25 @@ if (AUTH_TYPE === 'keycloak') {
 apt install curl git
 curl -fsSL https://get.docker.com | bash
 ```
-2. Compila e crea il container:
+2. Scarica i file richiesti:
+- AMD64:
 ```bash
-git clone https://git.vichingo455.freeddns.org/emmev-code/orario
-cd orario
-git checkout dev # richiesto per passare alla versione di sviluppo
-docker compose up -d --build
+wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/schema.sql
+wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/docker-compose.yml
 ```
-3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
+
+- ARM64:
+```bash
+wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/schema.sql
+wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/docker-compose-arm64.yml
+mv ./docker-compose-arm64.yml ./docker-compose.yml
+```
+
+3. Avvia il container:
+```bash
+docker compose up -d
+```
+4. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
 
 ### Personalizzare l'istanza
 Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` con un editor di testo e modificare le variabili d'ambiente:
