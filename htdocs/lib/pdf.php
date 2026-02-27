@@ -17,6 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . '/../vendor/autoload.php';
+include_once __DIR__ . '/../config/config.php';
 
 /**
  * Esporta un orario in PDF.
@@ -32,8 +33,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
  *   // Orario docente
  *   exportTimetablePDF($conn, 'teacher', 'Mario Rossi');
  *
- *   // Orario aula
- *   exportTimetablePDF($conn, 'room', 'Aula 12');
+ *   // Orario laboratori
+ *   exportTimetablePDF($conn, 'room', 'Laboratorio Informatica 1');
  */
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
 {
@@ -62,8 +63,8 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
             break;
 
         case 'room':
-            $title    = 'Orario aula ' . $identifier;
-            $filename = 'orario_aula_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $identifier);
+            $title    = 'Orario ' . $identifier;
+            $filename = 'orario_laboratorio_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $identifier);
             break;
 
         default:
@@ -218,7 +219,7 @@ class _OrarioPDF extends Fpdf\Fpdf
         $this->Cell(0, 9, $this->pageTitle, 0, 1, 'C');
         $this->SetFont('Arial', '', 7.5);
         $this->SetTextColor(120, 120, 120);
-        $this->Cell(0, 4, 'Generato il ' . date('d/m/Y'), 0, 1, 'C');
+        $this->Cell(0, 4, 'Anno Scolastico ' . YEAR, 0, 1, 'C');
         $this->Ln(3);
     }
 
@@ -227,7 +228,7 @@ class _OrarioPDF extends Fpdf\Fpdf
         $this->SetY(-11);
         $this->SetFont('Arial', 'I', 6.5);
         $this->SetTextColor(150, 150, 150);
-        $this->Cell(0, 5, 'Orario Scuola - Copyright (C) 2025-2026 EmmeV. - GNU AGPL 3.0', 0, 0, 'C');
+        $this->Cell(0, 5, 'Orario Scuola - Copyright (C) 2025-2026 EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 0, 0, 'C');
     }
 }
 
