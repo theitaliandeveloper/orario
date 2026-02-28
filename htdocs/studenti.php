@@ -114,7 +114,7 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
-      <a href="?class_id=<?= $class_id ?>&pdf=1" download>Esporta PDF</a>
+      <a href="?class_id=<?= $class_id ?>&pdf=1" target="_blank">Esporta PDF</a>
     </div>
   </div>
   <h1>Orario della classe <?php echo htmlspecialchars($class['name']); ?></h1>

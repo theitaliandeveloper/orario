@@ -325,6 +325,6 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     }
 
     // Output
-    $pdf->Output('I', $filename);
+    $pdf->Output('D', $filename);
     exit;
 }
