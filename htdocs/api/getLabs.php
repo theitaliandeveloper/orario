@@ -7,3 +7,4 @@ while ($row = $res->fetch_assoc()) {
 }
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode($rooms, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+exit();
