@@ -38,14 +38,18 @@ if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
-
-if (isset($_GET['json']) && $_GET['json'] == '1') {
+else if (isset($_GET['json']) && $_GET['json'] == '1') {
     header('Content-Type: application/json; charset=utf-8');
     
     $timetable = [];
     
     foreach($days as $d) {
-        $timetable[$d] = [];
+        $d_clean = str_replace(
+            ['à','è','é','ì','ò','ù'],
+            ['a','e','e','i','o','u'],
+            $d
+        );
+        $timetable[$d_clean] = [];
         
         foreach($hours as $hnum => $hlabel) {
             $q = $conn->query("
@@ -71,14 +75,14 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
                     ];
                 }
                 
-                $timetable[$d][$hnum] = [
+                $timetable[$d_clean][$hnum] = [
                     'hour' => $hnum,
                     'time' => strip_tags($hlabel),
                     'subject' => $subject,
                     'classes' => $class_teacher_pairs
                 ];
             } else {
-                $timetable[$d][$hnum] = [
+                $timetable[$d_clean][$hnum] = [
                     'hour' => $hnum,
                     'time' => strip_tags($hlabel),
                     'subject' => null,
@@ -96,6 +100,10 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
     echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
 }
+else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
+    require_once 'lib/pdf.php';
+    exportTimetablePDF($conn, 'room', $room);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -110,6 +118,7 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
+      <a href="?room=<?= $room ?>&pdf=1" target="_blank">Esporta PDF</a>
     </div>
   </div>
 

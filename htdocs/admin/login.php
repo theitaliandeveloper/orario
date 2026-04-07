@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 use Jumbojett\OpenIDConnectClient;
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 session_start();
 include("../lib/db.php");
 if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }

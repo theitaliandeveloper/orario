@@ -26,12 +26,12 @@ sudo apt install -y composer php-cli curl php-mysql php-curl php-mbstring php-xm
 3. **Installa le dipendenze del pannello d'amministrazione**
 - Debian:
 ```bash
-cd /var/www/html/admin
+cd /var/www/html
 composer install
 ```
 - Windows (con XAMPP):
 ```batch
-cd C:\xampp\htdocs\admin
+cd C:\xampp\htdocs
 composer install
 ```
 4. **(opzionale) Genera una password hashata**
@@ -117,13 +117,18 @@ if (AUTH_TYPE === 'keycloak') {
 apt install curl git
 curl -fsSL https://get.docker.com | bash
 ```
-2. Crea il container:
+2. Scarica i file richiesti:
 ```bash
-git clone https://git.vichingo455.freeddns.org/emmev-code/orario
-cd orario
+wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/stable/schema.sql
+wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/stable/docker-compose.yml
+```
+
+3. Avvia il container:
+```bash
 docker compose up -d
 ```
-3. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
+
+4. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
 
 ### Personalizzare l'istanza
 Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` con un editor di testo e modificare le variabili d'ambiente:
