@@ -44,7 +44,12 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
     $timetable = [];
     
     foreach($days as $d) {
-        $timetable[$d] = [];
+        $d_clean = str_replace(
+            ['à','è','é','ì','ò','ù'],
+            ['a','e','e','i','o','u'],
+            $d
+        );
+        $timetable[$d_clean] = [];
         
         foreach($hours as $hnum => $hlabel) {
             $q = $conn->query("
@@ -70,14 +75,14 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
                     ];
                 }
                 
-                $timetable[$d][$hnum] = [
+                $timetable[$d_clean][$hnum] = [
                     'hour' => $hnum,
                     'time' => strip_tags($hlabel),
                     'subject' => $subject,
                     'classes' => $class_teacher_pairs
                 ];
             } else {
-                $timetable[$d][$hnum] = [
+                $timetable[$d_clean][$hnum] = [
                     'hour' => $hnum,
                     'time' => strip_tags($hlabel),
                     'subject' => null,
