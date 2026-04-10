@@ -95,10 +95,10 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
     } else {
       http_response_code(403);
       if (DEV_MODE) {
-          echo "Non puoi accedere a questa API perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
+          echo "Non puoi accedere a questo JSON perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
       }
       else {
-          echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
+          echo "Non puoi accedere a questo JSON perchè non hai i permessi necessari per farlo.";
       }
       exit;
     }
