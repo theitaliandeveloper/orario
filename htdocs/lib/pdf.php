@@ -115,28 +115,30 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
                         LEFT JOIN classes  ON timetable.class_id   = classes.id
                         WHERE subjects.teacher = '$escaped_teacher'
-                          AND timetable.day    = '$escaped_d'
-                          AND timetable.hour   = $hnum
+                        AND timetable.day    = '$escaped_d'
+                        AND timetable.hour   = $hnum
                     ");
 
                     $subject = null;
-                    $room    = null;
                     $classes = [];
+                    $rooms   = [];
 
                     while ($row = $q->fetch_assoc()) {
                         if ($subject === null) {
                             $subject = $row['name'];
-                            $room    = $row['room'];
                         }
-                        if (!empty($row['class_name'])) {
+                        if (!empty($row['class_name']) && !in_array($row['class_name'], $classes)) {
                             $classes[] = $row['class_name'];
+                        }
+                        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
+                            $rooms[] = $row['room'];
                         }
                     }
 
                     $data[$d][$hnum] = [
                         'subject' => $subject,
                         'lines'   => $classes,
-                        'rooms'   => $room !== null ? [$room] : [],
+                        'rooms'   => $rooms,
                     ];
                     break;
 
