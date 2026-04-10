@@ -296,9 +296,11 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     $pdf->Output('D', $filename);
     exit;
 }
+/*
 function joinList(array $arr): string {
     if (empty($arr)) return '';
     if (count($arr) === 1) return $arr[0];
     $last = array_pop($arr);
     return implode(', ', $arr) . ' e ' . $last;
 }
+*/

@@ -111,7 +111,7 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
       exit;
     }
 }
-else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
+else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && EXPORT_PDF) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'room', $room);
     exit;
@@ -130,7 +130,7 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
-      <?php if (PDF_EXPORT):?>
+      <?php if (EXPORT_PDF):?>
         <a href="?room=<?= $room ?>&pdf=1" target="_blank">Esporta PDF</a>
       <?php endif;?>
     </div>
