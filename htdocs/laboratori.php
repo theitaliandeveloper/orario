@@ -34,6 +34,13 @@ if (!isset($_GET['room'])) {
 $room = $conn->real_escape_string($_GET['room']);
 $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room = '$room' LIMIT 1");
 
+function joinList(array $arr): string {
+    if (empty($arr)) return '';
+    if (count($arr) === 1) return $arr[0];
+    $last = array_pop($arr);
+    return implode(', ', $arr) . ' e ' . $last;
+}
+
 if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
