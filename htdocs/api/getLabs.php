@@ -33,4 +33,5 @@ if (OPEN_DATA) {
     else {
         echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
     }
+    exit();
 }

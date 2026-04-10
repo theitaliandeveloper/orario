@@ -70,7 +70,7 @@ function joinList($arr) {
     return implode(', ', $arr) . ' e ' . $last;
 }
 
-if (isset($_GET['json']) && $_GET['json'] == '1' && OPEN_DATA) {
+if (isset($_GET['json']) && $_GET['json'] == '1') {
     if (OPEN_DATA) {
       header('Content-Type: application/json; charset=utf-8');
 
@@ -126,12 +126,14 @@ if (isset($_GET['json']) && $_GET['json'] == '1' && OPEN_DATA) {
       else {
           echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
       }
+      exit;
     }
 }
 
 if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'class', $class_id);
+    exit;
 }
 ?>
 <!DOCTYPE html>

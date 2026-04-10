@@ -19,6 +19,8 @@ services:
       YEAR: "2025/26" # Anno scolastico corrente
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
       DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
+      EXPORT_PDF: true # Abilita l'esportazione degli orari in PDF
+      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
 
       # --- Impostazioni Autenticazione ---
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak

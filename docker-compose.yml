@@ -23,6 +23,8 @@ services:
       # --- Impostazioni Autenticazione ---
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
+      EXPORT_PDF: true # Abilita l'esportazione degli orari in PDF
+      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
 
       # --- Impostazioni di Keycloak (solo se il tipo di autenticazione è Keycloak) ---
       KEYCLOAK_DOMAIN: "" # Dominio di Keycloak, ad esempio sso.tuosito.com

@@ -108,11 +108,13 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
       else {
           echo "Non puoi accedere a questo JSON perchè non hai i permessi necessari per farlo.";
       }
+      exit;
     }
 }
 else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'room', $room);
+    exit;
 }
 ?>
 <!DOCTYPE html>

@@ -44,7 +44,7 @@ if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
-else if (isset($_GET['json']) && $_GET['json'] == '1' && OPEN_DATA) {
+else if (isset($_GET['json']) && $_GET['json'] == '1') {
     if (OPEN_DATA) {
       header('Content-Type: application/json; charset=utf-8');
       
@@ -100,11 +100,13 @@ else if (isset($_GET['json']) && $_GET['json'] == '1' && OPEN_DATA) {
       else {
           echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
       }
+      exit;
     }
 }
 else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'teacher', $teacher);
+    exit;
 }
 ?>
 <!DOCTYPE html>
