@@ -26,33 +26,44 @@ $hours = [
   6 => "Sesta ora<br> 12:50 - 13:50"
 ];
 
-if (!isset($_GET['room'])) {
+if (!isset($_GET['teacher'])) {
     header("Location: index.php");
     exit;
 }
 
-$room = $conn->real_escape_string($_GET['room']);
-$res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room = '$room' LIMIT 1");
+$teacher = $conn->real_escape_string($_GET['teacher']);
+
+if ($teacher == "No Lezione" || $teacher == "sconosciuto") {
+    header("Location: index.php");
+    exit;
+}
+
+$res = $conn->query("SELECT DISTINCT teacher FROM subjects WHERE teacher = '$teacher' LIMIT 1");
 
 if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
 
-// Helper: estrae subject e coppie classe+docente (deduplicate) da una query
-function parseRoomRows($q) {
+// Helper: estrae subject, classi e stanze (array, senza duplicati) da una query docente
+function parseTeacherRows($q) {
     $subject = null;
-    $pairs   = [];
+    $classes = [];
+    $rooms   = [];
 
     while ($row = $q->fetch_assoc()) {
         if ($subject === null) {
-            $subject = $row['subject_name'];
+            $subject = $row['name'];
         }
-        $pair = $row['class_name'] . " (" . $row['teacher'] . ")";
-        $pairs[$pair] = true;
+        if (!empty($row['class_name']) && !in_array($row['class_name'], $classes)) {
+            $classes[] = $row['class_name'];
+        }
+        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
+            $rooms[] = $row['room'];
+        }
     }
 
-    return [$subject, array_keys($pairs)];
+    return [$subject, $classes, $rooms];
 }
 
 // Helper: array → stringa "A, B e C"
@@ -78,44 +89,36 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
             $timetable[$d_clean] = [];
 
             foreach ($hours as $hnum => $hlabel) {
-                $q = $conn->query("
-                    SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
-                    FROM timetable
-                    LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                    LEFT JOIN classes ON timetable.class_id = classes.id
-                    WHERE subjects.room='" . $conn->real_escape_string($room) . "'
-                      AND timetable.day='$d' AND timetable.hour=$hnum
-                ");
+                $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+                                   FROM timetable
+                                   LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                                   LEFT JOIN classes ON timetable.class_id = classes.id
+                                   WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
 
                 if ($q->num_rows > 0) {
-                    [$subject, $pairs] = parseRoomRows($q);
-
-                    // Nel JSON manteniamo la struttura dettagliata con array di oggetti
-                    $class_teacher_pairs = array_map(function($p) {
-                        // Ricostruiamo gli oggetti separati per il JSON
-                        preg_match('/^(.+) \((.+)\)$/', $p, $m);
-                        return ['class' => $m[1] ?? $p, 'teacher' => $m[2] ?? ''];
-                    }, $pairs);
+                    [$subject, $classes, $rooms] = parseTeacherRows($q);
 
                     $timetable[$d_clean][$hnum] = [
                         'hour'    => $hnum,
                         'time'    => strip_tags($hlabel),
                         'subject' => $subject,
-                        'classes' => $class_teacher_pairs
+                        'classes' => $classes,
+                        'rooms'   => $rooms
                     ];
                 } else {
                     $timetable[$d_clean][$hnum] = [
                         'hour'    => $hnum,
                         'time'    => strip_tags($hlabel),
                         'subject' => null,
-                        'classes' => []
+                        'classes' => [],
+                        'rooms'   => []
                     ];
                 }
             }
         }
 
         echo json_encode([
-            'room'      => $room,
+            'teacher'   => $teacher,
             'timetable' => $timetable
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         exit;
@@ -132,14 +135,14 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
 
 if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
-    exportTimetablePDF($conn, 'room', $room);
+    exportTimetablePDF($conn, 'teacher', $teacher);
     exit;
 }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Orario <?php echo htmlspecialchars($room); ?></title>
+  <title>Orario <?php echo htmlspecialchars($teacher); ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/timetable.css">
   <link rel="stylesheet" href="css/navbar.css">
@@ -150,12 +153,12 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     <div class="links">
       <a href="index.php">Home</a>
       <?php if (PDF_EXPORT): ?>
-        <a href="?room=<?= $room ?>&pdf=1" target="_blank">Esporta PDF</a>
+        <a href="?teacher=<?= $teacher ?>&pdf=1" target="_blank">Esporta PDF</a>
       <?php endif; ?>
     </div>
   </div>
 
-  <h1>Orario <?php echo htmlspecialchars($room); ?></h1>
+  <h1>Orario docente <?php echo htmlspecialchars($teacher); ?></h1>
 
   <!-- Visualizzazione Desktop -->
   <table class="desktop-schedule">
@@ -169,22 +172,23 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <td><?= $hlabel ?></td>
       <?php foreach ($days as $d): ?>
         <?php
-        $q = $conn->query("
-            SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
-            FROM timetable
-            LEFT JOIN subjects ON timetable.subject_id = subjects.id
-            LEFT JOIN classes ON timetable.class_id = classes.id
-            WHERE subjects.room='" . $conn->real_escape_string($room) . "'
-              AND timetable.day='$d' AND timetable.hour=$hnum
-        ");
+        $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+                           FROM timetable
+                           LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                           LEFT JOIN classes ON timetable.class_id = classes.id
+                           WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
 
         if ($q->num_rows > 0):
-            [$subject, $pairs] = parseRoomRows($q);
-            $entries_list = joinList($pairs);
+            [$subject, $classes, $rooms] = parseTeacherRows($q);
+            $classes_str = joinList($classes);
+            $rooms_str   = joinList($rooms);
         ?>
           <td data-label="<?= htmlspecialchars($d) ?>">
             <div class="subject"><?= htmlspecialchars($subject) ?></div>
-            <div class="room"><?= htmlspecialchars($entries_list) ?></div>
+            <div class="teacher"><?= htmlspecialchars($classes_str) ?></div>
+            <?php if (!empty($rooms_str)): ?>
+              <div class="room"><?= htmlspecialchars($rooms_str) ?></div>
+            <?php endif; ?>
           </td>
         <?php else: ?>
           <td data-label="<?= htmlspecialchars($d) ?>"></td>
@@ -201,23 +205,24 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <h2><?= htmlspecialchars($d) ?></h2>
       <?php foreach ($hours as $hnum => $hlabel): ?>
         <?php
-        $q = $conn->query("
-            SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
-            FROM timetable
-            LEFT JOIN subjects ON timetable.subject_id = subjects.id
-            LEFT JOIN classes ON timetable.class_id = classes.id
-            WHERE subjects.room='" . $conn->real_escape_string($room) . "'
-              AND timetable.day='$d' AND timetable.hour=$hnum
-        ");
+        $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+                           FROM timetable
+                           LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                           LEFT JOIN classes ON timetable.class_id = classes.id
+                           WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
 
         if ($q->num_rows > 0):
-            [$subject, $pairs] = parseRoomRows($q);
-            $entries_list = joinList($pairs);
+            [$subject, $classes, $rooms] = parseTeacherRows($q);
+            $classes_str = joinList($classes);
+            $rooms_str   = joinList($rooms);
         ?>
           <div class="lesson">
             <div class="hour"><?= strip_tags($hlabel) ?></div>
             <div class="subject"><?= htmlspecialchars($subject) ?></div>
-            <div class="room"><?= htmlspecialchars($entries_list) ?></div>
+            <div class="teacher"><?= htmlspecialchars($classes_str) ?></div>
+            <?php if (!empty($rooms_str)): ?>
+              <div class="room"><?= htmlspecialchars($rooms_str) ?></div>
+            <?php endif; ?>
           </div>
         <?php else: ?>
           <div class="lesson empty">
