@@ -23,6 +23,9 @@ if (OPEN_DATA) {
         $docenti[] = $row['teacher'];
     }
     header('Content-Type: application/json; charset=utf-8');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST');
+    header("Access-Control-Allow-Headers: X-Requested-With");
     echo json_encode($docenti, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit();
 } else {
