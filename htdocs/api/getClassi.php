@@ -16,11 +16,21 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 include("../lib/db.php");
-$res = $conn->query("SELECT name FROM classes ORDER BY name");
-$classi = [];
-while ($row = $res->fetch_assoc()) {
-    $classi[] = $row['name'];
+if (OPEN_DATA) {
+    $res = $conn->query("SELECT name FROM classes ORDER BY name");
+    $classi = [];
+    while ($row = $res->fetch_assoc()) {
+        $classi[] = $row['name'];
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($classi, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit();
+} else {
+    http_response_code(403);
+    if (DEV_MODE) {
+        echo "Non puoi accedere a questa API perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
+    }
+    else {
+        echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
+    }
 }
-header('Content-Type: application/json; charset=utf-8');
-echo json_encode($classi, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-exit();

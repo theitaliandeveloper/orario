@@ -44,55 +44,65 @@ if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
-else if (isset($_GET['json']) && $_GET['json'] == '1') {
-    header('Content-Type: application/json; charset=utf-8');
-    
-    $timetable = [];
-    
-    foreach($days as $d) {
-        $d_clean = str_replace(
-            ['à','è','é','ì','ò','ù'],
-            ['a','e','e','i','o','u'],
-            $d
-        );
-        $timetable[$d_clean] = [];
-        
-        foreach($hours as $hnum => $hlabel) {
-            $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
-                               FROM timetable 
-                               LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                               LEFT JOIN classes ON timetable.class_id = classes.id
-                               WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
-            
-            if($row = $q->fetch_assoc()) {
-                $timetable[$d_clean][$hnum] = [
-                    'hour' => $hnum,
-                    'time' => strip_tags($hlabel),
-                    'subject' => $row['name'],
-                    'class' => $row['class_name'],
-                    'room' => $row['room'] ?? ''
-                ];
-            } else {
-                $timetable[$d_clean][$hnum] = [
-                    'hour' => $hnum,
-                    'time' => strip_tags($hlabel),
-                    'subject' => null,
-                    'class' => null,
-                    'room' => null
-                ];
-            }
-        }
+else if (isset($_GET['json']) && $_GET['json'] == '1' && OPEN_DATA) {
+    if (OPEN_DATA) {
+      header('Content-Type: application/json; charset=utf-8');
+      
+      $timetable = [];
+      
+      foreach($days as $d) {
+          $d_clean = str_replace(
+              ['à','è','é','ì','ò','ù'],
+              ['a','e','e','i','o','u'],
+              $d
+          );
+          $timetable[$d_clean] = [];
+          
+          foreach($hours as $hnum => $hlabel) {
+              $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+                                FROM timetable 
+                                LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                                LEFT JOIN classes ON timetable.class_id = classes.id
+                                WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
+              
+              if($row = $q->fetch_assoc()) {
+                  $timetable[$d_clean][$hnum] = [
+                      'hour' => $hnum,
+                      'time' => strip_tags($hlabel),
+                      'subject' => $row['name'],
+                      'class' => $row['class_name'],
+                      'room' => $row['room'] ?? ''
+                  ];
+              } else {
+                  $timetable[$d_clean][$hnum] = [
+                      'hour' => $hnum,
+                      'time' => strip_tags($hlabel),
+                      'subject' => null,
+                      'class' => null,
+                      'room' => null
+                  ];
+              }
+          }
+      }
+      
+      $response = [
+          'teacher' => $teacher,
+          'timetable' => $timetable
+      ];
+      
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+      exit;
+    } else {
+      http_response_code(403);
+      if (DEV_MODE) {
+          echo "Non puoi accedere a questa API perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
+      }
+      else {
+          echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
+      }
     }
-    
-    $response = [
-        'teacher' => $teacher,
-        'timetable' => $timetable
-    ];
-    
-    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    exit;
 }
-else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
+else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'teacher', $teacher);
 }
@@ -110,7 +120,9 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
-      <a href="?teacher=<?= $teacher ?>&pdf=1" target="_blank">Esporta PDF</a>
+      <?php if (PDF_EXPORT):?>
+        <a href="?teacher=<?= $teacher ?>&pdf=1" target="_blank">Esporta PDF</a>
+      <?php endif;?>
     </div>
   </div>
   
