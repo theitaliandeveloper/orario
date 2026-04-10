@@ -76,9 +76,25 @@ if (!defined('API_URL')) {
 if (!defined('DEV_MODE')) {
     $val = getenv('DEV_MODE');
     if ($val !== false && $val !== '') {
-        define('DEV_MODE', $val);
+        define('DEV_MODE', filter_var($val, FILTER_VALIDATE_BOOLEAN));
     } else {
         define('DEV_MODE', false);
+    }
+}
+if (!defined('PDF_EXPORT')) {
+    $val = getenv('PDF_EXPORT');
+    if ($val !== false && $val !== '') {
+        define('PDF_EXPORT', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('PDF_EXPORT', true);
+    }
+}
+if (!defined('OPEN_DATA')) {
+    $val = getenv('OPEN_DATA');
+    if ($val !== false && $val !== '') {
+        define('OPEN_DATA', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('OPEN_DATA', true);
     }
 }
 // Impostazioni autenticazione dashboard amministrativa
