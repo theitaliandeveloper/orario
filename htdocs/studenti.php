@@ -15,9 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-include("lib/db.php");  // FIX: Decommentato
-$class_id = intval($_GET['class_id']);
-$class = $conn->query("SELECT * FROM classes WHERE id=$class_id")->fetch_assoc();
+include("lib/db.php");
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
 $hours = [
   1 => "Prima ora<br> 7:50 - 8:50",
@@ -28,82 +26,114 @@ $hours = [
   6 => "Sesta ora<br> 12:50 - 13:50"
 ];
 
-// FIX: Validazione classe prima di tutto
 if (!isset($_GET['class_id'])) {
     header("Location: index.php");
     exit;
 }
 
 $class_id = intval($_GET['class_id']);
-$res = $conn->query("SELECT id FROM classes WHERE id = $class_id LIMIT 1");
+$res = $conn->query("SELECT * FROM classes WHERE id = $class_id LIMIT 1");
 
 if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
-else if (isset($_GET['json']) && $_GET['json'] == '1') {
-    header('Content-Type: application/json; charset=utf-8');
-    
-    $timetable = [];
-    
-    foreach($days as $d) {
-        $d_clean = str_replace(
-            ['à','è','é','ì','ò','ù'],
-            ['a','e','e','i','o','u'],
-            $d
-        );
-        $timetable[$d_clean] = [];
-        
-        foreach($hours as $hnum => $hlabel) {
-            $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
-                               FROM timetable 
-                               LEFT JOIN subjects ON timetable.subject_id = subjects.id 
-                               WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
-            
-            if($q->num_rows > 0) {
-                $teachers = [];
-                $subject = null;
-                $room = null;
-                
-                while($row = $q->fetch_assoc()) {
-                    if($subject === null) {
-                        $subject = $row['name'];
-                        $room = $row['room'];
-                    }
-                    $teachers[] = $row['teacher'];
-                }
-                
-                $timetable[$d_clean][$hnum] = [
-                    'hour' => $hnum,
-                    'time' => strip_tags($hlabel),
-                    'subject' => $subject,
-                    'teachers' => $teachers,
-                    'room' => $room ?? ''
-                ];
-            } else {
-                $timetable[$d_clean][$hnum] = [
-                    'hour' => $hnum,
-                    'time' => strip_tags($hlabel),
-                    'subject' => null,
-                    'teachers' => [],
-                    'room' => null
-                ];
-            }
+
+$class = $res->fetch_assoc();
+
+// Helper: dato un risultato query, estrae subject, teachers[], rooms[]
+function parseRows($q) {
+    $subject = null;
+    $teachers = [];
+    $rooms = [];
+
+    while ($row = $q->fetch_assoc()) {
+        if ($subject === null) {
+            $subject = $row['name'];
+        }
+        if (!empty($row['teacher']) && !in_array($row['teacher'], $teachers)) {
+            $teachers[] = $row['teacher'];
+        }
+        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
+            $rooms[] = $row['room'];
         }
     }
-    
-    $response = [
-        'class_id' => $class_id,
-        'class_name' => $class['name'],
-        'timetable' => $timetable
-    ];
-    
-    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    exit;
+
+    return [$subject, $teachers, $rooms];
 }
-else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
+
+// Helper: array → stringa "A, B e C"
+function joinList($arr) {
+    if (empty($arr)) return '';
+    if (count($arr) === 1) return $arr[0];
+    $last = array_pop($arr);
+    return implode(', ', $arr) . ' e ' . $last;
+}
+
+if (isset($_GET['json']) && $_GET['json'] == '1') {
+    if (OPEN_DATA) {
+      header('Content-Type: application/json; charset=utf-8');
+
+      $timetable = [];
+
+      foreach ($days as $d) {
+          $d_clean = str_replace(
+              ['à','è','é','ì','ò','ù'],
+              ['a','e','e','i','o','u'],
+              $d
+          );
+          $timetable[$d_clean] = [];
+
+          foreach ($hours as $hnum => $hlabel) {
+              $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
+                                FROM timetable 
+                                LEFT JOIN subjects ON timetable.subject_id = subjects.id 
+                                WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
+
+              if ($q->num_rows > 0) {
+                  [$subject, $teachers, $rooms] = parseRows($q);
+
+                  $timetable[$d_clean][$hnum] = [
+                      'hour'     => $hnum,
+                      'time'     => strip_tags($hlabel),
+                      'subject'  => $subject,
+                      'teachers' => $teachers,
+                      'rooms'    => $rooms   // <-- ora è un array
+                  ];
+              } else {
+                  $timetable[$d_clean][$hnum] = [
+                      'hour'     => $hnum,
+                      'time'     => strip_tags($hlabel),
+                      'subject'  => null,
+                      'teachers' => [],
+                      'rooms'    => []
+                  ];
+              }
+          }
+      }
+
+      echo json_encode([
+          'class_id'   => $class_id,
+          'class_name' => $class['name'],
+          'timetable'  => $timetable
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+      exit;
+    } else {
+      http_response_code(403);
+      if (DEV_MODE) {
+          echo "Non puoi accedere a questo JSON perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
+      }
+      else {
+          echo "Non puoi accedere a questo JSON perchè non hai i permessi necessari per farlo.";
+      }
+      exit;
+    }
+}
+
+if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'class', $class_id);
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -119,114 +149,87 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
-      <a href="?class_id=<?= $class_id ?>&pdf=1" target="_blank">Esporta PDF</a>
+      <?php if (PDF_EXPORT):?>
+        <a href="?class_id=<?= $class_id ?>&pdf=1" target="_blank">Esporta PDF</a>
+      <?php endif;?>
     </div>
   </div>
+
   <h1>Orario della classe <?php echo htmlspecialchars($class['name']); ?></h1>
-  
+
   <!-- Visualizzazione Desktop -->
   <table class="desktop-schedule">
     <tr>
       <th></th>
-      <?php foreach($days as $d) echo "<th>$d</th>"; ?>
+      <?php foreach ($days as $d) echo "<th>$d</th>"; ?>
     </tr>
-    <?php
-    foreach($hours as $hnum => $hlabel){
-      echo "<tr><td>$hlabel</td>";
-      foreach($days as $d){
+
+    <?php foreach ($hours as $hnum => $hlabel): ?>
+    <tr>
+      <td><?= $hlabel ?></td>
+      <?php foreach ($days as $d): ?>
+        <?php
         $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
                            FROM timetable 
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id 
                            WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
 
-        if($q->num_rows > 0){
-          // FIX: Gestione corretta di multipli docenti/materie
-          $entries = [];
-          $subject = null;
-          $room = null;
-          
-          while($row = $q->fetch_assoc()){
-            if($subject === null) {
-              $subject = $row['name'];
-              $room = $row['room'];
-            }
-            $entries[] = $row['teacher'];
-          }
-
-          // Unisci i docenti correttamente
-          if(count($entries) > 1){
-            $last = array_pop($entries);
-            $teachers_list = implode(", ", $entries) . " e " . $last;
-          } else {
-            $teachers_list = $entries[0];
-          }
-
-          echo "<td data-label='$d'>
-                  <div class='subject'>" . htmlspecialchars($subject) . "</div>
-                  <div class='teacher'>" . htmlspecialchars($teachers_list) . "</div>";
-          if(!empty($room)) {
-            echo "<div class='room'>" . htmlspecialchars($room) . "</div>";
-          }
-          echo "</td>";
-        } else {
-          echo "<td data-label='$d'></td>";
-        }
-      }
-      echo "</tr>";
-    }
-    ?>
+        if ($q->num_rows > 0):
+            [$subject, $teachers, $rooms] = parseRows($q);
+            $teachers_str = joinList($teachers);
+            $rooms_str    = joinList($rooms);
+        ?>
+          <td data-label="<?= htmlspecialchars($d) ?>">
+            <div class="subject"><?= htmlspecialchars($subject) ?></div>
+            <div class="teacher"><?= htmlspecialchars($teachers_str) ?></div>
+            <?php if (!empty($rooms_str)): ?>
+              <div class="room"><?= htmlspecialchars($rooms_str) ?></div>
+            <?php endif; ?>
+          </td>
+        <?php else: ?>
+          <td data-label="<?= htmlspecialchars($d) ?>"></td>
+        <?php endif; ?>
+      <?php endforeach; ?>
+    </tr>
+    <?php endforeach; ?>
   </table>
 
   <!-- Visualizzazione Mobile -->
   <div class="mobile-schedule">
-  <?php foreach($days as $d): ?>
+  <?php foreach ($days as $d): ?>
     <div class="day">
       <h2><?= htmlspecialchars($d) ?></h2>
-      <?php
-      foreach($hours as $hnum => $hlabel):
+      <?php foreach ($hours as $hnum => $hlabel): ?>
+        <?php
         $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
                            FROM timetable 
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id 
                            WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
 
-        if($q->num_rows > 0):
-          // FIX: Stessa logica corretta anche per mobile
-          $entries = [];
-          $subject = null;
-          $room = null;
-          
-          while($row = $q->fetch_assoc()){
-            if($subject === null) {
-              $subject = $row['name'];
-              $room = $row['room'];
-            }
-            $entries[] = $row['teacher'];
-          }
-
-          if(count($entries) > 1){
-            $last = array_pop($entries);
-            $teachers_list = implode(", ", $entries) . " e " . $last;
-          } else {
-            $teachers_list = $entries[0];
-          }
-      ?>
+        if ($q->num_rows > 0):
+            [$subject, $teachers, $rooms] = parseRows($q);
+            $teachers_str = joinList($teachers);
+            $rooms_str    = joinList($rooms);
+        ?>
           <div class="lesson">
             <div class="hour"><?= strip_tags($hlabel) ?></div>
             <div class="subject"><?= htmlspecialchars($subject) ?></div>
-            <div class="teacher"><?= htmlspecialchars($teachers_list) ?></div>
-            <?php if(!empty($room)): ?><div class="room"><?= htmlspecialchars($room) ?></div><?php endif; ?>
+            <div class="teacher"><?= htmlspecialchars($teachers_str) ?></div>
+            <?php if (!empty($rooms_str)): ?>
+              <div class="room"><?= htmlspecialchars($rooms_str) ?></div>
+            <?php endif; ?>
           </div>
-      <?php else: ?>
+        <?php else: ?>
           <div class="lesson empty">
             <div class="hour"><?= strip_tags($hlabel) ?></div>
             <div class="subject">—</div>
           </div>
-      <?php endif; ?>
+        <?php endif; ?>
       <?php endforeach; ?>
     </div>
   <?php endforeach; ?>
   </div>
 
-<p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+  <p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
 </body>
 </html>

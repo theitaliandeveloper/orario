@@ -82,6 +82,12 @@ if (!defined('YEAR')) {
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', false); // Modalita' di sviluppo: abilita messaggi di debug aggiuntivi. Imposta su false se sei in produzione
 }
+if (!defined('PDF_EXPORT')) {
+    define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
+}
+if (!defined('OPEN_DATA')) {
+    define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
     define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak
