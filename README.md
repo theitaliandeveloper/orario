@@ -150,6 +150,8 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
       DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
+      PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
+      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
 
       # --- Impostazioni Autenticazione ---
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
