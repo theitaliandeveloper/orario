@@ -261,7 +261,6 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
                 // Righe secondarie (docenti / classi / coppie classe+docente)
                 if (!empty($cell['lines'])) {
-                    //$linesStr = implode(', ', $cell['lines']);
                     $linesStr = joinList($cell['lines']);
                     $pdf->SetFont('Arial', '', 6.5);
                     $pdf->SetTextColor(50, 50, 50);
@@ -272,12 +271,11 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
                 // Aula/e
                 if (!empty($cell['rooms'])) {
-                    //$roomStr = implode(', ', $cell['rooms']);
                     $roomStr = joinList($cell['rooms']);
                     $pdf->SetFont('Arial', 'I', 6);
                     $pdf->SetTextColor(100, 100, 100);
-                    $pdf->SetXY($x + 1, $y + $rowH - 5);
-                    $pdf->Cell($dayColW - 2, 4, $roomStr, 0, 0, 'C');
+                    $pdf->SetXY($x + 1, $pdf->GetY() + 0.5);
+                    $pdf->MultiCell($dayColW - 2, 3, $roomStr, 0, 'C');
                     $pdf->SetTextColor(0, 0, 0);
                 }
 
