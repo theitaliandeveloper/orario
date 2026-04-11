@@ -34,75 +34,94 @@ if (!isset($_GET['room'])) {
 $room = $conn->real_escape_string($_GET['room']);
 $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room = '$room' LIMIT 1");
 
+function joinList(array $arr): string {
+    if (empty($arr)) return '';
+    if (count($arr) === 1) return $arr[0];
+    $last = array_pop($arr);
+    return implode(', ', $arr) . ' e ' . $last;
+}
+
 if ($res->num_rows === 0) {
     header("Location: index.php");
     exit;
 }
 else if (isset($_GET['json']) && $_GET['json'] == '1') {
-    header('Content-Type: application/json; charset=utf-8');
-    
-    $timetable = [];
-    
-    foreach($days as $d) {
-        $d_clean = str_replace(
-            ['à','è','é','ì','ò','ù'],
-            ['a','e','e','i','o','u'],
-            $d
-        );
-        $timetable[$d_clean] = [];
-        
-        foreach($hours as $hnum => $hlabel) {
-            $q = $conn->query("
-              SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
-              FROM timetable
-              LEFT JOIN subjects ON timetable.subject_id = subjects.id
-              LEFT JOIN classes ON timetable.class_id = classes.id
-              WHERE subjects.room='". $conn->real_escape_string($room) ."' 
-                AND timetable.day='$d' AND timetable.hour=$hnum
-            ");
-            
-            if($q->num_rows > 0) {
-                $subject = null;
-                $class_teacher_pairs = [];
-                
-                while($row = $q->fetch_assoc()) {
-                    if($subject === null) {
-                        $subject = $row['subject_name'];
-                    }
-                    $class_teacher_pairs[] = [
-                        'class' => $row['class_name'],
-                        'teacher' => $row['teacher']
-                    ];
-                }
-                
-                $timetable[$d_clean][$hnum] = [
-                    'hour' => $hnum,
-                    'time' => strip_tags($hlabel),
-                    'subject' => $subject,
-                    'classes' => $class_teacher_pairs
-                ];
-            } else {
-                $timetable[$d_clean][$hnum] = [
-                    'hour' => $hnum,
-                    'time' => strip_tags($hlabel),
-                    'subject' => null,
-                    'classes' => []
-                ];
-            }
-        }
+    if (OPEN_DATA) {
+      header('Content-Type: application/json; charset=utf-8');
+      
+      $timetable = [];
+      
+      foreach($days as $d) {
+          $d_clean = str_replace(
+              ['à','è','é','ì','ò','ù'],
+              ['a','e','e','i','o','u'],
+              $d
+          );
+          $timetable[$d_clean] = [];
+          
+          foreach($hours as $hnum => $hlabel) {
+              $q = $conn->query("
+                SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
+                FROM timetable
+                LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                LEFT JOIN classes ON timetable.class_id = classes.id
+                WHERE subjects.room='". $conn->real_escape_string($room) ."' 
+                  AND timetable.day='$d' AND timetable.hour=$hnum
+              ");
+              
+              if($q->num_rows > 0) {
+                  $subject = null;
+                  $class_teacher_pairs = [];
+                  
+                  while($row = $q->fetch_assoc()) {
+                      if($subject === null) {
+                          $subject = $row['subject_name'];
+                      }
+                      $class_teacher_pairs[] = [
+                          'class' => $row['class_name'],
+                          'teacher' => $row['teacher']
+                      ];
+                  }
+                  
+                  $timetable[$d_clean][$hnum] = [
+                      'hour' => $hnum,
+                      'time' => strip_tags($hlabel),
+                      'subject' => $subject,
+                      'classes' => $class_teacher_pairs
+                  ];
+              } else {
+                  $timetable[$d_clean][$hnum] = [
+                      'hour' => $hnum,
+                      'time' => strip_tags($hlabel),
+                      'subject' => null,
+                      'classes' => []
+                  ];
+              }
+          }
+      }
+      
+      $response = [
+          'room' => $room,
+          'timetable' => $timetable
+      ];
+      
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+      exit;
+    } else {
+      http_response_code(403);
+      if (DEV_MODE) {
+          echo "Non puoi accedere a questo JSON perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
+      }
+      else {
+          echo "Non puoi accedere a questo JSON perchè non hai i permessi necessari per farlo.";
+      }
+      exit;
     }
-    
-    $response = [
-        'room' => $room,
-        'timetable' => $timetable
-    ];
-    
-    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    exit;
 }
-else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
+else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     require_once 'lib/pdf.php';
     exportTimetablePDF($conn, 'room', $room);
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -118,7 +137,9 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1') {
     <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
     <div class="links">
       <a href="index.php">Home</a>
-      <a href="?room=<?= $room ?>&pdf=1" target="_blank">Esporta PDF</a>
+      <?php if (PDF_EXPORT):?>
+        <a href="?room=<?= $room ?>&pdf=1" target="_blank">Esporta PDF</a>
+      <?php endif;?>
     </div>
   </div>
 

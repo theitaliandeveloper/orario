@@ -19,23 +19,6 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 require_once __DIR__ . '/../vendor/autoload.php';
 include_once __DIR__ . '/../config/config.php';
 
-/**
- * Esporta un orario in PDF.
- *
- * @param mysqli $conn       Connessione al DB
- * @param string $type       Tipo di orario: 'class' | 'teacher' | 'room'
- * @param string $identifier ID (per class) o nome (per teacher/room)
- *
- * Uso:
- *   // Orario classe
- *   exportTimetablePDF($conn, 'class', $class_id);
- *
- *   // Orario docente
- *   exportTimetablePDF($conn, 'teacher', 'Mario Rossi');
- *
- *   // Orario laboratori
- *   exportTimetablePDF($conn, 'room', 'Laboratorio Informatica 1');
- */
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
 {
     $days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
@@ -48,11 +31,10 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
         6 => "Sesta ora\n12:50 - 13:50",
     ];
 
-    // --- Titolo e dati in base al tipo ---
     switch ($type) {
         case 'class':
             $class_id = intval($identifier);
-            $row = $conn->query("SELECT name FROM classes WHERE id = $class_id LIMIT 1")->fetch_assoc();
+            $row      = $conn->query("SELECT name FROM classes WHERE id = $class_id LIMIT 1")->fetch_assoc();
             $title    = 'Orario classe ' . $row['name'];
             $filename = 'orario_classe_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $row['name']);
             break;
@@ -72,22 +54,11 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
             exit('Tipo non valido.');
     }
 
-    // --- Carica i dati dell'orario ---
     $data = _loadTimetableData($conn, $type, $identifier, $days, array_keys($hours));
-
-    // --- Genera il PDF ---
     _renderPDF($title, $filename . '.pdf', $days, $hours, $data);
 }
 
 
-// -----------------------------------------------------------------------
-// Funzioni private
-// -----------------------------------------------------------------------
-
-/**
- * Carica tutti i dati dell'orario in un array $data[$day][$hour].
- * Ogni cella contiene: subject, lines[] (righe secondarie), room.
- */
 function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days, array $hournums): array
 {
     $data = [];
@@ -113,23 +84,25 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                     ");
 
                     $subject  = null;
-                    $room     = null;
                     $teachers = [];
+                    $rooms    = [];
 
                     while ($row = $q->fetch_assoc()) {
                         if ($subject === null) {
                             $subject = $row['name'];
-                            $room    = $row['room'];
                         }
-                        if (!empty($row['teacher'])) {
+                        if (!empty($row['teacher']) && !in_array($row['teacher'], $teachers)) {
                             $teachers[] = $row['teacher'];
+                        }
+                        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
+                            $rooms[] = $row['room'];
                         }
                     }
 
                     $data[$d][$hnum] = [
                         'subject' => $subject,
-                        'lines'   => $teachers,   // docenti
-                        'room'    => $room,
+                        'lines'   => $teachers,
+                        'rooms'   => $rooms,
                     ];
                     break;
 
@@ -142,28 +115,30 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
                         LEFT JOIN classes  ON timetable.class_id   = classes.id
                         WHERE subjects.teacher = '$escaped_teacher'
-                          AND timetable.day    = '$escaped_d'
-                          AND timetable.hour   = $hnum
+                        AND timetable.day    = '$escaped_d'
+                        AND timetable.hour   = $hnum
                     ");
 
                     $subject = null;
-                    $room    = null;
                     $classes = [];
+                    $rooms   = [];
 
                     while ($row = $q->fetch_assoc()) {
                         if ($subject === null) {
                             $subject = $row['name'];
-                            $room    = $row['room'];
                         }
-                        if (!empty($row['class_name'])) {
+                        if (!empty($row['class_name']) && !in_array($row['class_name'], $classes)) {
                             $classes[] = $row['class_name'];
+                        }
+                        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
+                            $rooms[] = $row['room'];
                         }
                     }
 
                     $data[$d][$hnum] = [
                         'subject' => $subject,
-                        'lines'   => $classes,    // classi
-                        'room'    => $room,
+                        'lines'   => $classes,
+                        'rooms'   => $rooms,
                     ];
                     break;
 
@@ -188,13 +163,13 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                             $subject = $row['subject_name'];
                         }
                         $pair = $row['class_name'] . ' (' . $row['teacher'] . ')';
-                        $pairs[$pair] = true; // deduplicazione
+                        $pairs[$pair] = true;
                     }
 
                     $data[$d][$hnum] = [
                         'subject' => $subject,
-                        'lines'   => array_keys($pairs),  // classe + docente
-                        'room'    => null,                 // siamo già nell'aula
+                        'lines'   => array_keys($pairs),
+                        'rooms'   => [],
                     ];
                     break;
             }
@@ -205,9 +180,6 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 }
 
 
-/**
- * Classe FPDF con header e footer personalizzati.
- */
 class _OrarioPDF extends Fpdf\Fpdf
 {
     public string $pageTitle = '';
@@ -233,20 +205,16 @@ class _OrarioPDF extends Fpdf\Fpdf
 }
 
 
-/**
- * Disegna il PDF e lo invia al browser.
- */
 function _renderPDF(string $title, string $filename, array $days, array $hours, array $data): void
 {
-    // Layout A4 landscape, margini 10mm
     $pdf = new _OrarioPDF('L', 'mm', 'A4');
     $pdf->pageTitle = $title;
     $pdf->SetMargins(10, 10, 10);
     $pdf->SetAutoPageBreak(true, 14);
     $pdf->AddPage();
 
-    $pageW    = 297 - 20;           // larghezza utile
-    $hourColW = 24;                 // colonna "ora"
+    $pageW    = 297 - 20;
+    $hourColW = 24;
     $dayColW  = ($pageW - $hourColW) / count($days);
     $rowH     = 22;
     $headerH  = 8;
@@ -293,7 +261,8 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
                 // Righe secondarie (docenti / classi / coppie classe+docente)
                 if (!empty($cell['lines'])) {
-                    $linesStr = implode(', ', $cell['lines']);
+                    //$linesStr = implode(', ', $cell['lines']);
+                    $linesStr = joinList($cell['lines']);
                     $pdf->SetFont('Arial', '', 6.5);
                     $pdf->SetTextColor(50, 50, 50);
                     $pdf->SetXY($x + 1, $pdf->GetY());
@@ -301,12 +270,14 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                     $pdf->SetTextColor(0, 0, 0);
                 }
 
-                // Aula (solo per classe e docente)
-                if (!empty($cell['room'])) {
+                // Aula/e
+                if (!empty($cell['rooms'])) {
+                    //$roomStr = implode(', ', $cell['rooms']);
+                    $roomStr = joinList($cell['rooms']);
                     $pdf->SetFont('Arial', 'I', 6);
                     $pdf->SetTextColor(100, 100, 100);
                     $pdf->SetXY($x + 1, $y + $rowH - 5);
-                    $pdf->Cell($dayColW - 2, 4, 'Aula: ' . $cell['room'], 0, 0, 'C');
+                    $pdf->Cell($dayColW - 2, 4, $roomStr, 0, 0, 'C');
                     $pdf->SetTextColor(0, 0, 0);
                 }
 
@@ -324,7 +295,14 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
         $pdf->Ln($rowH);
     }
 
-    // Output
     $pdf->Output('D', $filename);
     exit;
 }
+/*
+function joinList(array $arr): string {
+    if (empty($arr)) return '';
+    if (count($arr) === 1) return $arr[0];
+    $last = array_pop($arr);
+    return implode(', ', $arr) . ' e ' . $last;
+}
+*/
