@@ -17,7 +17,7 @@ services:
       # --- Impostazioni sito ---
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
-      DEV_MODE: "false" # Abilita modalita' di sviluppo per output dettagliato.
+      DEV_MODE: false # Abilita modalita' di sviluppo per output dettagliato.
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
       OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
 
