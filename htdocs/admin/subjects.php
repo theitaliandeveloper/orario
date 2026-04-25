@@ -106,7 +106,7 @@ if (isset($_GET['delete'])) {
             <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>" required placeholder="Docente">
             <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>" placeholder="Laboratorio">
             <button type="submit" name="update">Salva modifiche</button>
-            <a class="cancel-edit" href="subjects.php" style="color: #666; margin-left: 10px;">Annulla</a>
+            <a class="cancel-edit" href="subjects.php" style="margin-left: 10px;">Annulla</a>
           </form>
         </div>
     <?php

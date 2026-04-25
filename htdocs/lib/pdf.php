@@ -17,7 +17,18 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . '/../vendor/autoload.php';
-include_once __DIR__ . '/../config/config.php';
+$baseConfigFile  = __DIR__ . "/../config/config.php";
+$localConfigFile = __DIR__ . "/../config/config.local.php";
+
+/*
+ * 1. carico PRIMA il base
+ * 2. poi il local che può sovrascrivere SOLO se la costante NON esiste ancora
+ */
+if (file_exists($localConfigFile)) {
+    require $localConfigFile;
+}
+
+require $baseConfigFile;
 
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
 {
