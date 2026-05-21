@@ -1,6 +1,16 @@
 {
+    "name": "vichingo455/orario",
+    "description": "Un modo semplice e veloce di visualizzare gli orari scolastici",
+    "type": "project",
     "require": {
         "jumbojett/openid-connect-php": "^1.0",
         "fpdf/fpdf": "^1.86"
-    }
+    },
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Vichingo455"
+        }
+    ],
+    "minimum-stability": "stable"
 }

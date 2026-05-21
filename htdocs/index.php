@@ -24,6 +24,7 @@ include("lib/db.php");
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/navbar.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body>
 <div class="navbar">
@@ -31,7 +32,6 @@ include("lib/db.php");
     <div class="links">
       <a href="index.php">Home</a>
       <a href="admin/index.php">Admin</a>
-      <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank">Codice sorgente</a>
     </div>
   </div>
   <h1><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></h1>
@@ -45,7 +45,7 @@ include("lib/db.php");
       echo "<ul><li><b>$label</b></li>";
       $res = $conn->query("SELECT * FROM classes WHERE name LIKE '$year%' ORDER BY name");
       while($row = $res->fetch_assoc()){
-        echo "<li><a href='studenti.php?class_id={$row['id']}'>{$row['name']}</a></li>";
+        echo "<li><a href='studenti.php?class_id={$row['id']}' class='littlebutton'>{$row['name']}</a></li>";
       }
       echo "</ul>";
     }
@@ -61,7 +61,7 @@ include("lib/db.php");
       if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {
 	$teacher_name = htmlspecialchars($row['teacher']);
       	echo "<ul><li><b>$teacher_name</b></li>";
-      	echo "<li><a href='docenti.php?teacher=".urlencode($teacher_name)."'>Visualizza orario</a></li>";
+      	echo "<li><a href='docenti.php?teacher=".urlencode($teacher_name)."' class='littlebutton'>Visualizza orario</a></li>";
      	echo "</ul>";
       }
     }
@@ -76,12 +76,16 @@ $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room IS NOT NULL A
 while($row = $res->fetch_assoc()){
     $room_name = htmlspecialchars($row['room']);
     echo "<ul><li><b>$room_name</b></li>";
-    echo "<li><a href='laboratori.php?room=".urlencode($room_name)."'>Visualizza orario</a></li>";
+    echo "<li><a href='laboratori.php?room=".urlencode($room_name)."' class='littlebutton'>Visualizza orario</a></li>";
     echo "</ul>";
 }
 ?>
 </div>
 
-<p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+<p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+</p>
 </body>
 </html>

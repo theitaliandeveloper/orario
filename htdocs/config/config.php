@@ -55,7 +55,7 @@ if (!defined('APP_DOMAIN')) {
     define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
 }
 // Impostazioni autenticazione via Keycloak (richiesto solo se AUTH_TYPE sta impostato su keycloak)
-if (AUTH_TYPE === 'keycloak') {
+if (strtolower(AUTH_TYPE) === 'keycloak') {
     if (!defined('KEYCLOAK_DOMAIN')) {
         define('KEYCLOAK_DOMAIN',''); // Dominio di Keycloak (ad esempio auth.yourdomain.com)
     }

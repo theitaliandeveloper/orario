@@ -68,15 +68,16 @@ if (isset($_GET['delete'])) {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Gestisci Materie</title>
+  <title><?php echo APP_NAME; ?> - Gestisci Materie</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="/css/home.css">
+  <link rel="stylesheet" href="../css/home.css">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <!-- Navbar -->
   <div class="navbar">
-    <div class="logo">Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard</div>
     <div class="links">
       <a href="index.php">Dashboard</a>
       <a href="logout.php">Logout</a>
@@ -105,7 +106,7 @@ if (isset($_GET['delete'])) {
             <input type="text" name="name" value="<?php echo htmlspecialchars($subject['name']); ?>" required placeholder="Materia">
             <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>" required placeholder="Docente">
             <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>" placeholder="Laboratorio">
-            <button type="submit" name="update">Salva modifiche</button>
+            <button type="submit" name="update" class="cancel-edit">Salva modifiche</button>
             <a class="cancel-edit" href="subjects.php" style="margin-left: 10px;">Annulla</a>
           </form>
         </div>
@@ -154,17 +155,21 @@ if (isset($_GET['delete'])) {
         <?php endif; ?>
 
         <li style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-          <a href="subjects.php?edit=<?php echo $row['id']; ?>" class="edit-btn" style="background: #e3f2fd; color: #1976d2; font-size: 0.8em;">Modifica</a>
+          <a href="subjects.php?edit=<?php echo $row['id']; ?>" class="edit-btn littlebutton" style="background: #e3f2fd; color: #1976d2; font-size: 0.8em;">Modifica</a>
           <a href="subjects.php?delete=<?php echo $row['id']; ?>"
             onclick="return confirm('Eliminare questo docente?')"
-            class="delete-btn" style="background: #fbe9e7; color: #d32f2f; font-size: 0.8em;">Elimina</a>
+            class="delete-btn littlebutton" style="background: #fbe9e7; color: #d32f2f; font-size: 0.8em;">Elimina</a>
         </li>
       </ul>
 
     <?php }
     if (!$first_iteration) echo '</div>'; // Chiude l'ultima griglia aperta
     ?>
-    <p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+    </p>
   </div>
 </body>
 </html>

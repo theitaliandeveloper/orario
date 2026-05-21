@@ -73,7 +73,7 @@ li b {
     color: #1f618d;
 }
 
-a {
+.littlebutton {
     text-decoration: none;
     color: #0066cc;
     padding: 5px 8px;
@@ -81,7 +81,7 @@ a {
     transition: background-color 0.2s, color 0.2s;
 }
 
-a:hover {
+.littlebutton:hover {
     background-color: #0066cc;
     color: #fff;
 }

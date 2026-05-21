@@ -56,14 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cambia Password</title>
+    <title><?php echo APP_NAME; ?> - Cambia Password</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
 <div class="navbar">
-    <div class="logo">Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard</div>
     <div class="links">
         <a href="index.php">Dashboard</a>
         <a href="logout.php">Logout</a>
@@ -92,6 +93,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php if ($message): ?>
         <p style="color:<?php echo strpos($message,'successo')!==false ? 'green':'red'; ?>;"><?php echo $message; ?></p>
     <?php endif; ?>
+<p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+</p>
 </div>
 
 </body>

@@ -36,14 +36,15 @@ if (!isset($_SESSION['admin'])) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard</title>
+    <title><?php echo APP_NAME; ?> - Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <!-- Navbar -->
   <div class="navbar">
-    <div class="logo">Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard</div>
     <div class="links">
       <a href="/">Torna al sito</a>
       <a href="logout.php">Logout</a>
@@ -54,29 +55,34 @@ if (!isset($_SESSION['admin'])) {
   <div class="dashboard">
     <h1>Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
     <p>
-      <a href="classes.php">Gestisci Classi</a>
-      <a href="subjects.php">Gestisci Materie</a>
-      <a href="timetable.php">Gestisci Orario</a>
+      <a href="classes.php" class="buttons">Gestisci Classi</a>
+      <a href="subjects.php" class="buttons">Gestisci Materie</a>
+      <a href="timetable.php" class="buttons">Gestisci Orario</a>
       <?php
           if (defined(API_URL) || API_URL != "") {
-            echo '<a href="importer.php" style="background: #28a745;">🔄 Importa Orario</a>';
+            echo '<a href="importer.php" class="buttons" style="background: #9a1616;">🔄 Importa Orario</a>';
           }
       ?>
       <?php
       if ($_SESSION['auth_type'] === 'local') {
-        echo '<a href="password.php">Cambia Password</a>';
+        echo '<a href="password.php" class="buttons">Cambia Password</a>';
       }
       ?>
       <?php
       if ($_SESSION['auth_type'] === 'local' && $_SESSION['admin'] === 'admin') {
-        echo '<a href="users.php">Gestisci Amministratori</a>';
+        echo '<a href="users.php" class="buttons">Gestisci Utenti</a>';
       }
       ?>
+      <a href="about.php" class="buttons">Informazioni sulla piattaforma</a>
     </p>
-    <p>
+    <p class="only-mobile">
       Nota: Questa pagina si vede meglio da computer desktop. Se sei da computer, puoi ignorare questo messaggio.
     </p>
-    <p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+    </p>
   </div>
 </body>
 </html>
