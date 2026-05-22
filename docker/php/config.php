@@ -115,7 +115,7 @@ if (!defined('APP_DOMAIN')) {
     }
 }
 // Impostazioni autenticazione via Keycloak (richiesto solo se AUTH_TYPE sta impostato su keycloak)
-if (AUTH_TYPE === 'keycloak') {
+if (strtolower(AUTH_TYPE) === 'keycloak') {
     if (!defined('KEYCLOAK_DOMAIN')) {
         $val = getenv('KEYCLOAK_DOMAIN');
         if ($val !== false && $val !== '') {

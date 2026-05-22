@@ -53,7 +53,7 @@ if (isset($_GET['delete'])) {
         $stmt->execute();
         $message = "Utente admin rimosso.";
     } else {
-        $message = "Non puoi eliminare il super admin.";
+        $message = "Non puoi eliminare l'utente default.";
     }
 }
 
@@ -106,10 +106,10 @@ $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
                         <td data-label="Azione">
                             <?php if ($row['id'] != 1): ?>
                                 <a href="?delete=<?php echo $row['id']; ?>" 
-                                    onclick="return confirm('Vuoi davvero eliminare questo amministratore?')"
-                                    style="color:red;">Elimina</a>
+                                    onclick="return confirm('Vuoi davvero eliminare questo utente?')"
+                                    class='delete-link'>Elimina</a>
                             <?php else: ?>
-                                <em>Super Admin</em>
+                                <em>Non Disponibile</em>
                             <?php endif; ?>
                         </td>
                     </tr>

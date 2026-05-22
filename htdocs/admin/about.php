@@ -35,7 +35,7 @@ if ($res = $conn->query("SELECT COUNT(*) as cnt FROM timetable")) {
     $timetableCount = $res->fetch_assoc()['cnt'];
 }
 
-if (strtolower(AUTH_TYPE) == "local") {
+if ($_SESSION['auth_type'] == 'local') {
     $adminsCount = 0;
     if ($res = $conn->query("SELECT COUNT(*) as cnt FROM admin")) {
         $adminsCount = $res->fetch_assoc()['cnt'];
@@ -106,7 +106,7 @@ natcasesort($extensions);
                     <td data-label="Conteggio Attuale"><?php echo $timetableCount; ?></td>
                     <td data-label="Descrizione">Totale delle ore settimanali pianificate e salvate nell'orario generale.</td>
                 </tr>
-                <?php if (strtolower(AUTH_TYPE) == "local"): ?>
+                <?php if ($_SESSION['auth_type'] == 'local'): ?>
                 <tr>
                     <td data-label="Elemento"><strong>Amministratori</strong></td>
                     <td data-label="Conteggio Attuale"><?php echo $adminsCount; ?></td>
@@ -142,7 +142,7 @@ natcasesort($extensions);
                     <td data-label="Valore Rilevato"><?php echo php_uname(); ?></td>
                 </tr>
                 <tr>
-                    <td data-label="Parametro"><strong>Server Database</strong></td>
+                    <td data-label="Parametro"><strong>Versione Database</strong></td>
                     <td data-label="Valore Rilevato"><?php echo htmlspecialchars($dbVersion); ?></td>
                 </tr>
                 <tr>

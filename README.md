@@ -59,8 +59,8 @@ VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi')
 mysql -u root -p < orario/schema.sql
 ```
 
-6. **Modifica il file ``config/config.php`` inserendo i valori richiesti**
-- Esempio file ``config/config.php``:
+6. **Crea il file ``config/config.php`` inserendo i valori richiesti**
+- Esempio file ``config/config.php`` (trovi il file base sotto ``config/config.sample.php``):
 ```php
 <?php
 // Impostazioni Database
@@ -173,7 +173,7 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
 ```
 
 ## Segnalare un problema
-Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
+Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.qzz.io/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.qzz.io/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
 
 ## Licenza
 **Orario Scuola, Copyright (C) 2025-2026 EmmeV.**

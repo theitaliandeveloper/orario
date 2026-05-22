@@ -15,18 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-$baseConfigFile  = __DIR__ . "/../config/config.php";
-$localConfigFile = __DIR__ . "/../config/config.local.php";
-
-/*
- * 1. carico PRIMA il base
- * 2. poi il local che può sovrascrivere SOLO se la costante NON esiste ancora
- */
-if (file_exists($localConfigFile)) {
-    require $localConfigFile;
-}
-
-require $baseConfigFile;
+require __DIR__ . "/../config/config.php";
 session_start();
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");

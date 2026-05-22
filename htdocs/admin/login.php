@@ -41,12 +41,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
       $error = "Errore durante l'autenticazione. Potrebbe essere un problema con PHP oppure col database. Ulteriori dettagli: " . $e;
     }
 }
+$name = APP_NAME;
 if (strtolower(AUTH_TYPE) == 'local') {
 echo <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{$APP_NAME} - Accedi</title>
+  <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -54,7 +55,7 @@ echo <<<HTML
 <body>
 
   <div class="navbar">
-    <div class="logo">{$APP_NAME} - Admin Dashboard</div>
+    <div class="logo">{$name} - Admin Dashboard</div>
     <div class="links">
       <a href="/">Torna al sito</a>
     </div>
@@ -75,6 +76,7 @@ echo <<<HTML
 <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
         Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
         Codice sorgente disponibile su <a href="https://git.vichingo455.freeddns.org/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
 </p>
 </body>
 </html>
@@ -103,7 +105,7 @@ else if (strtolower(AUTH_TYPE) === 'keycloak') {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{$APP_NAME} - Accedi</title>
+  <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -111,7 +113,7 @@ else if (strtolower(AUTH_TYPE) === 'keycloak') {
 <body>
 
   <div class="navbar">
-    <div class="logo">{$APP_NAME} - Admin Dashboard</div>
+    <div class="logo">{$name} - Admin Dashboard</div>
     <div class="links">
       <a href="/">Torna al sito</a>
     </div>
@@ -138,7 +140,7 @@ HTML;
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{$APP_NAME} - Accedi</title>
+  <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -146,7 +148,7 @@ HTML;
 <body>
 
   <div class="navbar">
-    <div class="logo">{$APP_NAME} - Admin Dashboard</div>
+    <div class="logo">{$name} - Admin Dashboard</div>
     <div class="links">
       <a href="/">Torna al sito</a>
     </div>
