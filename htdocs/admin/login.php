@@ -42,6 +42,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
     }
 }
 $name = APP_NAME;
+if (DEV_MODE){
+  $dev = " - SVILUPPO";
+}
+else {
+  $dev = "";
+}
 if (strtolower(AUTH_TYPE) == 'local') {
 echo <<<HTML
 <!DOCTYPE html>
@@ -55,7 +61,7 @@ echo <<<HTML
 <body>
 
   <div class="navbar">
-    <div class="logo">{$name} - Admin Dashboard</div>
+    <div class="logo">{$name} - Admin Dashboard{$dev}</div>
     <div class="links">
       <a href="/">Torna al sito</a>
     </div>
@@ -113,7 +119,7 @@ else if (strtolower(AUTH_TYPE) === 'keycloak') {
 <body>
 
   <div class="navbar">
-    <div class="logo">{$name} - Admin Dashboard</div>
+    <div class="logo">{$name} - Admin Dashboard{$dev}</div>
     <div class="links">
       <a href="/">Torna al sito</a>
     </div>
@@ -148,7 +154,7 @@ HTML;
 <body>
 
   <div class="navbar">
-    <div class="logo">{$name} - Admin Dashboard</div>
+    <div class="logo">{$name} - Admin Dashboard{$dev}</div>
     <div class="links">
       <a href="/">Torna al sito</a>
     </div>

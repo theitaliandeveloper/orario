@@ -33,7 +33,7 @@ if (!isset($_SESSION['admin'])) {
 <body>
   <!-- Navbar -->
   <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="/">Torna al sito</a>
       <a href="logout.php">Logout</a>
@@ -49,7 +49,7 @@ if (!isset($_SESSION['admin'])) {
       <a href="timetable.php" class="buttons">Gestisci Orario</a>
       <?php
           if (defined(API_URL) || API_URL != "") {
-            echo '<a href="importer.php" class="buttons" style="background: #9a1616;">🔄 Importa Orario</a>';
+            echo '<a href="importer.php" class="buttons">Importa Orario</a>';
           }
       ?>
       <?php

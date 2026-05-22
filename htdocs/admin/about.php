@@ -63,7 +63,7 @@ natcasesort($extensions);
 <body>
   <!-- Navbar -->
   <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="index.php">Dashboard</a>
       <a href="logout.php">Logout</a>

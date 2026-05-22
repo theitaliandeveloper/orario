@@ -19,6 +19,9 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 if (!defined('VERSION')) {
     define('VERSION', 'dev');
 }
+if (!defined('DEV_MODE')) {
+    define('DEV_MODE', VERSION == 'dev');
+}
 // Config here
 require __DIR__ . "/../config/config.php";
 ?>

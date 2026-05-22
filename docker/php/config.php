@@ -73,14 +73,6 @@ if (!defined('API_URL')) {
         define('API_URL', '');
     }
 }
-if (!defined('DEV_MODE')) {
-    $val = getenv('DEV_MODE');
-    if ($val !== false && $val !== '') {
-        define('DEV_MODE', filter_var($val, FILTER_VALIDATE_BOOLEAN));
-    } else {
-        define('DEV_MODE', false);
-    }
-}
 if (!defined('PDF_EXPORT')) {
     $val = getenv('PDF_EXPORT');
     if ($val !== false && $val !== '') {

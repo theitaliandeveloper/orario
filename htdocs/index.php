@@ -28,7 +28,7 @@ include("lib/db.php");
 </head>
 <body>
 <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?></div>
+    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?><?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="index.php">Home</a>
       <a href="admin/index.php">Admin</a>
