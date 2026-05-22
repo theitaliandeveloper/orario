@@ -199,9 +199,9 @@ class _OrarioPDF extends Fpdf\Fpdf
     public function Footer(): void
     {
         $this->SetY(-11);
-        $this->SetFont('Arial', 'I', 6.5);
+        $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(150, 150, 150);
-        $this->Cell(0, 5, 'Orario Scuola - Copyright (C) 2025-2026 EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 0, 0, 'C');
+        $this->Cell(0, 5, APP_NAME . ' - Copyright (C) 2025-2026 EmmeV. (piattaforma) - Ultimo aggiornamento della tabella: ' . date('d/m/Y'), 0, 0, 'C');
     }
 }
 

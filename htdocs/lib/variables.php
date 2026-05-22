@@ -17,7 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 // Variables that only project developers should modify
 if (!defined('VERSION')) {
-    define('VERSION', 'dev');
+    define('VERSION', 'dev'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
 }
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', VERSION == 'dev');
