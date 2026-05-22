@@ -23,5 +23,5 @@ if (!defined('DEV_MODE')) {
     define('DEV_MODE', VERSION == 'dev');
 }
 // Config here
-require __DIR__ . "/../lib/variables.php";
+require __DIR__ . "/../lib/config.php";
 ?>

@@ -1,6 +1,5 @@
 FROM php:8.5-apache
 RUN docker-php-ext-install mysqli pdo pdo_mysql
-RUN echo "memory_limit=512M" > $PHP_INI_DIR/conf.d/memory-limit.ini
 COPY htdocs/ /var/www/html/
 COPY docker/php/config.php /var/www/html/config/config.php
 RUN rm -f /var/www/html/config/config.sample.php
