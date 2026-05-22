@@ -17,7 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . "/../config/config.php";
+require __DIR__ . "/../lib/variables.php";
 
 
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void

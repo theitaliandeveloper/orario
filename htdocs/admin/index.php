@@ -15,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-require __DIR__ . "/../config/config.php";
+require __DIR__ . "/../lib/variables.php";
 session_start();
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
