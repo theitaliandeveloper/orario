@@ -115,6 +115,9 @@ if (AUTH_TYPE === 'keycloak') {
 if (!defined('PHP_MAX_RAM')) {
     define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
 }
+if (!defined('SESSION_LIFETIME')) {
+    define('SESSION_LIFETIME',3600); // Durata del cookie di login
+}
 ?>
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
@@ -174,6 +177,7 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       # --- Impostazioni Avanzate ---
       # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
       PHP_MAX_RAM: "128M" # Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
+      SESSION_LIMIT: 3600 # Durata del cookie di login
 ```
 
 ## Segnalare un problema
