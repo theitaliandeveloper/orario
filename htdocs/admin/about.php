@@ -165,6 +165,10 @@ natcasesort($extensions);
                     <td data-label="Parametro"><strong>Estensioni attive</strong></td>
                     <td data-label="Valore Rilevato" style="text-align: left; font-size: 0.9em; line-height: 1.4;"><?php echo htmlspecialchars(implode(', ', $extensions)); ?></td>
                 </tr>
+                <tr>
+                    <td data-label="Parametro"><strong>Timeout sessione</strong></td>
+                    <td data-label="Valore Rilevato" style="text-align: left; font-size: 0.9em; line-height: 1.4;"><?php echo SESSION_LIFETIME; ?> secondi</td>
+                </tr>
             </tbody>
         </table>
     </div>
