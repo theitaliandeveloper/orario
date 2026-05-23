@@ -44,6 +44,9 @@ if ($_SESSION['auth_type'] == 'local') {
 
 // Info sul server DB
 $dbVersion = $conn->server_info;
+// Calculate DB size in MB
+$dbSizeResult = $conn->query("SELECT SUM(data_length + index_length) / 1024 / 1024 AS size_mb FROM information_schema.tables WHERE table_schema = DATABASE()");
+$dbSizeMB = $dbSizeResult->fetch_assoc()['size_mb'] ?? 0;
 
 // Telemetria PHP
 $memoryLimit = ini_get('memory_limit');
@@ -69,7 +72,6 @@ natcasesort($extensions);
       <a href="logout.php">Logout</a>
     </div>
   </div>
-
   <div class="admin-container">
     <h1>Informazioni sulla piattaforma</h1>
     <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
@@ -108,15 +110,14 @@ natcasesort($extensions);
                 </tr>
                 <?php if ($_SESSION['auth_type'] == 'local'): ?>
                 <tr>
-                    <td data-label="Elemento"><strong>Amministratori</strong></td>
+                    <td data-label="Elemento"><strong>Utenti</strong></td>
                     <td data-label="Conteggio Attuale"><?php echo $adminsCount; ?></td>
-                    <td data-label="Descrizione">Account abilitati ad accedere alla dashboard di gestione di questa istanza.</td>
+                    <td data-label="Descrizione">Utenti abilitati ad accedere alla dashboard di gestione di questa istanza.</td>
                 </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
-
     <h3 style="color: #2c3e50; border-left: 5px solid #1f618d; padding-left: 10px; margin-top: 30px; margin-bottom: 15px;">
         Dettagli Ambiente e Server
     </h3>
@@ -131,19 +132,23 @@ natcasesort($extensions);
             <tbody>
                 <tr>
                     <td data-label="Parametro"><strong>Versione Piattaforma</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo htmlspecialchars(VERSION); ?></td>
+                    <td data-label="Valore Rilevato"><?php if (VERSION == "dev") {echo "Sviluppo";} else {echo htmlspecialchars(VERSION);} ?></td>
                 </tr>
                 <tr>
                     <td data-label="Parametro"><strong>Versione di PHP</strong></td>
                     <td data-label="Valore Rilevato"><?php echo PHP_VERSION; ?> <?php if (PHP_DEBUG){echo "(Debug)";} ?></td>
                 </tr>
                 <tr>
-                    <td data-label="Parametro"><strong>Sistema Operativo Host</strong></td>
+                    <td data-label="Parametro"><strong>Sistema Operativo</strong></td>
                     <td data-label="Valore Rilevato"><?php echo php_uname(); ?></td>
                 </tr>
                 <tr>
                     <td data-label="Parametro"><strong>Versione Database</strong></td>
                     <td data-label="Valore Rilevato"><?php echo htmlspecialchars($dbVersion); ?></td>
+                </tr>
+                <tr>
+                    <td data-label="Parametro"><strong>Dimensione Database</strong></td>
+                    <td data-label="Valore Rilevato"><?php echo round($dbSizeMB, 2); ?> MB</td>
                 </tr>
                 <tr>
                     <td data-label="Parametro"><strong>Limite Memoria PHP</strong></td>
@@ -165,9 +170,7 @@ natcasesort($extensions);
         Ciò significa che puoi liberamente studiare, modificare e distribuire il codice sorgente, a patto che ogni modifica apportata 
         venga resa pubblica e condivisa sotto la medesima licenza qualora il servizio sia reso disponibile in rete.
     </p>
-
     <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-
     <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
         Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
         Codice sorgente disponibile su <a href="https://git.vichingo455.qzz.io/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.

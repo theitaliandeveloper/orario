@@ -41,9 +41,9 @@ h2 {
 /* Grid layout */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-    max-width: 1000px;
+    max-width: 2000px;
     margin: 0 auto;
 }
 
@@ -102,7 +102,7 @@ li b {
     }
     
     .grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 10px;
     }
     
@@ -110,7 +110,7 @@ li b {
         padding: 10px;
     }
     
-    a {
+    .littlebutton {
         padding: 8px 10px;
         font-size: 0.95em;
     }
@@ -134,7 +134,7 @@ li b {
         padding: 8px;
     }
     
-    a {
+    .littlebutton {
         display: block;
         text-align: center;
         padding: 10px;
