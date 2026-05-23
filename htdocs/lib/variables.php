@@ -15,13 +15,24 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-// Variables that only project developers should modify
+// Queste variabili sono per sviluppatori
 if (!defined('VERSION')) {
     define('VERSION', 'dev'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
 }
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', VERSION == 'dev');
 }
-// Config here
+
+// Configurazione dell'utente
 require __DIR__ . "/../config/config.php";
+
+// Controllo sulle variabili impostate dall'utente (quelle critiche)
+if (!defined('PHP_MAX_RAM')) {
+    define('PHP_MAX_RAM','128M');
+} else if (PHP_MAX_RAM == "") {
+    die("Il limite di memoria di PHP non puo' essere una stringa vuota!");
+}
+
+// Imposta le variabili user-defined sperando che effettivamente non siano eresie.
+ini_set('memory_limit',PHP_MAX_RAM); // https://www.php.net/manual/en/ini.core.php#ini.memory-limit
 ?>

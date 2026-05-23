@@ -19,6 +19,9 @@ use Jumbojett\OpenIDConnectClient;
 require '../vendor/autoload.php';
 session_start();
 include("../lib/db.php");
+if (AUTH_TYPE == "" || (strtolower(AUTH_TYPE) != "local" && strtolower(AUTH_TYPE) != "keycloak")) {
+    die("Tipo di autenticazione non valido!");
+}
 if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
     try {

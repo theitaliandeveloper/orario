@@ -152,4 +152,13 @@ if (strtolower(AUTH_TYPE) === 'keycloak') {
         define('KEYCLOAK_ALLOWED_USERS',$users);
     }
 }
+// Impostazioni avanzate
+if (!defined('PHP_MAX_RAM')) {
+        $val = getenv('PHP_MAX_RAM');
+        if ($val !== false && $val !== '') {
+            define('PHP_MAX_RAM', $val);
+        } else {
+            define('PHP_MAX_RAM','128M');
+        }
+    }
 ?>

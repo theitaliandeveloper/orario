@@ -69,4 +69,8 @@ if (strtolower(AUTH_TYPE) === 'keycloak') {
         define('KEYCLOAK_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti autorizzati ad accedere all'amministrazione
     }
 }
+// Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
+if (!defined('PHP_MAX_RAM')) {
+    define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
+}
 ?>

@@ -15,12 +15,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+// Carica le variabili necessarie
 require __DIR__ . "/variables.php";
 $host = DB_HOST;
 $user = DB_USER;
 $pass = DB_PASS;
 $dbname = DB_NAME;
 
+// Tenta la connessione al database
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) {
     if (DEV_MODE)

@@ -111,6 +111,10 @@ if (AUTH_TYPE === 'keycloak') {
         define('KEYCLOAK_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti autorizzati ad accedere all'amministrazione
     }
 }
+// Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
+if (!defined('PHP_MAX_RAM')) {
+    define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
+}
 ?>
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
@@ -166,6 +170,10 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
       KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
       KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+
+      # --- Impostazioni Avanzate ---
+      # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
+      PHP_MAX_RAM: "128M" # Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
 ```
 
 ## Segnalare un problema
