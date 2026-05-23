@@ -32,7 +32,7 @@ services:
       KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
       KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
   db:
-    image: mariadb:11
+    image: mariadb:12
     container_name: orario-db
     restart: unless-stopped
     environment:

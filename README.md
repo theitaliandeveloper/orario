@@ -14,7 +14,7 @@ Una piattaforma web per visualizzare gli orari scolastici delle classi, degli in
 1. **Clona la repository e copia la cartella htdocs in una cartella accessibile dal server web**
 - Esempio (Debian):
 ```bash
-git clone https://git.vichingo455.freeddns.org/emmev-code/orario
+git clone https://git.vichingo455.qzz.io/emmev-code/orario
 git checkout dev # Per cambiare al ramo di sviluppo
 cp -r orario/htdocs/* /var/www/html/
 ```
