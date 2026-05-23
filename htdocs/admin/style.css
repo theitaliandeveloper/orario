@@ -345,6 +345,7 @@ body {
 @media (max-width: 480px) {
   .admin-container td::before,
   .responsive-table td::before {
+    content: "";
     width: 50%;
     font-size: 0.9em;
   }
