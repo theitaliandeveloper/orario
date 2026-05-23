@@ -16,11 +16,18 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 session_start();
+include("../lib/db.php");
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    session_start();
+}
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (!isset($_SESSION['admin'])) {
   header("Location: login.php");
   exit;
 }
-include("../lib/db.php");
 
 // FIX: Usa prepared statements per sicurezza
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && !isset($_POST['update'])) {

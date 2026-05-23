@@ -17,9 +17,12 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require __DIR__ . "/../lib/variables.php";
 session_start();
+session_unset();
 session_destroy();
 if (strtolower(AUTH_TYPE) === 'local')
     header("Location: /index.php");
 else if (strtolower(AUTH_TYPE) === 'keycloak')
     header('Location: https://' . KEYCLOAK_DOMAIN . '/realms/' . KEYCLOAK_REALM . '/protocol/openid-connect/logout?post_logout_redirect_uri=https://' . APP_DOMAIN . '&client_id=' . KEYCLOAK_CLIENT_ID);
+else
+    die("Tipo di autenticazione non valido!");
 ?>

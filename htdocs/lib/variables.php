@@ -19,6 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 if (!defined('VERSION')) {
     define('VERSION', 'dev'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
 }
+
 if (!defined('DEV_MODE')) {
     define('DEV_MODE', VERSION == 'dev');
 }
@@ -33,6 +34,16 @@ if (!defined('PHP_MAX_RAM')) {
     die("Il limite di memoria di PHP non puo' essere una stringa vuota!");
 }
 
+if (!defined('SESSION_LIFETIME')) {
+    define('SESSION_LIFETIME',3600);
+}
+
+if (!is_numeric(SESSION_LIFETIME) || SESSION_LIFETIME < 60) {
+    die("Il limite di sessione deve essere un valore numerico non minore di 60.");
+}
+
 // Imposta le variabili user-defined sperando che effettivamente non siano eresie.
 ini_set('memory_limit',PHP_MAX_RAM); // https://www.php.net/manual/en/ini.core.php#ini.memory-limit
+ini_set('session.gc_maxlifetime', SESSION_LIFETIME); // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+session_set_cookie_params(SESSION_LIFETIME); // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 ?>

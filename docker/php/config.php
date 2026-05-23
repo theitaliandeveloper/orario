@@ -160,5 +160,13 @@ if (!defined('PHP_MAX_RAM')) {
         } else {
             define('PHP_MAX_RAM','128M');
         }
+}
+if (!defined('SESSION_LIFETIME')) {
+    $val = getenv('SESSION_LIFETIME');
+    if ($val !== false && $val !== '' && is_numeric($val)) {
+        define('SESSION_LIFETIME', (int)$val);
+    } else {
+        define('SESSION_LIFETIME', 3600);
     }
+}
 ?>

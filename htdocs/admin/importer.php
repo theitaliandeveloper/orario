@@ -17,6 +17,13 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 session_start();
 include("../lib/db.php");
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    session_start();
+}
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); exit; }
 $message = "";

@@ -19,11 +19,15 @@ use Jumbojett\OpenIDConnectClient;
 require '../vendor/autoload.php';
 session_start();
 include("../lib/db.php");
-if (AUTH_TYPE == "" || (strtolower(AUTH_TYPE) != "local" && strtolower(AUTH_TYPE) != "keycloak")) {
-    die("Tipo di autenticazione non valido!");
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    session_start();
 }
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }
-if ($_SERVER["REQUEST_METHOD"] == "POST" && AUTH_TYPE == 'local') {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(AUTH_TYPE) == 'local') {
     try {
       $username = $_POST['username'];
       $password = $_POST['password'];
@@ -185,5 +189,7 @@ echo <<<HTML
 HTML;
     exit;
   }
+} else {
+  die("Tipo di autenticazione non valido!");
 }
 ?>
