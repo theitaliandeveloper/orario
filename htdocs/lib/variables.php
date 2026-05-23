@@ -24,6 +24,12 @@ if (!defined('DEV_MODE')) {
     define('DEV_MODE', VERSION == 'dev');
 }
 
+if (!DEV_MODE) {
+    ini_set('error_reporting','E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR'); // Show only errors in production.
+} else {
+    ini_set('error_reporting','E_ALL'); // In development show everything
+}
+
 // Configurazione dell'utente
 require __DIR__ . "/../config/config.php";
 
