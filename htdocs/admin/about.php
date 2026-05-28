@@ -143,7 +143,7 @@ natcasesort($extensions);
                 </tr>
                 <tr>
                     <td data-label="Parametro"><strong>Versione di PHP</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo PHP_VERSION; ?> <?php if (PHP_DEBUG){echo "(Debug)";} ?></td>
+                    <td data-label="Valore Rilevato"><?php echo PHP_VERSION; ?><?php if (PHP_DEBUG){echo " (Debug)";} ?></td>
                 </tr>
                 <tr>
                     <td data-label="Parametro"><strong>Sistema Operativo</strong></td>

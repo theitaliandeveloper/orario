@@ -44,6 +44,16 @@ jobs:
       - name: Log out from registry
         if: always()
         run: docker logout ${{ vars.DEFAULT_REGISTRY }}
+
+      - name: Cleanup compiled images
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          SHORT_HASH: ${{ github.sha }}
+        run: |
+          docker image rm ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}-amd64
+          docker image rm ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-amd64
+          docker image rm ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest-amd64
+
   build-arm64:
     needs: build-amd64
     runs-on: ubuntu-latest-arm64
@@ -82,3 +92,12 @@ jobs:
       - name: Log out from registry
         if: always()
         run: docker logout ${{ vars.DEFAULT_REGISTRY }}
+
+      - name: Cleanup compiled images
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          SHORT_HASH: ${{ github.sha }}
+        run: |
+          docker image rm ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5}-arm64
+          docker image rm ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-arm64
+          docker image rm ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:latest-arm64

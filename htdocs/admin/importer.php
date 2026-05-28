@@ -340,7 +340,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
             </div>
 
             <button type="submit" name="import" style="width: 100%; padding: 12px; font-size: 16px;">
-                🔄 Importa Orario
+                Importa Orario
             </button>
         </form>
     </div>
