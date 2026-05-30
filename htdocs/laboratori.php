@@ -31,8 +31,11 @@ if (!isset($_GET['room'])) {
     exit;
 }
 
-$room = $conn->real_escape_string($_GET['room']);
-$res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room = '$room' LIMIT 1");
+$room = $_GET['room']; // Will be bound
+$stmt = $conn->prepare("SELECT DISTINCT room FROM subjects WHERE room = ? LIMIT 1");
+$stmt->bind_param("s", $room);
+$stmt->execute();
+$res = $stmt->get_result();
 
 function joinList(array $arr): string {
     if (empty($arr)) return '';
@@ -60,14 +63,17 @@ else if (isset($_GET['json']) && $_GET['json'] == '1') {
           $timetable[$d_clean] = [];
           
           foreach($hours as $hnum => $hlabel) {
-              $q = $conn->query("
+              $stmt = $conn->prepare("
                 SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
                 FROM timetable
                 LEFT JOIN subjects ON timetable.subject_id = subjects.id
                 LEFT JOIN classes ON timetable.class_id = classes.id
-                WHERE subjects.room='". $conn->real_escape_string($room) ."' 
-                  AND timetable.day='$d' AND timetable.hour=$hnum
+                WHERE subjects.room=? 
+                  AND timetable.day=? AND timetable.hour=?
               ");
+              $stmt->bind_param("ssi", $room, $d, $hnum);
+              $stmt->execute();
+              $q = $stmt->get_result();
               
               if($q->num_rows > 0) {
                   $subject = null;
@@ -157,14 +163,17 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
     foreach($hours as $hnum => $hlabel){
       echo "<tr><td>$hlabel</td>";
       foreach($days as $d){
-        $q = $conn->query("
+        $stmt = $conn->prepare("
           SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
           FROM timetable
           LEFT JOIN subjects ON timetable.subject_id = subjects.id
           LEFT JOIN classes ON timetable.class_id = classes.id
-          WHERE subjects.room='". $conn->real_escape_string($room) ."' 
-            AND timetable.day='$d' AND timetable.hour=$hnum
+          WHERE subjects.room=? 
+            AND timetable.day=? AND timetable.hour=?
         ");
+        $stmt->bind_param("ssi", $room, $d, $hnum);
+        $stmt->execute();
+        $q = $stmt->get_result();
 
         if($q->num_rows > 0){
           $subject = null;
@@ -210,14 +219,17 @@ else if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <h2><?= htmlspecialchars($d) ?></h2>
       <?php
       foreach($hours as $hnum => $hlabel):
-        $q = $conn->query("
+        $stmt = $conn->prepare("
           SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
           FROM timetable
           LEFT JOIN subjects ON timetable.subject_id = subjects.id
           LEFT JOIN classes ON timetable.class_id = classes.id
-          WHERE subjects.room='". $conn->real_escape_string($room) ."' 
-            AND timetable.day='$d' AND timetable.hour=$hnum
+          WHERE subjects.room=? 
+            AND timetable.day=? AND timetable.hour=?
         ");
+        $stmt->bind_param("ssi", $room, $d, $hnum);
+        $stmt->execute();
+        $q = $stmt->get_result();
 
         if($q->num_rows > 0):
           $subject = null;

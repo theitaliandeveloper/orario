@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 include("../lib/db.php");
+include("../lib/csrf.php");
 session_start();
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
@@ -34,6 +35,7 @@ $message = "";
 
 // Add admin
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_user'])) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
@@ -53,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_user'])) {
 
 // Delete admin
 if (isset($_GET['delete'])) {
+    if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $id = intval($_GET['delete']);
     if ($id != 1) { // proteggi super admin
         $stmt = $conn->prepare("DELETE FROM admin WHERE id = ?");
@@ -65,6 +68,7 @@ if (isset($_GET['delete'])) {
 }
 
 // Fetch admins
+$csrf_token = generate_csrf_token();
 $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
 ?>
 <!DOCTYPE html>
@@ -81,7 +85,7 @@ $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
     <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
         <a href="index.php">Dashboard</a>
-        <a href="logout.php">Logout</a>
+        <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
 </div>
 
@@ -112,7 +116,7 @@ $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
                         <td data-label="Username"><?php echo htmlspecialchars($row['username']); ?></td>
                         <td data-label="Azione">
                             <?php if ($row['id'] != 1): ?>
-                                <a href="?delete=<?php echo $row['id']; ?>" 
+                                <a href="?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo $csrf_token; ?>" 
                                     onclick="return confirm('Vuoi davvero eliminare questo utente?')"
                                     class='delete-link'>Elimina</a>
                             <?php else: ?>
@@ -127,6 +131,7 @@ $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
 
     <h2>Aggiungi nuovo utente</h2>
     <form method="POST">
+        <?php echo csrf_field(); ?>
         <label>Username:<br>
             <input type="text" name="username" required>
         </label><br><br>

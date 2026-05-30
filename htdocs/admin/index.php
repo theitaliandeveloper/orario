@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require __DIR__ . "/../lib/variables.php";
+require __DIR__ . "/../lib/csrf.php";
 session_start();
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
@@ -43,7 +44,7 @@ if (!isset($_SESSION['admin'])) {
     <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="/">Torna al sito</a>
-      <a href="logout.php">Logout</a>
+      <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
   </div>
 

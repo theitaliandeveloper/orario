@@ -43,9 +43,13 @@ include("lib/db.php");
     $years = [1=>"Prime",2=>"Seconde",3=>"Terze",4=>"Quarte",5=>"Quinte"];
     foreach($years as $year=>$label){
       echo "<ul><li><b>$label</b></li>";
-      $res = $conn->query("SELECT * FROM classes WHERE name LIKE '$year%' ORDER BY name");
+      $likeYear = $year . '%';
+      $stmt = $conn->prepare("SELECT * FROM classes WHERE name LIKE ? ORDER BY name");
+      $stmt->bind_param("s", $likeYear);
+      $stmt->execute();
+      $res = $stmt->get_result();
       while($row = $res->fetch_assoc()){
-        echo "<li><a href='studenti.php?class_id={$row['id']}' class='littlebutton'>{$row['name']}</a></li>";
+        echo "<li><a href='studenti.php?class_id={$row['id']}' class='littlebutton'>" . htmlspecialchars($row['name']) . "</a></li>";
       }
       echo "</ul>";
     }

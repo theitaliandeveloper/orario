@@ -38,7 +38,10 @@ if ($teacher == "No Lezione" || $teacher == "sconosciuto") {
     exit;
 }
 
-$res = $conn->query("SELECT DISTINCT teacher FROM subjects WHERE teacher = '$teacher' LIMIT 1");
+$stmt = $conn->prepare("SELECT DISTINCT teacher FROM subjects WHERE teacher = ? LIMIT 1");
+$stmt->bind_param("s", $teacher);
+$stmt->execute();
+$res = $stmt->get_result();
 
 if ($res->num_rows === 0) {
     header("Location: index.php");
@@ -89,11 +92,14 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
             $timetable[$d_clean] = [];
 
             foreach ($hours as $hnum => $hlabel) {
-                $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+                $stmt = $conn->prepare("SELECT subjects.name, classes.name AS class_name, subjects.room
                                    FROM timetable
                                    LEFT JOIN subjects ON timetable.subject_id = subjects.id
                                    LEFT JOIN classes ON timetable.class_id = classes.id
-                                   WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
+                                   WHERE subjects.teacher=? AND timetable.day=? AND timetable.hour=?");
+                $stmt->bind_param("ssi", $teacher, $d, $hnum);
+                $stmt->execute();
+                $q = $stmt->get_result();
 
                 if ($q->num_rows > 0) {
                     [$subject, $classes, $rooms] = parseTeacherRows($q);
@@ -173,11 +179,14 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <td><?= $hlabel ?></td>
       <?php foreach ($days as $d): ?>
         <?php
-        $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+        $stmt = $conn->prepare("SELECT subjects.name, classes.name AS class_name, subjects.room
                            FROM timetable
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id
                            LEFT JOIN classes ON timetable.class_id = classes.id
-                           WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
+                           WHERE subjects.teacher=? AND timetable.day=? AND timetable.hour=?");
+        $stmt->bind_param("ssi", $teacher, $d, $hnum);
+        $stmt->execute();
+        $q = $stmt->get_result();
 
         if ($q->num_rows > 0):
             [$subject, $classes, $rooms] = parseTeacherRows($q);
@@ -206,11 +215,14 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <h2><?= htmlspecialchars($d) ?></h2>
       <?php foreach ($hours as $hnum => $hlabel): ?>
         <?php
-        $q = $conn->query("SELECT subjects.name, classes.name AS class_name, subjects.room
+        $stmt = $conn->prepare("SELECT subjects.name, classes.name AS class_name, subjects.room
                            FROM timetable
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id
                            LEFT JOIN classes ON timetable.class_id = classes.id
-                           WHERE subjects.teacher='$teacher' AND timetable.day='$d' AND timetable.hour=$hnum");
+                           WHERE subjects.teacher=? AND timetable.day=? AND timetable.hour=?");
+        $stmt->bind_param("ssi", $teacher, $d, $hnum);
+        $stmt->execute();
+        $q = $stmt->get_result();
 
         if ($q->num_rows > 0):
             [$subject, $classes, $rooms] = parseTeacherRows($q);

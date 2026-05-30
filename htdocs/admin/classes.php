@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 include("../lib/db.php");
+include("../lib/csrf.php");
 session_start();
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
@@ -27,14 +28,22 @@ $_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.c
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name'])) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $name = $_POST['name'];
-    if (!empty($name)) { $conn->query("INSERT INTO classes (name) VALUES ('$name')"); }
+    if (!empty($name)) { 
+        $stmt = $conn->prepare("INSERT INTO classes (name) VALUES (?)");
+        $stmt->bind_param("s", $name);
+        $stmt->execute();
+    }
     header("Location: classes.php"); exit;
 }
 
 if (isset($_GET['delete'])) {
+    if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $id = intval($_GET['delete']);
-    $conn->query("DELETE FROM classes WHERE id=$id");
+    $stmt = $conn->prepare("DELETE FROM classes WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
     header("Location: classes.php"); exit;
 }
 ?>
@@ -52,7 +61,7 @@ if (isset($_GET['delete'])) {
     <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="index.php">Dashboard</a>
-      <a href="logout.php">Logout</a>
+      <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
   </div>
 
@@ -61,6 +70,7 @@ if (isset($_GET['delete'])) {
     <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
     <form method="POST">
+      <?php echo csrf_field(); ?>
       <input type="text" name="name" placeholder="Nome Classe" required>
       <button type="submit">Aggiungi</button>
     </form>
@@ -68,12 +78,13 @@ if (isset($_GET['delete'])) {
     <table>
       <tr><th>ID</th><th>Nome</th><th>Azione</th></tr>
       <?php
+      $csrf_token = generate_csrf_token();
       $res = $conn->query("SELECT * FROM classes ORDER BY name ASC");
       while($row=$res->fetch_assoc()){
         echo "<tr>
                 <td>{$row['id']}</td>
-                <td>{$row['name']}</td>
-                <td><a href='classes.php?delete={$row['id']}' class='delete-link' onclick='return confirm(\"Sei sicuro di voler eliminare questa classe?\")'>Elimina</a></td>
+                <td>" . htmlspecialchars($row['name']) . "</td>
+                <td><a href='classes.php?delete={$row['id']}&csrf_token={$csrf_token}' class='delete-link' onclick='return confirm(\"Sei sicuro di voler eliminare questa classe?\")'>Elimina</a></td>
               </tr>";
       }
       ?>

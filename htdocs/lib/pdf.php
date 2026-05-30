@@ -35,7 +35,10 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
     switch ($type) {
         case 'class':
             $class_id = intval($identifier);
-            $row      = $conn->query("SELECT name FROM classes WHERE id = $class_id LIMIT 1")->fetch_assoc();
+            $stmt = $conn->prepare("SELECT name FROM classes WHERE id = ? LIMIT 1");
+            $stmt->bind_param("i", $class_id);
+            $stmt->execute();
+            $row = $stmt->get_result()->fetch_assoc();
             $title    = 'Orario classe ' . $row['name'];
             $filename = 'orario_classe_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $row['name']);
             break;
@@ -75,14 +78,17 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                 // ---- CLASSE ----
                 case 'class':
                     $class_id = intval($identifier);
-                    $q = $conn->query("
+                    $stmt = $conn->prepare("
                         SELECT subjects.name, subjects.teacher, subjects.room
                         FROM timetable
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                        WHERE timetable.class_id = $class_id
-                          AND timetable.day = '$escaped_d'
-                          AND timetable.hour = $hnum
+                        WHERE timetable.class_id = ?
+                          AND timetable.day = ?
+                          AND timetable.hour = ?
                     ");
+                    $stmt->bind_param("isi", $class_id, $d, $hnum);
+                    $stmt->execute();
+                    $q = $stmt->get_result();
 
                     $subject  = null;
                     $teachers = [];
@@ -109,16 +115,18 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                 // ---- DOCENTE ----
                 case 'teacher':
-                    $escaped_teacher = $conn->real_escape_string($identifier);
-                    $q = $conn->query("
+                    $stmt = $conn->prepare("
                         SELECT subjects.name, classes.name AS class_name, subjects.room
                         FROM timetable
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
                         LEFT JOIN classes  ON timetable.class_id   = classes.id
-                        WHERE subjects.teacher = '$escaped_teacher'
-                        AND timetable.day    = '$escaped_d'
-                        AND timetable.hour   = $hnum
+                        WHERE subjects.teacher = ?
+                        AND timetable.day    = ?
+                        AND timetable.hour   = ?
                     ");
+                    $stmt->bind_param("ssi", $identifier, $d, $hnum);
+                    $stmt->execute();
+                    $q = $stmt->get_result();
 
                     $subject = null;
                     $classes = [];
@@ -145,16 +153,18 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                 // ---- AULA ----
                 case 'room':
-                    $escaped_room = $conn->real_escape_string($identifier);
-                    $q = $conn->query("
+                    $stmt = $conn->prepare("
                         SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
                         FROM timetable
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
                         LEFT JOIN classes  ON timetable.class_id   = classes.id
-                        WHERE subjects.room = '$escaped_room'
-                          AND timetable.day = '$escaped_d'
-                          AND timetable.hour = $hnum
+                        WHERE subjects.room = ?
+                          AND timetable.day = ?
+                          AND timetable.hour = ?
                     ");
+                    $stmt->bind_param("ssi", $identifier, $d, $hnum);
+                    $stmt->execute();
+                    $q = $stmt->get_result();
 
                     $subject = null;
                     $pairs   = [];

@@ -51,5 +51,12 @@ if (!is_numeric(SESSION_LIFETIME) || SESSION_LIFETIME < 60) {
 // Imposta le variabili user-defined sperando che effettivamente non siano eresie.
 ini_set('memory_limit',PHP_MAX_RAM); // https://www.php.net/manual/en/ini.core.php#ini.memory-limit
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME); // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
-session_set_cookie_params(SESSION_LIFETIME); // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+session_set_cookie_params([
+    'lifetime' => SESSION_LIFETIME,
+    'path' => '/',
+    'domain' => '',
+    'secure' => !DEV_MODE,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 ?>

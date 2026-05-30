@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 include("../lib/db.php");
+include("../lib/csrf.php");
 session_start();
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
@@ -32,6 +33,7 @@ if (!isset($_SESSION['admin']) || $_SESSION['auth_type'] != 'local') {
 $message = '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $old = $_POST['old_password'];
     $new = $_POST['new_password'];
     $confirm = $_POST['confirm_password'];
@@ -73,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
         <a href="index.php">Dashboard</a>
-        <a href="logout.php">Logout</a>
+        <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
 </div>
 
@@ -82,6 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
     <form method="POST">
+        <?php echo csrf_field(); ?>
         <label>Password attuale:<br>
             <input type="password" name="old_password" required>
         </label><br><br>
@@ -97,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <button type="submit">Cambia password</button>
     </form>
         <?php if ($message): ?>
-        <p style="color:<?php echo strpos($message,'successo')!==false ? 'green':'red'; ?>;"><?php echo $message; ?></p>
+        <p style="color:<?php echo strpos($message,'successo')!==false ? 'green':'red'; ?>;"><?php echo htmlspecialchars($message); ?></p>
     <?php endif; ?>
 <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
         Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>

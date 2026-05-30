@@ -24,28 +24,36 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { //
     session_unset();
     session_destroy();
     session_start();
+    session_regenerate_id(true);
 }
 $_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(AUTH_TYPE) == 'local') {
     try {
-      $username = $_POST['username'];
-      $password = $_POST['password'];
-      $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+      $username = $_POST['username'] ?? '';
+      $password = $_POST['password'] ?? '';
+      $stmt = $conn->prepare("SELECT username, password FROM admin WHERE username = ?");
       $stmt->bind_param("s", $username);
       $stmt->execute();
       $res = $stmt->get_result();
       if ($row = $res->fetch_assoc()) {
           if (password_verify($password, $row['password'])) {
+            session_regenerate_id(true);
             $_SESSION['admin'] = $row['username'];
             $_SESSION['auth_type'] = 'local';
             header("Location: index.php");
             exit;
           }
       }
+      sleep(2); // Brute force mitigation
       $error = "Credenziali non valide";
     } catch (Exception $e) {
-      $error = "Errore durante l'autenticazione. Potrebbe essere un problema con PHP oppure col database. Ulteriori dettagli: " . $e;
+      sleep(2); // Brute force mitigation
+      if (DEV_MODE) {
+        $error = "Errore del server durante l'autenticazione. Ulteriori dettagli: " . $e;
+      } else {
+        $error = "Errore durante l'autenticazione.";
+      }
     }
 }
 $name = APP_NAME;

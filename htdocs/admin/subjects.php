@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 include("../lib/db.php");
+include("../lib/csrf.php");
 session_start();
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
@@ -31,6 +32,7 @@ if (!isset($_SESSION['admin'])) {
 
 // FIX: Usa prepared statements per sicurezza
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && !isset($_POST['update'])) {
+  if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
   $name = $_POST['name'];
   $teacher = $_POST['teacher'];
   $room = $_POST['room'];
@@ -47,6 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && !isset($_PO
 
 // FIX: Aggiunto redirect dopo update
 if (isset($_POST['update'])) {
+  if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
   $id = intval($_POST['id']);
   $name = $_POST['name'];
   $teacher = $_POST['teacher'];
@@ -63,6 +66,7 @@ if (isset($_POST['update'])) {
 
 // FIX: Usa prepared statement anche per delete
 if (isset($_GET['delete'])) {
+  if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
   $id = intval($_GET['delete']);
   $stmt = $conn->prepare("DELETE FROM subjects WHERE id=?");
   $stmt->bind_param("i", $id);
@@ -87,7 +91,7 @@ if (isset($_GET['delete'])) {
     <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="index.php">Dashboard</a>
-      <a href="logout.php">Logout</a>
+      <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
   </div>
 
@@ -109,6 +113,7 @@ if (isset($_GET['delete'])) {
         <div class="edit-section" style="background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
           <h3>Modifica materia</h3>
           <form method="post" action="subjects.php">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
             <input type="text" name="name" value="<?php echo htmlspecialchars($subject['name']); ?>" required placeholder="Materia">
             <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>" required placeholder="Docente">
@@ -125,6 +130,7 @@ if (isset($_GET['delete'])) {
 
     <h2>Aggiungi Nuova Materia</h2>
     <form method="POST" class="add-form">
+      <?php echo csrf_field(); ?>
       <input type="text" name="name" placeholder="Materia (es. Informatica)" required>
       <input type="text" name="teacher" placeholder="Docente (Cognome Nome)" required>
       <input type="text" name="room" placeholder="Laboratorio (opzionale)">
@@ -136,6 +142,7 @@ if (isset($_GET['delete'])) {
     <h2>Elenco Materie e Docenti</h2>
 
     <?php
+    $csrf_token = generate_csrf_token();
     // Ordiniamo prima per materia (name) e poi per docente
     $res = $conn->query("SELECT * FROM subjects ORDER BY name ASC, teacher ASC");
 
@@ -163,7 +170,7 @@ if (isset($_GET['delete'])) {
 
         <li style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
           <a href="subjects.php?edit=<?php echo $row['id']; ?>" class="edit-btn littlebutton" style="background: #e3f2fd; color: #1976d2; font-size: 0.8em;">Modifica</a>
-          <a href="subjects.php?delete=<?php echo $row['id']; ?>"
+          <a href="subjects.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo $csrf_token; ?>"
             onclick="return confirm('Eliminare questo docente?')"
             class="delete-btn littlebutton" style="background: #fbe9e7; color: #d32f2f; font-size: 0.8em;">Elimina</a>
         </li>

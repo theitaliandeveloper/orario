@@ -32,7 +32,10 @@ if (!isset($_GET['class_id'])) {
 }
 
 $class_id = intval($_GET['class_id']);
-$res = $conn->query("SELECT * FROM classes WHERE id = $class_id LIMIT 1");
+$stmt = $conn->prepare("SELECT * FROM classes WHERE id = ? LIMIT 1");
+$stmt->bind_param("i", $class_id);
+$stmt->execute();
+$res = $stmt->get_result();
 
 if ($res->num_rows === 0) {
     header("Location: index.php");
@@ -85,10 +88,13 @@ if (isset($_GET['json']) && $_GET['json'] == '1') {
           $timetable[$d_clean] = [];
 
           foreach ($hours as $hnum => $hlabel) {
-              $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
+              $stmt = $conn->prepare("SELECT subjects.name, subjects.teacher, subjects.room 
                                 FROM timetable 
                                 LEFT JOIN subjects ON timetable.subject_id = subjects.id 
-                                WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
+                                WHERE class_id=? AND day=? AND hour=?");
+              $stmt->bind_param("isi", $class_id, $d, $hnum);
+              $stmt->execute();
+              $q = $stmt->get_result();
 
               if ($q->num_rows > 0) {
                   [$subject, $teachers, $rooms] = parseRows($q);
@@ -170,10 +176,13 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <td><?= $hlabel ?></td>
       <?php foreach ($days as $d): ?>
         <?php
-        $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
+        $stmt = $conn->prepare("SELECT subjects.name, subjects.teacher, subjects.room 
                            FROM timetable 
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id 
-                           WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
+                           WHERE class_id=? AND day=? AND hour=?");
+        $stmt->bind_param("isi", $class_id, $d, $hnum);
+        $stmt->execute();
+        $q = $stmt->get_result();
 
         if ($q->num_rows > 0):
             [$subject, $teachers, $rooms] = parseRows($q);
@@ -202,10 +211,13 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
       <h2><?= htmlspecialchars($d) ?></h2>
       <?php foreach ($hours as $hnum => $hlabel): ?>
         <?php
-        $q = $conn->query("SELECT subjects.name, subjects.teacher, subjects.room 
+        $stmt = $conn->prepare("SELECT subjects.name, subjects.teacher, subjects.room 
                            FROM timetable 
                            LEFT JOIN subjects ON timetable.subject_id = subjects.id 
-                           WHERE class_id=$class_id AND day='$d' AND hour=$hnum");
+                           WHERE class_id=? AND day=? AND hour=?");
+        $stmt->bind_param("isi", $class_id, $d, $hnum);
+        $stmt->execute();
+        $q = $stmt->get_result();
 
         if ($q->num_rows > 0):
             [$subject, $teachers, $rooms] = parseRows($q);
