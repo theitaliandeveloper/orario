@@ -1,4 +1,4 @@
 docker-compose.override.yml
 vendor/
-htdocs/config/config.local.php
+htdocs/config/config.php
 htdocs/composer.lock
