@@ -1,6 +1,8 @@
 ## AVVISO IMPORTANTE
 Questo è il ramo di SVILUPPO. È inteso per testare le ultime funzionalità e aiutarmi nello sviluppo. La stabilità e il funzionamento del codice non sono garantiti. Usare a proprio rischio e pericolo.
 
+[Roadmap sviluppo](https://todo.vichingo455.com/share/hFNyiwMDYNY57JDhKcHNAdiYKz0DKdbI5FizTfht/auth?view=8)
+
 # Orario Scuola
 Una piattaforma web per visualizzare gli orari scolastici delle classi, degli insegnanti e dei vari laboratori (se presenti)
 
