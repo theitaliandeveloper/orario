@@ -55,7 +55,6 @@ session_set_cookie_params([
     'lifetime' => SESSION_LIFETIME,
     'path' => '/',
     'domain' => '',
-    'secure' => !DEV_MODE,
     'httponly' => true,
     'samesite' => 'Lax'
 ]);

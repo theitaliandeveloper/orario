@@ -16,6 +16,20 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 include("lib/db.php");
+include("../lib/csrf.php");
+session_start();
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    session_start();
+}
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+if (!isset($_SESSION['admin']) && MAINTENANCE) {
+  header("Location: manutenzione.php");
+  exit;
+}
+
 $days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
 $hours = [
   1 => "Prima ora<br> 7:50 - 8:50",
@@ -149,11 +163,11 @@ if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/timetable.css">
   <link rel="stylesheet" href="css/navbar.css">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?><?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
+    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?><?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
     <div class="links">
       <a href="index.php">Home</a>
       <?php if (PDF_EXPORT):?>

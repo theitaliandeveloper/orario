@@ -63,6 +63,7 @@ if (DEV_MODE){
 else {
   $dev = "";
 }
+
 if (strtolower(AUTH_TYPE) == 'local') {
 echo <<<HTML
 <!DOCTYPE html>
@@ -70,8 +71,8 @@ echo <<<HTML
 <head>
   <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
@@ -128,8 +129,8 @@ else if (strtolower(AUTH_TYPE) === 'keycloak') {
 <head>
   <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
@@ -163,8 +164,8 @@ HTML;
 <head>
   <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 

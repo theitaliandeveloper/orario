@@ -232,7 +232,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
 <head>
     <title><?php echo APP_NAME; ?> - Importa Orario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../css/admin.css">
     <style>
         .import-form {
             max-width: 600px;
@@ -289,12 +289,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
             color: #856404;
         }
     </style>
-    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
 <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
     <div class="links">
         <a href="index.php">Dashboard</a>
         <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>

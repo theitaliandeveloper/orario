@@ -44,6 +44,9 @@ if (!defined('PDF_EXPORT')) {
 if (!defined('OPEN_DATA')) {
     define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
 }
+if (!defined('MAINTENANCE')) {
+    define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
     define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak

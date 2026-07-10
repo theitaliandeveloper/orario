@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 require __DIR__ . "/../lib/variables.php";
 require __DIR__ . "/../lib/csrf.php";
 session_start();
-if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { die("Token CSRF non valido per il logout."); }
+if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { echo "Token CSRF non valido per il logout."; exit; }
 session_unset();
 session_destroy();
 if (strtolower(AUTH_TYPE) === 'local')
