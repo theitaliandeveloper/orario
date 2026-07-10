@@ -16,7 +16,7 @@ Una piattaforma web per visualizzare gli orari scolastici delle classi, degli in
 1. **Clona la repository e copia la cartella htdocs in una cartella accessibile dal server web**
 - Esempio (Debian):
 ```bash
-git clone https://git.vichingo455.qzz.io/emmev-code/orario
+git clone https://git.vichingo455.com/emmev-code/orario
 git checkout dev # Per cambiare al ramo di sviluppo
 cp -r orario/htdocs/* /var/www/html/
 ```
@@ -88,6 +88,15 @@ if (!defined('YEAR')) {
 if (!defined('API_URL')) {
     define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
 }
+if (!defined('PDF_EXPORT')) {
+    define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
+}
+if (!defined('OPEN_DATA')) {
+    define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
+}
+if (!defined('MAINTENANCE')) {
+    define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
     define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak
@@ -133,14 +142,14 @@ curl -fsSL https://get.docker.com | bash
 2. Scarica i file richiesti:
 - AMD64:
 ```bash
-wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/schema.sql
-wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/docker-compose.yml
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose.yml
 ```
 
 - ARM64:
 ```bash
-wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/schema.sql
-wget https://git.vichingo455.qzz.io/emmev-code/orario/raw/branch/dev/docker-compose-arm64.yml
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose-arm64.yml
 mv ./docker-compose-arm64.yml ./docker-compose.yml
 ```
 
@@ -164,6 +173,9 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
+      PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
+      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
+      MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak

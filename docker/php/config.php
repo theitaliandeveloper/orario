@@ -89,6 +89,14 @@ if (!defined('OPEN_DATA')) {
         define('OPEN_DATA', true);
     }
 }
+if (!defined('MAINTENANCE')) {
+    $val = getenv('MAINTENANCE');
+    if ($val !== false && $val !== '') {
+        define('MAINTENANCE', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('MAINTENANCE', false);
+    }
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
     $val = getenv('AUTH_TYPE');

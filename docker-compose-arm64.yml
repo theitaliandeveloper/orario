@@ -20,6 +20,7 @@ services:
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
       OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
+      MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
