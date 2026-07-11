@@ -21,10 +21,8 @@ session_start();
 if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { echo "Token CSRF non valido per il logout."; exit; }
 session_unset();
 session_destroy();
-if (strtolower(AUTH_TYPE) === 'local')
-    header("Location: /index.php");
-else if (strtolower(AUTH_TYPE) === 'keycloak')
-    header('Location: https://' . KEYCLOAK_DOMAIN . '/realms/' . KEYCLOAK_REALM . '/protocol/openid-connect/logout?post_logout_redirect_uri=https://' . APP_DOMAIN . '&client_id=' . KEYCLOAK_CLIENT_ID);
+if (strtolower(AUTH_TYPE) === 'oidc' && OIDC_LOGOUT_URI != '' && defined(OIDC_LOGOUT_URI))
+    header('Location: ' . OIDC_LOGOUT_URI);
 else
-    die("Tipo di autenticazione non valido!");
+    header("Location: /index.php");
 ?>

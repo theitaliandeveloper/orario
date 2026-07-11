@@ -104,21 +104,21 @@ echo <<<HTML
 </html>
 HTML;
 }
-else if (strtolower(AUTH_TYPE) === 'keycloak') {
+else if (strtolower(AUTH_TYPE) === 'oidc') {
   try {
-    // Configura il client Keycloak
+    // Configura il client OIDC
   $oidc = new OpenIDConnectClient(
-    'https://' . KEYCLOAK_DOMAIN . '/realms/' . KEYCLOAK_REALM . '/',
-    KEYCLOAK_CLIENT_ID,
-    KEYCLOAK_CLIENT_SECRET
+    OIDC_ISSUER,
+    OIDC_CLIENT_ID,
+    OIDC_CLIENT_SECRET
   );
   // Redirect post-login
   $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
   $oidc->authenticate();
   $userinfo = $oidc->getVerifiedClaims();
-  if (in_array($userinfo->preferred_username, KEYCLOAK_ALLOWED_USERS, true) || empty(KEYCLOAK_ALLOWED_USERS)) {
+  if (in_array($userinfo->preferred_username, OIDC_ALLOWED_USERS, true) || empty(OIDC_ALLOWED_USERS)) {
     $_SESSION['admin'] = $userinfo->preferred_username;
-    $_SESSION['auth_type'] = 'keycloak';
+    $_SESSION['auth_type'] = 'oidc';
     header("Location: index.php");
     exit;
   } else {
@@ -181,9 +181,9 @@ HTML;
     <h1>Accedi</h1>
 HTML;
 if (DEV_MODE) {
-  echo "<br><div class='error'>Errore durante l'autenticazione con Keycloak. Assicurati di avere impostato i vari parametri correttamente. Ulteriori dettagli: " . $e . "</div>";
+  echo "<br><div class='error'>Errore durante l'autenticazione con OpenID Connect. Assicurati di avere impostato i vari parametri correttamente. Ulteriori dettagli: " . $e . "</div>";
 } else {
-  echo "<br><div class='error'>Errore durante l'autenticazione con Keycloak. Contatta l'amministratore del sito.</div>";
+  echo "<br><div class='error'>Errore durante l'autenticazione con OpenID Connect. Contatta l'amministratore del sito.</div>";
 }
 echo <<<HTML
 <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
