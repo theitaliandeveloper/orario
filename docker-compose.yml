@@ -1,6 +1,6 @@
 services:
   web:
-    image: git.vichingo455.com/emmev-code/orario:latest-amd64
+    image: git.vichingo455.com/emmev-code/orario:latest
     container_name: orario-web
     ports:
       - "8080:80"
@@ -26,12 +26,11 @@ services:
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
 
-      # --- Impostazioni di Keycloak (solo se il tipo di autenticazione è Keycloak) ---
-      KEYCLOAK_DOMAIN: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
-      KEYCLOAK_REALM: "" # Realm di Keycloak, ad esempio master
-      KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
-      KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
-      KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è Keycloak) ---
+      OIDC_ISSUER: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
+      OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
+      OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
 
       # --- Impostazioni Avanzate ---
       # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!

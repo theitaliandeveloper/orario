@@ -64,9 +64,6 @@ if (!defined('OIDC_CLIENT_ID')) {
 if (!defined('OIDC_CLIENT_SECRET')) {
     define('OIDC_CLIENT_SECRET',''); // Client Secret per OIDC (ad esempio abcdefghijklm)
 }
-if (!defined('OIDC_LOGOUT_URI')) {
-    define('OIDC_LOGOUT_URI',''); // URL dove reindirizzare per il logout
-}
 if (!defined('OIDC_ALLOWED_USERS')) {
     define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
 }

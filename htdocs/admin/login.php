@@ -114,7 +114,12 @@ else if (strtolower(AUTH_TYPE) === 'oidc') {
   );
   // Redirect post-login
   $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
-  $oidc->authenticate();
+  if ($oidc->authenticate()) {
+    $_SESSION['id_token'] = $oidc->getIdToken();
+  }
+  else {
+    throw new Exception("OIDC Authentication failed");
+  }
   $userinfo = $oidc->getVerifiedClaims();
   if (in_array($userinfo->preferred_username, OIDC_ALLOWED_USERS, true) || empty(OIDC_ALLOWED_USERS)) {
     $_SESSION['admin'] = $userinfo->preferred_username;

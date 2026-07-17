@@ -140,17 +140,9 @@ apt install curl git
 curl -fsSL https://get.docker.com | bash
 ```
 2. Scarica i file richiesti:
-- AMD64:
 ```bash
 wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
 wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose.yml
-```
-
-- ARM64:
-```bash
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose-arm64.yml
-mv ./docker-compose-arm64.yml ./docker-compose.yml
 ```
 
 3. Avvia il container:
@@ -181,12 +173,11 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
 
-      # --- Impostazioni di Keycloak (solo se il tipo di autenticazione è Keycloak) ---
-      KEYCLOAK_DOMAIN: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
-      KEYCLOAK_REALM: "" # Realm di Keycloak, ad esempio master
-      KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
-      KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
-      KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è Keycloak) ---
+      OIDC_ISSUER: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
+      OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
+      OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
 
       # --- Impostazioni Avanzate ---
       # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
