@@ -17,7 +17,6 @@ services:
       # --- Impostazioni sito ---
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
-      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
       OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
       MAINTENANCE: false # Abilita la modalità di manutenzione
@@ -36,6 +35,10 @@ services:
       # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
       PHP_MAX_RAM: "128M" # Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
       SESSION_LIMIT: 3600 # Durata del cookie di login
+
+      # --- Labs ---
+      # Queste sono funzioni interne che non sono documentate
+      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
   db:
     image: mariadb:12
     container_name: orario-db

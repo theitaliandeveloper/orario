@@ -22,6 +22,7 @@ require __DIR__ . "/../lib/misc.php";
 use Jumbojett\OpenIDConnectClient;
 session_start();
 if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { echo "Token CSRF non valido per il logout."; exit; }
+$idToken = $_SESSION['id_token'] ?? null;
 session_unset();
 session_destroy();
 if (strtolower(AUTH_TYPE) === 'oidc') {
@@ -30,7 +31,7 @@ if (strtolower(AUTH_TYPE) === 'oidc') {
         OIDC_CLIENT_ID,
         OIDC_CLIENT_SECRET
     );
-    $idToken = $_SESSION['id_token'] ?? null;
+    /* Sto codice non mi piace
     $_SESSION = array();
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
@@ -38,7 +39,7 @@ if (strtolower(AUTH_TYPE) === 'oidc') {
             $params["path"], $params["domain"],
             $params["secure"], $params["httponly"]
         );
-    }
+    }*/
     if (is_https()) {
         $postLogoutRedirectUri = 'http://' + APP_DOMAIN + '/index.php';
     } else {

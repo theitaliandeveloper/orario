@@ -67,13 +67,13 @@ mysql -u root -p < orario/schema.sql
 <?php
 // Impostazioni Database
 if (!defined('DB_HOST')) {
-    define('DB_HOST', 'localhost'); // Host del database (ad esempio localhost)
+    define('DB_HOST', '<MYSQL_HOST>'); // Host del database (ad esempio localhost)
 }
 if (!defined('DB_USER')) {
-    define('DB_USER', 'orario'); // Utente del database (ad esempio orario)
+    define('DB_USER', '<MYSQL_USER>'); // Utente del database (ad esempio orario)
 }
 if (!defined('DB_PASS')) {
-    define('DB_PASS', 'orario'); // Password dell'utente specificato prima (ad esempio password123)
+    define('DB_PASS', '<MYSQL_PASSWORD>'); // Password dell'utente specificato prima (ad esempio password123)
 }
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'school_timetable'); // Nome del database, non modificare se non sai cosa stai facendo.
@@ -84,9 +84,6 @@ if (!defined('APP_NAME')) {
 }
 if (!defined('YEAR')) {
     define('YEAR', '2025/26'); // Anno Scolastico Corrente
-}
-if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
 }
 if (!defined('PDF_EXPORT')) {
     define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
@@ -99,28 +96,23 @@ if (!defined('MAINTENANCE')) {
 }
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
-    define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak
+    define('AUTH_TYPE','local'); // Può essere local (integrata), oidc (OpenID Connect)
 }
 if (!defined('APP_DOMAIN')) {
     define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
 }
-// Impostazioni autenticazione via Keycloak (richiesto solo se AUTH_TYPE sta impostato su keycloak)
-if (AUTH_TYPE === 'keycloak') {
-    if (!defined('KEYCLOAK_DOMAIN')) {
-        define('KEYCLOAK_DOMAIN',''); // Dominio di Keycloak (ad esempio auth.yourdomain.com)
-    }
-    if (!defined('KEYCLOAK_REALM')) {
-        define('KEYCLOAK_REALM',''); // Realm di Keycloak (ad esempio master)
-    }
-    if (!defined('KEYCLOAK_CLIENT_ID')) {
-        define('KEYCLOAK_CLIENT_ID',''); // Client ID per Keycloak (ad esempio orario)
-    }
-    if (!defined('KEYCLOAK_CLIENT_SECRET')) {
-        define('KEYCLOAK_CLIENT_SECRET',''); // Client Secret per Keycloak (ad esempio abcdefghijklm)
-    }
-    if (!defined('KEYCLOAK_ALLOWED_USERS')) {
-        define('KEYCLOAK_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti autorizzati ad accedere all'amministrazione
-    }
+// Impostazioni autenticazione via OpenID Connect (richiesto solo se AUTH_TYPE sta impostato su oidc)
+if (!defined('OIDC_ISSUER')) {
+    define('OIDC_ISSUER',''); // Issuer URL per OIDC (ad esempio https://tuokeycloak.com/realms/master)
+}
+if (!defined('OIDC_CLIENT_ID')) {
+    define('OIDC_CLIENT_ID',''); // Client ID per OIDC (ad esempio orario)
+}
+if (!defined('OIDC_CLIENT_SECRET')) {
+    define('OIDC_CLIENT_SECRET',''); // Client Secret per OIDC (ad esempio abcdefghijklm)
+}
+if (!defined('OIDC_ALLOWED_USERS')) {
+    define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
 }
 // Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
 if (!defined('PHP_MAX_RAM')) {
@@ -129,6 +121,11 @@ if (!defined('PHP_MAX_RAM')) {
 if (!defined('SESSION_LIFETIME')) {
     define('SESSION_LIFETIME',3600); // Durata del cookie di login
 }
+// Labs (funzioni interne)
+if (!defined('API_URL')) {
+    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
+}
+?>
 ?>
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
@@ -183,6 +180,10 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
       PHP_MAX_RAM: "128M" # Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
       SESSION_LIMIT: 3600 # Durata del cookie di login
+
+      # --- Labs ---
+      # Queste sono funzioni interne che non sono documentate
+      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
 ```
 
 ## Segnalare un problema

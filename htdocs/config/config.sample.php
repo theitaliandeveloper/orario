@@ -35,9 +35,6 @@ if (!defined('APP_NAME')) {
 if (!defined('YEAR')) {
     define('YEAR', '2025/26'); // Anno Scolastico Corrente
 }
-if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
-}
 if (!defined('PDF_EXPORT')) {
     define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
 }
@@ -54,7 +51,7 @@ if (!defined('AUTH_TYPE')) {
 if (!defined('APP_DOMAIN')) {
     define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
 }
-// Impostazioni autenticazione via OAuth2 (richiesto solo se AUTH_TYPE sta impostato su oidc)
+// Impostazioni autenticazione via OpenID Connect (richiesto solo se AUTH_TYPE sta impostato su oidc)
 if (!defined('OIDC_ISSUER')) {
     define('OIDC_ISSUER',''); // Issuer URL per OIDC (ad esempio https://tuokeycloak.com/realms/master)
 }
@@ -73,5 +70,9 @@ if (!defined('PHP_MAX_RAM')) {
 }
 if (!defined('SESSION_LIFETIME')) {
     define('SESSION_LIFETIME',3600); // Durata del cookie di login
+}
+// Labs (funzioni interne)
+if (!defined('API_URL')) {
+    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
 }
 ?>
