@@ -64,6 +64,9 @@ if (!defined('OIDC_CLIENT_SECRET')) {
 if (!defined('OIDC_ALLOWED_USERS')) {
     define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
 }
+if (!defined('OIDC_NO_LOGOUT')) {
+    define('OIDC_NO_LOGOUT',false); // Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
+}
 // Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
 if (!defined('PHP_MAX_RAM')) {
     define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit

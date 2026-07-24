@@ -16,13 +16,17 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require __DIR__ . "/../lib/variables.php";
-require __DIR__ . "/../lib/csrf.php";
-session_start();
+require_once __DIR__ . "/../lib/csrf.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
     session_unset();
     session_destroy();
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 }
 $_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (!isset($_SESSION['admin'])) {

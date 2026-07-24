@@ -16,44 +16,53 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 use Jumbojett\OpenIDConnectClient;
-require '../vendor/autoload.php';
-include("../lib/db.php");
-session_start();
+require_once '../vendor/autoload.php';
+require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/csrf.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $now = time();
 if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
     session_unset();
     session_destroy();
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     session_regenerate_id(true);
 }
 $_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(AUTH_TYPE) == 'local') {
-    try {
-      $username = $_POST['username'] ?? '';
-      $password = $_POST['password'] ?? '';
-      $stmt = $conn->prepare("SELECT username, password FROM admin WHERE username = ?");
-      $stmt->bind_param("s", $username);
-      $stmt->execute();
-      $res = $stmt->get_result();
-      if ($row = $res->fetch_assoc()) {
-          if (password_verify($password, $row['password'])) {
-            session_regenerate_id(true);
-            $_SESSION['admin'] = $row['username'];
-            $_SESSION['auth_type'] = 'local';
-            header("Location: index.php");
-            exit;
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error = "Token CSRF non valido.";
+    } else {
+        try {
+          $username = $_POST['username'] ?? '';
+          $password = $_POST['password'] ?? '';
+          $stmt = $conn->prepare("SELECT username, password FROM admin WHERE username = ?");
+          $stmt->bind_param("s", $username);
+          $stmt->execute();
+          $res = $stmt->get_result();
+          if ($row = $res->fetch_assoc()) {
+              if (password_verify($password, $row['password'])) {
+                session_regenerate_id(true);
+                $_SESSION['admin'] = $row['username'];
+                $_SESSION['auth_type'] = 'local';
+                header("Location: index.php");
+                exit;
+              }
           }
-      }
-      sleep(2); // Brute force mitigation
-      $error = "Credenziali non valide";
-    } catch (Exception $e) {
-      sleep(2); // Brute force mitigation
-      if (DEV_MODE) {
-        $error = "Errore del server durante l'autenticazione. Ulteriori dettagli: " . $e;
-      } else {
-        $error = "Errore durante l'autenticazione.";
-      }
+          sleep(2); // Brute force mitigation
+          $error = "Credenziali non valide";
+        } catch (Exception $e) {
+          sleep(2); // Brute force mitigation
+          if (DEV_MODE) {
+            $error = "Errore del server durante l'autenticazione. Ulteriori dettagli: " . $e;
+          } else {
+            $error = "Errore durante l'autenticazione.";
+          }
+        }
     }
 }
 $name = APP_NAME;
@@ -65,6 +74,7 @@ else {
 }
 
 if (strtolower(AUTH_TYPE) == 'local') {
+$csrf_field = csrf_field();
 echo <<<HTML
 <!DOCTYPE html>
 <html>
@@ -87,6 +97,7 @@ echo <<<HTML
   <div class="login-container">
     <h1>Accedi</h1>
     <form method="post">
+      {$csrf_field}
       <input type="text" name="username" placeholder="Username" required><br>
       <input type="password" name="password" placeholder="Password" required><br>
       <button type="submit">Login</button>

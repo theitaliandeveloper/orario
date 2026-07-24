@@ -142,6 +142,14 @@ if (!defined('OIDC_ALLOWED_USERS')) {
     }
     define('OIDC_ALLOWED_USERS',$users);
 }
+if (!defined('OIDC_NO_LOGOUT')) {
+    $val = getenv('OIDC_NO_LOGOUT');
+    if ($val !== false && $val !== '') {
+        define('OIDC_NO_LOGOUT', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('OIDC_NO_LOGOUT', false);
+    }
+}
 // Impostazioni avanzate
 if (!defined('PHP_MAX_RAM')) {
         $val = getenv('PHP_MAX_RAM');

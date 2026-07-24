@@ -15,7 +15,10 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-include("lib/db.php");
+require_once __DIR__ . "/lib/variables.php";
+if (!MAINTENANCE) {
+  header('Location: index.php');
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -28,7 +31,7 @@ include("lib/db.php");
 </head>
 <body>
   <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?><?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
+    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?><?php if (DEV_MODE){echo " - SVILUPPO";}?></div>
     <div class="links">
       <a href="index.php">Home</a>
       <a href="admin/index.php">Admin</a>

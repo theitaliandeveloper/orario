@@ -15,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-include("../lib/db.php");
+require_once __DIR__ . "/../lib/db.php";
 if (OPEN_DATA) {
     $res = $conn->query("SELECT name FROM classes ORDER BY name");
     $classi = [];
