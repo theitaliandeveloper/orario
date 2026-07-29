@@ -118,28 +118,52 @@ HTML;
 else if (strtolower(AUTH_TYPE) === 'oidc') {
   try {
     // Configura il client OIDC
-  $oidc = new OpenIDConnectClient(
-    OIDC_ISSUER,
-    OIDC_CLIENT_ID,
-    OIDC_CLIENT_SECRET
-  );
-  // Redirect post-login
-  $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
-  if ($oidc->authenticate()) {
+    $oidc = new OpenIDConnectClient(
+        OIDC_ISSUER,
+        OIDC_CLIENT_ID,
+        OIDC_CLIENT_SECRET
+    );
+
+    // Richiedi anche le informazioni del profilo
+    $oidc->addScope(['openid', 'profile', 'email']);
+
+    // Redirect post-login
+    $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
+
+    if (!$oidc->authenticate()) {
+        throw new Exception("OIDC Authentication failed");
+    }
+
     $_SESSION['id_token'] = $oidc->getIdToken();
-  }
-  else {
-    throw new Exception("OIDC Authentication failed");
-  }
-  $userinfo = $oidc->getVerifiedClaims();
-  if (in_array($userinfo->preferred_username, OIDC_ALLOWED_USERS, true) || empty(OIDC_ALLOWED_USERS)) {
-    $_SESSION['admin'] = $userinfo->preferred_username;
-    $_SESSION['auth_type'] = 'oidc';
-    header("Location: index.php");
-    exit;
-  } else {
-    http_response_code(403);
-    echo <<<HTML
+
+    // Recupera le informazioni dell'utente dall'endpoint UserInfo
+    $userinfo = $oidc->requestUserInfo();
+
+    // Determina un identificativo dell'utente
+    $username =
+        $userinfo->preferred_username
+        ?? $userinfo->username
+        ?? $userinfo->email
+        ?? null;
+
+    // Debug (rimuovi dopo i test) TENERE CODICE PER TEST LOGIN
+    /* var_dump($userinfo);
+    var_dump($username);
+    die(); */
+
+    if ($username === null) {
+        throw new Exception("Il provider OIDC non ha restituito preferred_username, username o email.");
+    }
+
+    if (OIDC_ALLOWED_USERS === [] || in_array($username, OIDC_ALLOWED_USERS, true)) {
+        $_SESSION['admin'] = $username;
+        $_SESSION['auth_type'] = 'oidc';
+
+        header("Location: index.php");
+        exit;
+    } else {
+        http_response_code(403);
+        echo <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
