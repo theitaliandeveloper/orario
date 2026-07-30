@@ -114,6 +114,9 @@ if (!defined('OIDC_CLIENT_SECRET')) {
 if (!defined('OIDC_ALLOWED_USERS')) {
     define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
 }
+if (!defined('OIDC_NO_LOGOUT')) {
+    define('OIDC_NO_LOGOUT',false); // Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
+}
 // Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
 if (!defined('PHP_MAX_RAM')) {
     define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
@@ -175,6 +178,7 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
       OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
       OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+      OIDC_NO_LOGOUT: false # Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
 
       # --- Impostazioni Avanzate ---
       # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!

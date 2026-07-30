@@ -22,10 +22,10 @@ services:
       MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
-      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
+      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o oidc
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
 
-      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è Keycloak) ---
+      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è oidc) ---
       OIDC_ISSUER: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
       OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
       OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
