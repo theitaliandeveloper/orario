@@ -17,7 +17,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . '/../vendor/autoload.php';
-include_once __DIR__ . '/../config/config.php';
+require __DIR__ . "/variables.php";
+
 
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
 {
@@ -34,7 +35,10 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
     switch ($type) {
         case 'class':
             $class_id = intval($identifier);
-            $row      = $conn->query("SELECT name FROM classes WHERE id = $class_id LIMIT 1")->fetch_assoc();
+            $stmt = $conn->prepare("SELECT name FROM classes WHERE id = ? LIMIT 1");
+            $stmt->bind_param("i", $class_id);
+            $stmt->execute();
+            $row = $stmt->get_result()->fetch_assoc();
             $title    = 'Orario classe ' . $row['name'];
             $filename = 'orario_classe_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $row['name']);
             break;
@@ -74,14 +78,17 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                 // ---- CLASSE ----
                 case 'class':
                     $class_id = intval($identifier);
-                    $q = $conn->query("
+                    $stmt = $conn->prepare("
                         SELECT subjects.name, subjects.teacher, subjects.room
                         FROM timetable
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                        WHERE timetable.class_id = $class_id
-                          AND timetable.day = '$escaped_d'
-                          AND timetable.hour = $hnum
+                        WHERE timetable.class_id = ?
+                          AND timetable.day = ?
+                          AND timetable.hour = ?
                     ");
+                    $stmt->bind_param("isi", $class_id, $d, $hnum);
+                    $stmt->execute();
+                    $q = $stmt->get_result();
 
                     $subject  = null;
                     $teachers = [];
@@ -108,16 +115,18 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                 // ---- DOCENTE ----
                 case 'teacher':
-                    $escaped_teacher = $conn->real_escape_string($identifier);
-                    $q = $conn->query("
+                    $stmt = $conn->prepare("
                         SELECT subjects.name, classes.name AS class_name, subjects.room
                         FROM timetable
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
                         LEFT JOIN classes  ON timetable.class_id   = classes.id
-                        WHERE subjects.teacher = '$escaped_teacher'
-                        AND timetable.day    = '$escaped_d'
-                        AND timetable.hour   = $hnum
+                        WHERE subjects.teacher = ?
+                        AND timetable.day    = ?
+                        AND timetable.hour   = ?
                     ");
+                    $stmt->bind_param("ssi", $identifier, $d, $hnum);
+                    $stmt->execute();
+                    $q = $stmt->get_result();
 
                     $subject = null;
                     $classes = [];
@@ -144,16 +153,18 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                 // ---- AULA ----
                 case 'room':
-                    $escaped_room = $conn->real_escape_string($identifier);
-                    $q = $conn->query("
+                    $stmt = $conn->prepare("
                         SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
                         FROM timetable
                         LEFT JOIN subjects ON timetable.subject_id = subjects.id
                         LEFT JOIN classes  ON timetable.class_id   = classes.id
-                        WHERE subjects.room = '$escaped_room'
-                          AND timetable.day = '$escaped_d'
-                          AND timetable.hour = $hnum
+                        WHERE subjects.room = ?
+                          AND timetable.day = ?
+                          AND timetable.hour = ?
                     ");
+                    $stmt->bind_param("ssi", $identifier, $d, $hnum);
+                    $stmt->execute();
+                    $q = $stmt->get_result();
 
                     $subject = null;
                     $pairs   = [];
@@ -198,9 +209,9 @@ class _OrarioPDF extends Fpdf\Fpdf
     public function Footer(): void
     {
         $this->SetY(-11);
-        $this->SetFont('Arial', 'I', 6.5);
+        $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(150, 150, 150);
-        $this->Cell(0, 5, 'Orario Scuola - Copyright (C) 2025-2026 EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 0, 0, 'C');
+        $this->Cell(0, 5, APP_NAME . ' - Copyright (C) 2025-2026 EmmeV. (piattaforma) - Ultimo aggiornamento della tabella: ' . date('d/m/Y'), 0, 0, 'C');
     }
 }
 
@@ -261,6 +272,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
                 // Righe secondarie (docenti / classi / coppie classe+docente)
                 if (!empty($cell['lines'])) {
+                    //$linesStr = implode(', ', $cell['lines']);
                     $linesStr = joinList($cell['lines']);
                     $pdf->SetFont('Arial', '', 6.5);
                     $pdf->SetTextColor(50, 50, 50);
@@ -271,11 +283,12 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
                 // Aula/e
                 if (!empty($cell['rooms'])) {
+                    //$roomStr = implode(', ', $cell['rooms']);
                     $roomStr = joinList($cell['rooms']);
                     $pdf->SetFont('Arial', 'I', 6);
                     $pdf->SetTextColor(100, 100, 100);
-                    $pdf->SetXY($x + 1, $pdf->GetY() + 0.5);
-                    $pdf->MultiCell($dayColW - 2, 3, $roomStr, 0, 'C');
+                    $pdf->SetXY($x + 1, $y + $rowH - 5);
+                    $pdf->Cell($dayColW - 2, 4, $roomStr, 0, 0, 'C');
                     $pdf->SetTextColor(0, 0, 0);
                 }
 

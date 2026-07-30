@@ -15,19 +15,15 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-// Carica le variabili necessarie
-require __DIR__ . "/variables.php";
-$host = DB_HOST;
-$user = DB_USER;
-$pass = DB_PASS;
-$dbname = DB_NAME;
-
-// Tenta la connessione al database
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) {
-    if (DEV_MODE)
-        die("[DEBUG] Connessione al database fallita: " . $conn->connect_error);
-    else
-        die("Connessione al database fallita!");
+function is_https(): bool {
+    if (
+        (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ||
+        (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ||
+        (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') ||
+        (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on')
+    ) {
+        return true;
+    }
+    return false;
 }
 ?>

@@ -17,25 +17,31 @@ services:
       # --- Impostazioni sito ---
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
-      DEV_MODE: false # Abilita modalita' di sviluppo per output dettagliato.
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
       OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
+      MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
-      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
+      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o oidc
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
 
-      # --- Impostazioni di Keycloak (solo se il tipo di autenticazione è Keycloak) ---
-      KEYCLOAK_DOMAIN: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
-      KEYCLOAK_REALM: "" # Realm di Keycloak, ad esempio master
-      KEYCLOAK_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
-      KEYCLOAK_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
-      KEYCLOAK_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è oidc) ---
+      OIDC_ISSUER: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
+      OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
+      OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
+      OIDC_NO_LOGOUT: false # Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
 
-      # --- Labs: funzionalità ancora in beta ---
+      # --- Impostazioni Avanzate ---
+      # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
+      PHP_MAX_RAM: "128M" # Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
+      SESSION_LIMIT: 3600 # Durata del cookie di login
+
+      # --- Labs ---
+      # Queste sono funzioni interne che non sono documentate
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
   db:
-    image: mariadb:11
+    image: mariadb:12
     container_name: orario-db
     restart: unless-stopped
     environment:

@@ -65,22 +65,6 @@ if (!defined('YEAR')) {
         define('YEAR', '2025/26');
     }
 }
-if (!defined('API_URL')) {
-    $val = getenv('API_URL');
-    if ($val !== false && $val !== '') {
-        define('API_URL', $val);
-    } else {
-        define('API_URL', '');
-    }
-}
-if (!defined('DEV_MODE')) {
-    $val = getenv('DEV_MODE');
-    if ($val !== false && $val !== '') {
-        define('DEV_MODE', filter_var($val, FILTER_VALIDATE_BOOLEAN));
-    } else {
-        define('DEV_MODE', false);
-    }
-}
 if (!defined('PDF_EXPORT')) {
     $val = getenv('PDF_EXPORT');
     if ($val !== false && $val !== '') {
@@ -95,6 +79,14 @@ if (!defined('OPEN_DATA')) {
         define('OPEN_DATA', filter_var($val, FILTER_VALIDATE_BOOLEAN));
     } else {
         define('OPEN_DATA', true);
+    }
+}
+if (!defined('MAINTENANCE')) {
+    $val = getenv('MAINTENANCE');
+    if ($val !== false && $val !== '') {
+        define('MAINTENANCE', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('MAINTENANCE', false);
     }
 }
 // Impostazioni autenticazione dashboard amministrativa
@@ -114,50 +106,74 @@ if (!defined('APP_DOMAIN')) {
         define('APP_DOMAIN','');
     }
 }
-// Impostazioni autenticazione via Keycloak (richiesto solo se AUTH_TYPE sta impostato su keycloak)
-if (AUTH_TYPE === 'keycloak') {
-    if (!defined('KEYCLOAK_DOMAIN')) {
-        $val = getenv('KEYCLOAK_DOMAIN');
-        if ($val !== false && $val !== '') {
-            define('KEYCLOAK_DOMAIN', $val);
-        } else {
-            define('KEYCLOAK_DOMAIN','');
-        }
+// Impostazioni autenticazione via OpenID Connect (richiesto solo se AUTH_TYPE sta impostato su oidc)
+if (!defined('OIDC_ISSUER')) {
+    $val = getenv('OIDC_ISSUER');
+    if ($val !== false && $val !== '') {
+        define('OIDC_ISSUER', $val);
+    } else {
+        define('OIDC_ISSUER','');
     }
-    if (!defined('KEYCLOAK_REALM')) {
-        $val = getenv('KEYCLOAK_REALM');
-        if ($val !== false && $val !== '') {
-            define('KEYCLOAK_REALM', $val);
-        } else {
-            define('KEYCLOAK_REALM','');
-        }
+}
+if (!defined('OIDC_CLIENT_ID')) {
+    $val = getenv('OIDC_CLIENT_ID');
+    if ($val !== false && $val !== '') {
+        define('OIDC_CLIENT_ID', $val);
+    } else {
+        define('OIDC_CLIENT_ID','');
     }
-    if (!defined('KEYCLOAK_CLIENT_ID')) {
-        $val = getenv('KEYCLOAK_CLIENT_ID');
-        if ($val !== false && $val !== '') {
-            define('DB_USER', $val);
-        } else {
-            define('KEYCLOAK_CLIENT_ID','');
-        }
+}
+if (!defined('OIDC_CLIENT_SECRET')) {
+    $val = getenv('OIDC_CLIENT_SECRET');
+    if ($val !== false && $val !== '') {
+        define('OIDC_CLIENT_SECRET', $val);
+    } else {
+        define('OIDC_CLIENT_SECRET','');
     }
-    if (!defined('KEYCLOAK_CLIENT_SECRET')) {
-        $val = getenv('KEYCLOAK_CLIENT_SECRET');
-        if ($val !== false && $val !== '') {
-            define('KEYCLOAK_CLIENT_SECRET', $val);
-        } else {
-            define('KEYCLOAK_CLIENT_SECRET','');
-        }
+}
+if (!defined('OIDC_ALLOWED_USERS')) {
+    $json = getenv('OIDC_ALLOWED_USERS');
+    if ($json === false || trim($json) === '') {
+        define('OIDC_ALLOWED_USERS',[]);
     }
-    if (!defined('KEYCLOAK_ALLOWED_USERS')) {
-        $json = getenv('USERS');
-        if ($json === false || trim($json) === '') {
-            define('KEYCLOAK_ALLOWED_USERS',[]);
+    $users = json_decode($json, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        define('OIDC_ALLOWED_USERS',[]);
+    }
+    define('OIDC_ALLOWED_USERS',$users);
+}
+if (!defined('OIDC_NO_LOGOUT')) {
+    $val = getenv('OIDC_NO_LOGOUT');
+    if ($val !== false && $val !== '') {
+        define('OIDC_NO_LOGOUT', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('OIDC_NO_LOGOUT', false);
+    }
+}
+// Impostazioni avanzate
+if (!defined('PHP_MAX_RAM')) {
+        $val = getenv('PHP_MAX_RAM');
+        if ($val !== false && $val !== '') {
+            define('PHP_MAX_RAM', $val);
+        } else {
+            define('PHP_MAX_RAM','128M');
         }
-        $users = json_decode($json, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            define('KEYCLOAK_ALLOWED_USERS',[]);
-        }
-        define('KEYCLOAK_ALLOWED_USERS',$users);
+}
+if (!defined('SESSION_LIFETIME')) {
+    $val = getenv('SESSION_LIFETIME');
+    if ($val !== false && $val !== '' && is_numeric($val)) {
+        define('SESSION_LIFETIME', (int)$val);
+    } else {
+        define('SESSION_LIFETIME', 3600);
+    }
+}
+// Labs (funzioni interne)
+if (!defined('API_URL')) {
+    $val = getenv('API_URL');
+    if ($val !== false && $val !== '') {
+        define('API_URL', $val);
+    } else {
+        define('API_URL', '');
     }
 }
 ?>

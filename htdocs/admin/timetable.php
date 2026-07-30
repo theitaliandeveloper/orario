@@ -15,9 +15,21 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-session_start();
+require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/csrf.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
-include("../lib/db.php");
 
 // --- Recupera tutte le materie ---
 $subjects = [];
@@ -31,18 +43,23 @@ while ($r = $res->fetch_assoc()) {
 
 // --- Salvataggio orario ---
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['class_id']) && isset($_POST['subject'])) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $class_id = intval($_POST['class_id']);
     if ($class_id > 0) {
         // Cancella solo l'orario di questa classe
-        $conn->query("DELETE FROM timetable WHERE class_id=$class_id");
+        $stmt_del = $conn->prepare("DELETE FROM timetable WHERE class_id=?");
+        $stmt_del->bind_param("i", $class_id);
+        $stmt_del->execute();
 
+        $stmt_ins = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
+        
         foreach ($_POST['subject'] as $day => $hours) {
             foreach ($hours as $hour => $sub_ids) {
                 foreach ($sub_ids as $subject_id) {
                     $subject_id = intval($subject_id);
                     if (!empty($subject_id)) {
-                        $conn->query("INSERT INTO timetable (class_id, day, hour, subject_id) 
-                                      VALUES ($class_id, '" . $conn->real_escape_string($day) . "', $hour, $subject_id)");
+                        $stmt_ins->bind_param("isii", $class_id, $day, $hour, $subject_id);
+                        $stmt_ins->execute();
                     }
                 }
             }
@@ -59,7 +76,10 @@ $class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
 // --- Precaricamento dati orario ---
 $preselectedData = [];
 if ($class_id > 0) {
-    $res = $conn->query("SELECT * FROM timetable WHERE class_id=$class_id");
+    $stmt = $conn->prepare("SELECT * FROM timetable WHERE class_id=?");
+    $stmt->bind_param("i", $class_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
     while ($r = $res->fetch_assoc()) {
         $preselectedData[$r['day']][$r['hour']][] = $r['subject_id'];
     }
@@ -68,9 +88,9 @@ if ($class_id > 0) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gestisci Orario</title>
+    <title><?php echo APP_NAME; ?> - Gestisci Orario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../css/admin.css">
     <style>
         .subject-container select { min-width: 120px; }
         .subject-container button { cursor: pointer; margin-left: 3px; }
@@ -88,13 +108,14 @@ if ($class_id > 0) {
             color: green;
         }
     </style>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 <div class="navbar">
-    <div class="logo">Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
     <div class="links">
         <a href="index.php">Dashboard</a>
-        <a href="logout.php">Logout</a>
+        <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
 </div>
 
@@ -103,6 +124,7 @@ if ($class_id > 0) {
     <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
     <form method="POST" autocomplete="off">
+        <?php echo csrf_field(); ?>
         Classe:
         <select name="class_id" required onchange="window.location='timetable.php?class_id='+this.value;">
             <option value="" disabled <?= $class_id === 0 ? 'selected' : '' ?>>--Scegli un'opzione--</option>
@@ -168,10 +190,14 @@ if ($class_id > 0) {
             <p class="saved-message">✅ Orario salvato con successo!</p>
         <?php endif; ?>
     </form>
-    <p style="text-align: center;">
+    <p class="only-mobile" style="text-align: center;">
       Nota: Questa pagina si vede meglio da computer desktop. Se sei da computer, puoi ignorare questo messaggio.
     </p>
-    <p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.qzz.io/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+    </p>
 </div>
 
 <script>

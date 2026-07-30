@@ -35,41 +35,46 @@ if (!defined('APP_NAME')) {
 if (!defined('YEAR')) {
     define('YEAR', '2025/26'); // Anno Scolastico Corrente
 }
-if (!defined('DEV_MODE')) {
-    define('DEV_MODE', false); // Modalita' di sviluppo: abilita messaggi di debug aggiuntivi. Imposta su false se sei in produzione
-}
 if (!defined('PDF_EXPORT')) {
     define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
 }
 if (!defined('OPEN_DATA')) {
     define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
 }
+if (!defined('MAINTENANCE')) {
+    define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
+}
 // Impostazioni autenticazione dashboard amministrativa
 if (!defined('AUTH_TYPE')) {
-    define('AUTH_TYPE','local'); // Può essere local (integrata), keycloak
+    define('AUTH_TYPE','local'); // Può essere local (integrata), oidc (OpenID Connect)
 }
 if (!defined('APP_DOMAIN')) {
     define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
 }
-// Impostazioni autenticazione via Keycloak (richiesto solo se AUTH_TYPE sta impostato su keycloak)
-if (AUTH_TYPE === 'keycloak') {
-    if (!defined('KEYCLOAK_DOMAIN')) {
-        define('KEYCLOAK_DOMAIN',''); // Dominio di Keycloak (ad esempio auth.yourdomain.com)
-    }
-    if (!defined('KEYCLOAK_REALM')) {
-        define('KEYCLOAK_REALM',''); // Realm di Keycloak (ad esempio master)
-    }
-    if (!defined('KEYCLOAK_CLIENT_ID')) {
-        define('KEYCLOAK_CLIENT_ID',''); // Client ID per Keycloak (ad esempio orario)
-    }
-    if (!defined('KEYCLOAK_CLIENT_SECRET')) {
-        define('KEYCLOAK_CLIENT_SECRET',''); // Client Secret per Keycloak (ad esempio abcdefghijklm)
-    }
-    if (!defined('KEYCLOAK_ALLOWED_USERS')) {
-        define('KEYCLOAK_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti autorizzati ad accedere all'amministrazione
-    }
+// Impostazioni autenticazione via OpenID Connect (richiesto solo se AUTH_TYPE sta impostato su oidc)
+if (!defined('OIDC_ISSUER')) {
+    define('OIDC_ISSUER',''); // Issuer URL per OIDC (ad esempio https://tuokeycloak.com/realms/master)
 }
-// LABS: Funzionalità in Beta
+if (!defined('OIDC_CLIENT_ID')) {
+    define('OIDC_CLIENT_ID',''); // Client ID per OIDC (ad esempio orario)
+}
+if (!defined('OIDC_CLIENT_SECRET')) {
+    define('OIDC_CLIENT_SECRET',''); // Client Secret per OIDC (ad esempio abcdefghijklm)
+}
+if (!defined('OIDC_ALLOWED_USERS')) {
+    define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
+}
+if (!defined('OIDC_NO_LOGOUT')) {
+    define('OIDC_NO_LOGOUT',false); // Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
+}
+// Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
+if (!defined('PHP_MAX_RAM')) {
+    define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
+}
+if (!defined('SESSION_LIFETIME')) {
+    define('SESSION_LIFETIME',3600); // Durata del cookie di login
+}
+// Labs (funzioni interne)
 if (!defined('API_URL')) {
     define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
 }

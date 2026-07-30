@@ -15,15 +15,28 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-session_start();
+require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/csrf.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (!isset($_SESSION['admin'])) {
   header("Location: login.php");
   exit;
 }
-include("../lib/db.php");
 
 // FIX: Usa prepared statements per sicurezza
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && !isset($_POST['update'])) {
+  if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
   $name = $_POST['name'];
   $teacher = $_POST['teacher'];
   $room = $_POST['room'];
@@ -40,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && !isset($_PO
 
 // FIX: Aggiunto redirect dopo update
 if (isset($_POST['update'])) {
+  if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
   $id = intval($_POST['id']);
   $name = $_POST['name'];
   $teacher = $_POST['teacher'];
@@ -56,6 +70,7 @@ if (isset($_POST['update'])) {
 
 // FIX: Usa prepared statement anche per delete
 if (isset($_GET['delete'])) {
+  if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
   $id = intval($_GET['delete']);
   $stmt = $conn->prepare("DELETE FROM subjects WHERE id=?");
   $stmt->bind_param("i", $id);
@@ -68,18 +83,19 @@ if (isset($_GET['delete'])) {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Gestisci Materie</title>
+  <title><?php echo APP_NAME; ?> - Gestisci Materie</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="/css/home.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="../css/home.css">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <!-- Navbar -->
   <div class="navbar">
-    <div class="logo">Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
     <div class="links">
       <a href="index.php">Dashboard</a>
-      <a href="logout.php">Logout</a>
+      <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
   </div>
 
@@ -101,12 +117,13 @@ if (isset($_GET['delete'])) {
         <div class="edit-section" style="background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
           <h3>Modifica materia</h3>
           <form method="post" action="subjects.php">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="id" value="<?php echo $subject['id']; ?>">
             <input type="text" name="name" value="<?php echo htmlspecialchars($subject['name']); ?>" required placeholder="Materia">
             <input type="text" name="teacher" value="<?php echo htmlspecialchars($subject['teacher']); ?>" required placeholder="Docente">
             <input type="text" name="room" value="<?php echo htmlspecialchars($subject['room']); ?>" placeholder="Laboratorio">
-            <button type="submit" name="update">Salva modifiche</button>
-            <a class="cancel-edit" href="subjects.php" style="color: #666; margin-left: 10px;">Annulla</a>
+            <button type="submit" name="update" class="cancel-edit">Salva modifiche</button>
+            <a class="cancel-edit" href="subjects.php" style="margin-left: 10px;">Annulla</a>
           </form>
         </div>
     <?php
@@ -117,6 +134,7 @@ if (isset($_GET['delete'])) {
 
     <h2>Aggiungi Nuova Materia</h2>
     <form method="POST" class="add-form">
+      <?php echo csrf_field(); ?>
       <input type="text" name="name" placeholder="Materia (es. Informatica)" required>
       <input type="text" name="teacher" placeholder="Docente (Cognome Nome)" required>
       <input type="text" name="room" placeholder="Laboratorio (opzionale)">
@@ -128,6 +146,7 @@ if (isset($_GET['delete'])) {
     <h2>Elenco Materie e Docenti</h2>
 
     <?php
+    $csrf_token = generate_csrf_token();
     // Ordiniamo prima per materia (name) e poi per docente
     $res = $conn->query("SELECT * FROM subjects ORDER BY name ASC, teacher ASC");
 
@@ -154,17 +173,21 @@ if (isset($_GET['delete'])) {
         <?php endif; ?>
 
         <li style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-          <a href="subjects.php?edit=<?php echo $row['id']; ?>" class="edit-btn" style="background: #e3f2fd; color: #1976d2; font-size: 0.8em;">Modifica</a>
-          <a href="subjects.php?delete=<?php echo $row['id']; ?>"
+          <a href="subjects.php?edit=<?php echo $row['id']; ?>" class="edit-btn littlebutton" style="background: #e3f2fd; color: #1976d2; font-size: 0.8em;">Modifica</a>
+          <a href="subjects.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo $csrf_token; ?>"
             onclick="return confirm('Eliminare questo docente?')"
-            class="delete-btn" style="background: #fbe9e7; color: #d32f2f; font-size: 0.8em;">Elimina</a>
+            class="delete-btn littlebutton" style="background: #fbe9e7; color: #d32f2f; font-size: 0.8em;">Elimina</a>
         </li>
       </ul>
 
     <?php }
     if (!$first_iteration) echo '</div>'; // Chiude l'ultima griglia aperta
     ?>
-    <p style="text-align: center;">Copyright (C) 2025-2026 EmmeV. - Released under <a href="https://git.vichingo455.freeddns.org/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank">GNU AGPL 3.0 License</a>.</p>
+    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.qzz.io/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+    </p>
   </div>
 </body>
 </html>

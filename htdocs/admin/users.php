@@ -15,8 +15,20 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-session_start();
-include("../lib/db.php");
+require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/csrf.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$now = time();
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+    session_unset();
+    session_destroy();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 
 if (!isset($_SESSION['admin']) || $_SESSION['auth_type'] != 'local' || $_SESSION['admin'] != 'admin') {
     header("Location: login.php");
@@ -27,6 +39,7 @@ $message = "";
 
 // Add admin
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_user'])) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
@@ -46,6 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_user'])) {
 
 // Delete admin
 if (isset($_GET['delete'])) {
+    if (!verify_csrf_token($_GET['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
     $id = intval($_GET['delete']);
     if ($id != 1) { // proteggi super admin
         $stmt = $conn->prepare("DELETE FROM admin WHERE id = ?");
@@ -53,32 +67,34 @@ if (isset($_GET['delete'])) {
         $stmt->execute();
         $message = "Utente admin rimosso.";
     } else {
-        $message = "Non puoi eliminare il super admin.";
+        $message = "Non puoi eliminare l'utente default.";
     }
 }
 
 // Fetch admins
+$csrf_token = generate_csrf_token();
 $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gestione Admin</title>
+    <title><?php echo APP_NAME; ?> - Gestione Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
 <div class="navbar">
-    <div class="logo">Admin Dashboard</div>
+    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
     <div class="links">
         <a href="index.php">Dashboard</a>
-        <a href="logout.php">Logout</a>
+        <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
     </div>
 </div>
 
 <div class="admin-container">
-    <h1>Gestione Amministratori</h1>
+    <h1>Gestione Utenti</h1>
     <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
     <?php if ($message): ?>
@@ -88,35 +104,38 @@ $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
     <?php endif; ?>
 
     <h2>Utenti Attivi</h2>
-    <table border="1" cellspacing="0" cellpadding="6" width="100%">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Azione</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+    <div class="table-container">
+        <table class="responsive-table">
+            <thead>
                 <tr>
-                    <td><?php echo $row['id']; ?></td>
-                    <td><?php echo htmlspecialchars($row['username']); ?></td>
-                    <td>
-                        <?php if ($row['id'] != 1): ?>
-                            <a href="?delete=<?php echo $row['id']; ?>" 
-                               onclick="return confirm('Vuoi davvero eliminare questo amministratore?')"
-                               style="color:red;">Elimina</a>
-                        <?php else: ?>
-                            <em>Super Admin</em>
-                        <?php endif; ?>
-                    </td>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Azione</th>
                 </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td data-label="ID"><?php echo $row['id']; ?></td>
+                        <td data-label="Username"><?php echo htmlspecialchars($row['username']); ?></td>
+                        <td data-label="Azione">
+                            <?php if ($row['id'] != 1): ?>
+                                <a href="?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo $csrf_token; ?>" 
+                                    onclick="return confirm('Vuoi davvero eliminare questo utente?')"
+                                    class='delete-link'>Elimina</a>
+                            <?php else: ?>
+                                <em>Non Disponibile</em>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 
-    <h2>Aggiungi Nuovo Admin</h2>
+    <h2>Aggiungi nuovo utente</h2>
     <form method="POST">
+        <?php echo csrf_field(); ?>
         <label>Username:<br>
             <input type="text" name="username" required>
         </label><br><br>
@@ -125,6 +144,11 @@ $result = $conn->query("SELECT id, username FROM admin ORDER BY id ASC");
         </label><br><br>
         <button type="submit" name="add_user">Aggiungi</button>
     </form>
+    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
+        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
+        Codice sorgente disponibile su <a href="https://git.vichingo455.qzz.io/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
+        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
+    </p>
 </div>
 
 </body>

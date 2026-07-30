@@ -15,19 +15,26 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-// Carica le variabili necessarie
-require __DIR__ . "/variables.php";
-$host = DB_HOST;
-$user = DB_USER;
-$pass = DB_PASS;
-$dbname = DB_NAME;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Tenta la connessione al database
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) {
-    if (DEV_MODE)
-        die("[DEBUG] Connessione al database fallita: " . $conn->connect_error);
-    else
-        die("Connessione al database fallita!");
+function generate_csrf_token() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verify_csrf_token($token) {
+    if (empty($_SESSION['csrf_token']) || empty($token)) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], (string)$token);
+}
+
+function csrf_field() {
+    $token = generate_csrf_token();
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
 }
 ?>
