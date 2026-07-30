@@ -89,7 +89,7 @@ echo <<<HTML
   <div class="navbar">
     <div class="logo">{$name} - Admin Dashboard{$dev}</div>
     <div class="links">
-      <a href="/">Torna al sito</a>
+      <a href="../index.php">Torna al sito</a>
     </div>
   </div>
 
@@ -177,7 +177,7 @@ else if (strtolower(AUTH_TYPE) === 'oidc') {
   <div class="navbar">
     <div class="logo">{$name} - Admin Dashboard{$dev}</div>
     <div class="links">
-      <a href="/">Torna al sito</a>
+      <a href="../index.php">Torna al sito</a>
     </div>
   </div>
 
@@ -212,7 +212,7 @@ HTML;
   <div class="navbar">
     <div class="logo">{$name} - Admin Dashboard{$dev}</div>
     <div class="links">
-      <a href="/">Torna al sito</a>
+      <a href="../index.php">Torna al sito</a>
     </div>
   </div>
 
