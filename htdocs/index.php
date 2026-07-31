@@ -39,17 +39,16 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
 <head>
     <title><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!--<link rel="stylesheet" href="css/home.css">-->
-    <!--<link rel="stylesheet" href="css/navbar.css">-->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./css/fonts.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3">
+    <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php">
+            <a class="navbar-brand fw-bold text-reset" href="index.php">
                 <i class="bi bi-clock"></i>&nbsp;
                 <?php echo APP_NAME; ?> <?php echo YEAR; ?>
                 <?php if (DEV_MODE) echo " - SVILUPPO"; ?>
@@ -61,10 +60,10 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
             <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link fw-bold" href="index.php">Home</a>
+                        <a class="nav-link fw-bold text-reset" href="index.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-bold" href="admin/index.php">Admin</a>
+                        <a class="nav-link fw-bold text-reset" href="admin/index.php">Admin</a>
                     </li>
                 </ul>
             </div>
@@ -94,7 +93,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
                     autocomplete="off">
             </div>
         </div>
-        <h2 class="mb-3">Classi</h2>
+        <h2 class="mb-3"><i class="bi bi-calendar"></i> Classi</h2>
         <div class="row g-3">
 
             <?php
@@ -129,7 +128,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
 
         </div>
         <!-- Sezione Docenti -->
-        <h2 class="mt-5 mb-3">Docenti</h2>
+        <h2 class="mt-5 mb-3"><i class="bi bi-people-fill"></i> Docenti</h2>
         <div class="row g-3">
             <?php
             $res = $conn->query("SELECT DISTINCT teacher FROM subjects ORDER BY teacher");
@@ -155,7 +154,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
             ?>
         </div>
         <!-- Sezione Laboratori -->
-        <h2 class="mb-3 mt-4">Laboratori</h2>
+        <h2 class="mb-3 mt-4"><i class="bi bi-flask"></i> Laboratori</h2>
         <div class="row g-3">
             <?php
             $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room IS NOT NULL AND room != '' ORDER BY room");
