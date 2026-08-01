@@ -225,14 +225,15 @@
 
                 if ($q->num_rows > 0):
                     [$subject, $teachers, $rooms] = parseRows($q);
-                    $teachers_str = joinList($teachers);
+                    $subject      = normalise_string($subject);
+                    $teachers_str = normalise_string(joinList($teachers));
                     $rooms_str    = joinList($rooms);
                 ?>
                 <td data-label="<?= htmlspecialchars($d) ?>">
-                    <div class="subject fw-bold text-success"><?= normalise_string(htmlspecialchars($subject)) ?></div>
-                    <div class="teacher"><?= normalise_string(htmlspecialchars($teachers_str)) ?></div>
+                    <div class="subject fw-bold text-primary-emphasis"><?= htmlspecialchars($subject) ?></div>
+                    <div class="teacher small"><?= htmlspecialchars($teachers_str) ?></div>
                     <?php if (!empty($rooms_str)): ?>
-                    <div class="room text-secondary-emphasis"><?= htmlspecialchars($rooms_str) ?></div>
+                    <div class="room text-secondary-emphasis small"><?= htmlspecialchars($rooms_str) ?></div>
                     <?php endif; ?>
                 </td>
                 <?php else: ?>
@@ -245,52 +246,73 @@
 
     <!-- Visualizzazione Mobile -->
     <div class="d-block d-md-none">
-    <?php foreach ($days as $d): ?>
-    <div class="day">
-        <h2><?= htmlspecialchars($d) ?></h2>
-        <?php foreach ($hours as $hnum => $hlabel): ?>
-        <?php
-        $stmt = $conn->prepare("SELECT subjects.name, subjects.teacher, subjects.room 
-                            FROM timetable 
-                            LEFT JOIN subjects ON timetable.subject_id = subjects.id 
-                            WHERE class_id=? AND day=? AND hour=?");
-        $stmt->bind_param("isi", $class_id, $d, $hnum);
-        $stmt->execute();
-        $q = $stmt->get_result();
-
-        if ($q->num_rows > 0):
-            [$subject, $teachers, $rooms] = parseRows($q);
-            $teachers_str = joinList($teachers);
-            $rooms_str    = joinList($rooms);
-        ?>
-            <div class="lesson">
-            <div class="hour"><?= strip_tags($hlabel) ?></div>
-            <div class="subject"><?= htmlspecialchars($subject) ?></div>
-            <div class="teacher"><?= htmlspecialchars($teachers_str) ?></div>
-            <?php if (!empty($rooms_str)): ?>
-                <div class="room"><?= htmlspecialchars($rooms_str) ?></div>
-            <?php endif; ?>
+        <?php foreach ($days as $d): ?>
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header fw-semibold">
+                    <?= htmlspecialchars($d) ?>
+                </div>
+                <div class="list-group list-group-flush">
+                    <?php foreach ($hours as $hnum => $hlabel): ?>
+                        <?php
+                        $stmt = $conn->prepare("
+                            SELECT subjects.name, subjects.teacher, subjects.room
+                            FROM timetable
+                            LEFT JOIN subjects ON timetable.subject_id = subjects.id
+                            WHERE class_id=? AND day=? AND hour=?
+                        ");
+                        $stmt->bind_param("isi", $class_id, $d, $hnum);
+                        $stmt->execute();
+                        $q = $stmt->get_result();
+                        ?>
+                        <?php if ($q->num_rows > 0): ?>
+                            <?php
+                            [$subject, $teachers, $rooms] = parseRows($q);
+                            $subject      = normalise_string($subject);
+                            $teachers_str = normalise_string(joinList($teachers));
+                            $rooms_str    = joinList($rooms);
+                            ?>
+                            <div class="list-group-item">
+                                <div class="small text-body-secondary">
+                                    <?= strip_tags($hlabel) ?>
+                                </div>
+                                <div class="fw-semibold text-primary-emphasis">
+                                    <?= htmlspecialchars($subject) ?>
+                                </div>
+                                <?php if ($teachers_str !== ''): ?>
+                                    <div class="text-secondary-emphasis">
+                                        <?= htmlspecialchars($teachers_str) ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if ($rooms_str !== ''): ?>
+                                    <span class="badge border border-info text-info mt-1">
+                                        <?= htmlspecialchars($rooms_str) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="list-group-item text-body-tertiary">
+                                <div class="small">
+                                    <?= strip_tags($hlabel) ?>
+                                </div>
+                                <div>—</div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        <?php else: ?>
-            <div class="lesson empty">
-            <div class="hour"><?= strip_tags($hlabel) ?></div>
-            <div class="subject">—</div>
-            </div>
-        <?php endif; ?>
         <?php endforeach; ?>
     </div>
-    <?php endforeach; ?>
-    </div>
+
     <footer class="text-center text-body-secondary small mt-5 mb-3">
-        Copyright &copy; 2025-2026 EmmeV. Rilasciato sotto
-        <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt"
+        Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto
+        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
             target="_blank"
             class="fw-bold text-decoration-none">
             Licenza GNU AGPL 3.0
         </a>.
         <br>
         Codice sorgente disponibile su
-        <a href="https://git.vichingo455.qzz.io/emmev-code/orario"
+        <a href="https://git.vichingo455.com/emmev-code/orario"
             target="_blank"
             class="fw-bold text-decoration-none">
             Gitea

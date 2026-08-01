@@ -85,7 +85,7 @@ th {
     padding: 1px 5px;
 }
 
-/* Colonna orario/ID: la rendiamo il piÃ¹ stretta possibile */
+/* Colonna orario/ID: la rendiamo il più stretta possibile */
 th:first-child, td:first-child {
     width: 75px; 
     background-color: #fcfdfe;

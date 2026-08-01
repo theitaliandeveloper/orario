@@ -32,7 +32,7 @@ function normalise_string(string $input): string {
     $eccezioni_minuscole = ['e', 'ed', 'o', 'od', 'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'di', 'a', 'da', 'in', 'con', 'su', 'per', 'tra', 'fra'];
     
     // 2. Array vuoto (o precompilato) di parole da mantenere INTERAMENTE MAIUSCOLE
-    $eccezioni_maiuscole = ['TPS']; 
+    $eccezioni_maiuscole = ['TPS', 'STA']; 
     
     // 3. Convertiamo tutto in minuscolo e dividiamo la stringa in un array
     $parole = explode(' ', strtolower($input));
