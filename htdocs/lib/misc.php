@@ -26,4 +26,32 @@ function is_https(): bool {
     }
     return false;
 }
+
+function normalise_string(string $input): string {
+    // 1. Parole che rimangono minuscole (tranne a inizio frase)
+    $eccezioni_minuscole = ['e', 'ed', 'o', 'od', 'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'di', 'a', 'da', 'in', 'con', 'su', 'per', 'tra', 'fra'];
+    
+    // 2. Array vuoto (o precompilato) di parole da mantenere INTERAMENTE MAIUSCOLE
+    $eccezioni_maiuscole = ['TPS']; 
+    
+    // 3. Convertiamo tutto in minuscolo e dividiamo la stringa in un array
+    $parole = explode(' ', strtolower($input));
+    
+    // 4. Elaboriamo ogni parola
+    foreach ($parole as $indice => $parola) {
+        // Controlliamo se la parola originale (prima del lowercase) era nell'array delle maiuscole
+        // Oppure verifichiamo la corrispondenza testuale
+        $parola_originale = explode(' ', $input)[$indice] ?? '';
+        
+        if (in_array(strtoupper($parola_originale), $eccezioni_maiuscole, true)) {
+            $parole[$indice] = strtoupper($parola_originale);
+        } elseif ($indice === 0 || !in_array($parola, $eccezioni_minuscole, true)) {
+            // Regola standard: maiuscola iniziale
+            $parole[$indice] = ucfirst($parola);
+        }
+    }
+    
+    // 5. Ricomponiamo la stringa
+    return implode(' ', $parole);
+}
 ?>

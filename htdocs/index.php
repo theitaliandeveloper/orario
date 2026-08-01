@@ -17,6 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/lib/db.php";
 require_once __DIR__ . "/lib/csrf.php";
+require_once __DIR__ . "/lib/misc.php";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -137,13 +138,12 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
                 if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {
 
                     $teacher_name = htmlspecialchars($row['teacher']);
-                    $teacher_display = ucwords(strtolower($teacher_name));
 
                     echo "<div class='col-12 col-sm-6 col-md-4 col-lg-3'>";
                     echo "  <div class='card h-100 shadow-sm'>";
                     echo "    <div class='card-body text-center'>";
-                    echo "      <h5 class='card-title'>$teacher_display</h5>";
-                    echo "      <a href='docenti.php?teacher=" . urlencode($teacher_name) . "' class='btn btn-outline-primary btn-sm'>";
+                    echo "      <h5 class='card-title'>". normalise_string($teacher_name) ."</h5>";
+                    echo "      <a href='docenti.php?teacher=" . urlencode($teacher_name) . "' class='btn btn-outline-info btn-sm'>";
                     echo "          Visualizza orario";
                     echo "      </a>";
                     echo "    </div>";
@@ -167,7 +167,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
                 echo "  <div class='card h-100 shadow-sm'>";
                 echo "    <div class='card-body text-center'>";
                 echo "      <h5 class='card-title'>$room_name</h5>";
-                echo "      <a href='laboratori.php?room=" . urlencode($room_name) . "' class='btn btn-outline-primary btn-sm'>";
+                echo "      <a href='laboratori.php?room=" . urlencode($room_name) . "' class='btn btn-outline-info btn-sm'>";
                 echo "          Visualizza orario";
                 echo "      </a>";
                 echo "    </div>";
@@ -193,6 +193,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
         </a>.
     </footer>
     <script src="js/index.js"></script>
+    <script src="js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
