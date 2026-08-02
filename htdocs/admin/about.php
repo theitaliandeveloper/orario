@@ -72,131 +72,184 @@ natcasesort($extensions);
 <head>
     <title><?php echo APP_NAME; ?> - Informazioni sulla piattaforma</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/admin.css">
-    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../css/fonts.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
-    <div class="links">
-      <a href="index.php">Dashboard</a>
-      <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
-    </div>
-  </div>
-  <div class="admin-container">
-    <h1>Informazioni sulla piattaforma</h1>
-    <a href="index.php" class="back-link">⬅ Torna al Dashboard</a>
 
-    <p style="font-size: 1.1em; color: #555; text-align: center; margin-bottom: 25px;">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+      <div class="container-fluid">
+          <a class="navbar-brand fw-bold text-reset" href="index.php">
+              <i class="bi bi-clock"></i>&nbsp;
+              <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
+              <?php if (DEV_MODE) echo " - SVILUPPO"; ?>
+              <?php if (isset($_SESSION['admin']) && MAINTENANCE) echo " - MANUTENZIONE"; ?>
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+              <ul class="navbar-nav">
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                  </li>
+              </ul>
+          </div>
+      </div>
+  </nav>
+
+<div class="container my-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="fw-bold mb-0"><i class="bi bi-info-circle"></i> Informazioni sulla piattaforma</h1>
+        <a href="index.php" class="btn btn-outline-info"><i class="bi bi-arrow-left"></i> Torna alla Dashboard</a>
+    </div>
+
+    <p class="lead text-secondary text-center mb-4">
         Benvenuto nella pagina informativa di <strong><?php echo APP_NAME; ?></strong>. Qui puoi monitorare lo stato del database e i dettagli dell'ambiente di esecuzione.
     </p>
 
-    <h3 style="color: #2c3e50; border-left: 5px solid #1f618d; padding-left: 10px; margin-top: 30px; margin-bottom: 15px;">
-        Statistiche del Database
-    </h3>
-    <div class="table-container">
-        <table class="responsive-table">
-            <thead>
-                <tr>
-                    <th style="text-align: left;">Elemento</th>
-                    <th style="text-align: left; width: 20%;">Conteggio Attuale</th>
-                    <th style="text-align: left;">Descrizione</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td data-label="Elemento"><strong>Classi</strong></td>
-                    <td data-label="Conteggio Attuale"><?php echo $classesCount; ?></td>
-                    <td data-label="Descrizione">Classi scolastiche registrate per le quali è possibile definire l'orario.</td>
-                </tr>
-                <tr>
-                    <td data-label="Elemento"><strong>Docenti / Materie</strong></td>
-                    <td data-label="Conteggio Attuale"><?php echo $subjectsCount; ?></td>
-                    <td data-label="Descrizione">Accoppiamenti di docenti, materie e relativi laboratori inseriti.</td>
-                </tr>
-                <tr>
-                    <td data-label="Elemento"><strong>Ore Programmate</strong></td>
-                    <td data-label="Conteggio Attuale"><?php echo $timetableCount; ?></td>
-                    <td data-label="Descrizione">Totale delle ore settimanali pianificate e salvate nell'orario generale.</td>
-                </tr>
-                <?php if ($_SESSION['auth_type'] == 'local'): ?>
-                <tr>
-                    <td data-label="Elemento"><strong>Utenti</strong></td>
-                    <td data-label="Conteggio Attuale"><?php echo $adminsCount; ?></td>
-                    <td data-label="Descrizione">Utenti abilitati ad accedere alla dashboard di gestione di questa istanza.</td>
-                </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-    <h3 style="color: #2c3e50; border-left: 5px solid #1f618d; padding-left: 10px; margin-top: 30px; margin-bottom: 15px;">
-        Dettagli Ambiente e Server
-    </h3>
-    <div class="table-container">
-        <table class="responsive-table">
-            <thead>
-                <tr>
-                    <th style="text-align: left; width: 35%;">Parametro</th>
-                    <th style="text-align: left;">Valore Rilevato</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td data-label="Parametro"><strong>Versione Piattaforma</strong></td>
-                    <td data-label="Valore Rilevato"><?php if (VERSION == "dev") {echo "Sviluppo";} else {echo htmlspecialchars(VERSION);} ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Modalità Manutenzione</strong></td>
-                    <td data-label="Valore Rilevato"><?php if (MAINTENANCE) {echo "Attivata (in manutenzione)";} else {echo "Disattivata (normale)";} ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Versione di PHP</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo PHP_VERSION; ?><?php if (PHP_DEBUG){echo " (Debug)";} ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Sistema Operativo</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo php_uname(); ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Versione Database</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo htmlspecialchars($dbVersion); ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Dimensione Database</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo round($dbSizeMB, 2); ?> MB</td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Limite Memoria PHP</strong></td>
-                    <td data-label="Valore Rilevato"><?php echo htmlspecialchars($memoryLimit ?: 'N/D'); ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Estensioni attive</strong></td>
-                    <td data-label="Valore Rilevato" style="text-align: left; font-size: 0.9em; line-height: 1.4;"><?php echo htmlspecialchars(implode(', ', $extensions)); ?></td>
-                </tr>
-                <tr>
-                    <td data-label="Parametro"><strong>Timeout sessione</strong></td>
-                    <td data-label="Valore Rilevato" style="text-align: left; font-size: 0.9em; line-height: 1.4;"><?php echo SESSION_LIFETIME; ?> secondi</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Card Statistiche DB -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-body-tertiary fw-bold fs-5">
+            <i class="bi bi-database me-1 text-primary"></i> Statistiche del Database
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table">
+                        <tr>
+                            <th style="width: 25%;">Elemento</th>
+                            <th style="width: 20%;" class="text-center">Conteggio Attuale</th>
+                            <th>Descrizione</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold"><i class="bi bi-building me-2 text-primary"></i>Classi</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6"><?php echo $classesCount; ?></span></td>
+                            <td>Classi scolastiche registrate per le quali è possibile definire l'orario.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold"><i class="bi bi-book me-2 text-primary"></i>Docenti / Materie</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6"><?php echo $subjectsCount; ?></span></td>
+                            <td>Accoppiamenti di docenti, materie e relativi laboratori inseriti.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Ore Programmate</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6"><?php echo $timetableCount; ?></span></td>
+                            <td>Totale delle ore settimanali pianificate e salvate nell'orario generale.</td>
+                        </tr>
+                        <?php if ($_SESSION['auth_type'] == 'local'): ?>
+                        <tr>
+                            <td class="fw-bold"><i class="bi bi-people me-2 text-primary"></i>Utenti Admin</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6"><?php echo $adminsCount; ?></span></td>
+                            <td>Utenti abilitati ad accedere alla dashboard di gestione di questa istanza.</td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <h3 style="color: #2c3e50; border-left: 5px solid #1f618d; padding-left: 10px; margin-top: 30px; margin-bottom: 15px;">
-        Licenza e Progetto
-    </h3>
-    <p style="line-height: 1.6; color: #444; margin-bottom: 30px;">
-        Questa piattaforma è rilasciata sotto i termini della licenza <strong>GNU Affero General Public License versione 3.0 (AGPL-3.0)</strong>. 
-        Ciò significa che puoi liberamente studiare, modificare e distribuire il codice sorgente, a patto che ogni modifica apportata 
-        venga resa pubblica e condivisa sotto la medesima licenza qualora il servizio sia reso disponibile in rete.
-    </p>
-    <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
-        Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
-        Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
-        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
-    </p>
-  </div>
+    <!-- Card Dettagli Ambiente -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-body-tertiary fw-bold fs-5">
+            <i class="bi bi-cpu me-1 text-primary"></i> Dettagli Ambiente e Server
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table">
+                        <tr>
+                            <th style="width: 35%;">Parametro</th>
+                            <th>Valore Rilevato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-arrow-repeat"></i> Versione Piattaforma</td>
+                            <td>
+                                <?php if (VERSION == "dev"): ?>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-code-slash"></i> Sviluppo</span>
+                                <?php else: ?>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> <?php echo htmlspecialchars(VERSION); ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-tools"></i> Modalità Manutenzione</td>
+                            <td>
+                                <?php if (MAINTENANCE): ?>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Attivata (in manutenzione)</span>
+                                <?php else: ?>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Disattivata (normale)</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-terminal"></i> Versione di PHP</td>
+                            <td><code>PHP <?php echo PHP_VERSION; ?><?php if (PHP_DEBUG){echo " (Debug)";} ?></code></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-hdd-stack"></i> Sistema Operativo</td>
+                            <td><small class="text-body-secondary"><?php echo php_uname(); ?></small></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-database"></i> Versione Database</td>
+                            <td><code><?php echo htmlspecialchars($dbVersion); ?></code></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-device-hdd"></i> Dimensione Database</td>
+                            <td><span class="badge bg-secondary"><?php echo round($dbSizeMB, 2); ?> MB</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-memory"></i> Limite Memoria PHP</td>
+                            <td><code><?php echo htmlspecialchars($memoryLimit ?: 'N/D'); ?></code></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-hourglass-split"></i> Timeout sessione</td>
+                            <td><code><?php echo SESSION_LIFETIME; ?> secondi</code></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-terminal-plus"></i> Estensioni attive</td>
+                            <td><small class="text-body-secondary" style="font-size: 0.85em; line-height: 1.4;"><?php echo htmlspecialchars(implode(', ', $extensions)); ?></small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Licenza -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-body-tertiary fw-bold fs-5">
+            <i class="bi bi-patch-check me-1 text-primary"></i> Licenza e Progetto
+        </div>
+        <div class="card-body p-4">
+            <p class="mb-0 text-body-secondary">
+                Questa piattaforma è rilasciata sotto i termini della licenza <strong>GNU Affero General Public License versione 3.0 (AGPL-3.0)</strong>. 
+                Ciò significa che puoi liberamente studiare, modificare e distribuire il codice sorgente, a patto che ogni modifica apportata 
+                venga resa pubblica e condivisa sotto la medesima licenza qualora il servizio sia reso disponibile in rete.
+            </p>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-body-secondary small mt-5 mb-3">
+    Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto
+    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+</footer>
+<script src="../js/theme.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
 

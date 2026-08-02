@@ -13,6 +13,26 @@ http_response_code(404);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-body-tertiary">
+    <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-reset" href="index.php">
+                <i class="bi bi-clock"></i>&nbsp;
+                <?php echo APP_NAME; ?> <?php echo YEAR; ?>
+                <?php if (DEV_MODE) echo " - SVILUPPO"; ?>
+                <?php if (isset($_SESSION['admin']) && MAINTENANCE) echo " - MANUTENZIONE"; ?>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <main class="container min-vh-100 d-flex align-items-center justify-content-center">
         <div class="text-center">
             <h1 class="display-1 fw-bold text-danger">
@@ -29,6 +49,21 @@ http_response_code(404);
             </a>
         </div>
     </main>
+    <footer class="text-center text-body-secondary small mt-5 mb-3">
+        Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto
+        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
+            target="_blank"
+            class="fw-bold text-decoration-none">
+            Licenza GNU AGPL 3.0
+        </a>.
+        <br>
+        Codice sorgente disponibile su
+        <a href="https://git.vichingo455.com/emmev-code/orario"
+            target="_blank"
+            class="fw-bold text-decoration-none">
+            Gitea
+        </a>.
+    </footer>
     <script src="js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>

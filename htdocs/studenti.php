@@ -91,67 +91,10 @@ function joinList($arr) {
     return implode(', ', $arr) . ' e ' . $last;
 }
 
-if (isset($_GET['json']) && $_GET['json'] == '1') {
-    if (OPEN_DATA) {
-      header('Content-Type: application/json; charset=utf-8');
-
-      $timetable = [];
-
-      foreach ($days as $d) {
-          $d_clean = str_replace(
-              ['à','è','é','ì','ò','ù'],
-              ['a','e','e','i','o','u'],
-              $d
-          );
-          $timetable[$d_clean] = [];
-
-          foreach ($hours as $hnum => $hlabel) {
-              $stmt = $conn->prepare("SELECT subjects.name, subjects.teacher, subjects.room 
-                                FROM timetable 
-                                LEFT JOIN subjects ON timetable.subject_id = subjects.id 
-                                WHERE class_id=? AND day=? AND hour=?");
-              $stmt->bind_param("isi", $class_id, $d, $hnum);
-              $stmt->execute();
-              $q = $stmt->get_result();
-
-              if ($q->num_rows > 0) {
-                  [$subject, $teachers, $rooms] = parseRows($q);
-
-                  $timetable[$d_clean][$hnum] = [
-                      'hour'     => $hnum,
-                      'time'     => strip_tags($hlabel),
-                      'subject'  => $subject,
-                      'teachers' => $teachers,
-                      'rooms'    => $rooms   // <-- ora è un array
-                  ];
-              } else {
-                  $timetable[$d_clean][$hnum] = [
-                      'hour'     => $hnum,
-                      'time'     => strip_tags($hlabel),
-                      'subject'  => null,
-                      'teachers' => [],
-                      'rooms'    => []
-                  ];
-              }
-          }
-      }
-
-      echo json_encode([
-          'class_id'   => $class_id,
-          'class_name' => $class['name'],
-          'timetable'  => $timetable
-      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-      exit;
-    } else {
-      http_response_code(403);
-      if (DEV_MODE) {
-          echo "Non puoi accedere a questo JSON perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
-      }
-      else {
-          echo "Non puoi accedere a questo JSON perchè non hai i permessi necessari per farlo.";
-      }
-      exit;
-    }
+if (isset($_GET['json']) && $_GET['json'] == '1' && OPEN_DATA) {
+    require_once 'lib/json.php';
+    exportTimetableJSON($conn, 'class', $class_id);
+    exit;
 }
 
 if (isset($_GET['pdf']) && $_GET['pdf'] == '1' && PDF_EXPORT) {

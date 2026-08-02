@@ -17,7 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . "/variables.php";
+require_once __DIR__ . "/variables.php";
 
 
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
@@ -197,12 +197,12 @@ class _OrarioPDF extends Fpdf\Fpdf
 
     public function Header(): void
     {
-        $this->SetFont('Arial', 'B', 13);
-        $this->SetTextColor(30, 30, 30);
-        $this->Cell(0, 9, $this->pageTitle, 0, 1, 'C');
-        $this->SetFont('Arial', '', 7.5);
-        $this->SetTextColor(120, 120, 120);
-        $this->Cell(0, 4, 'Anno Scolastico ' . YEAR, 0, 1, 'C');
+        $this->SetFont('Arial', 'B', 14);
+        $this->SetTextColor(13, 110, 253); // Bootstrap Primary Blue #0d6efd
+        $this->Cell(0, 9, mb_convert_encoding($this->pageTitle, 'ISO-8859-1', 'UTF-8'), 0, 1, 'C');
+        $this->SetFont('Arial', '', 8);
+        $this->SetTextColor(108, 117, 125); // Bootstrap Secondary Text #6c757d
+        $this->Cell(0, 4, mb_convert_encoding('Anno Scolastico ' . YEAR, 'ISO-8859-1', 'UTF-8'), 0, 1, 'C');
         $this->Ln(3);
     }
 
@@ -210,10 +210,19 @@ class _OrarioPDF extends Fpdf\Fpdf
     {
         $this->SetY(-11);
         $this->SetFont('Arial', 'I', 8);
-        $this->SetTextColor(150, 150, 150);
-        $this->Cell(0, 5, APP_NAME . ' - Copyright (C) 2025-2026 EmmeV. (piattaforma) - Ultimo aggiornamento della tabella: ' . date('d/m/Y'), 0, 0, 'C');
+        $this->SetTextColor(108, 117, 125);
+        $this->Cell(0, 5, mb_convert_encoding(APP_NAME . ' - Copyright (C) 2025-' . date('Y') . ' EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
     }
 }
+
+
+/*function joinList(array $arr): string
+{
+    if (empty($arr)) return '';
+    if (count($arr) === 1) return $arr[0];
+    $last = array_pop($arr);
+    return implode(', ', $arr) . ' e ' . $last;
+}*/
 
 
 function _renderPDF(string $title, string $filename, array $days, array $hours, array $data): void
@@ -224,19 +233,23 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     $pdf->SetAutoPageBreak(true, 14);
     $pdf->AddPage();
 
-    $pageW    = 297 - 20;
-    $hourColW = 24;
-    $dayColW  = ($pageW - $hourColW) / count($days);
+    $pageW    = 297 - 20; // 277 mm
+    $hourColW = 25;
+    $dayColW  = ($pageW - $hourColW) / count($days); // ~42 mm
     $rowH     = 22;
-    $headerH  = 8;
+    $headerH  = 9;
 
     // ---- Intestazione colonne (giorni) ----
-    $pdf->SetFont('Arial', 'B', 9);
-    $pdf->SetFillColor(44, 62, 80);
+    $pdf->SetFont('Arial', 'B', 10);
+    $pdf->SetFillColor(13, 110, 253); // Bootstrap Primary Blue #0d6efd
     $pdf->SetTextColor(255, 255, 255);
-    $pdf->SetDrawColor(200, 200, 200);
-    $giorni = mb_convert_encoding($days, 'Windows-1252');
-    $pdf->Cell($hourColW, $headerH, '', 1, 0, 'C', true);
+    $pdf->SetDrawColor(222, 226, 230); // #dee2e6
+
+    $giorni = array_map(function($d) {
+        return mb_convert_encoding($d, 'ISO-8859-1', 'UTF-8');
+    }, $days);
+
+    $pdf->Cell($hourColW, $headerH, mb_convert_encoding('Ora/Giorno', 'ISO-8859-1', 'UTF-8'), 1, 0, 'C', true);
     foreach ($giorni as $d) {
         $pdf->Cell($dayColW, $headerH, $d, 1, 0, 'C', true);
     }
@@ -244,14 +257,15 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
     // ---- Righe ore ----
     foreach ($hours as $hnum => $hlabel) {
-        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetTextColor(33, 37, 41);
         $xStart = $pdf->GetX();
         $yStart = $pdf->GetY();
 
         // Colonna ORA
-        $pdf->SetFillColor(236, 240, 241);
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->MultiCell($hourColW, $rowH / 2, $hlabel, 1, 'C', true);
+        $pdf->SetFillColor(248, 249, 250); // #f8f9fa
+        $pdf->SetDrawColor(222, 226, 230);
+        $pdf->SetFont('Arial', 'B', 7.5);
+        $pdf->MultiCell($hourColW, $rowH / 2, mb_convert_encoding($hlabel, 'ISO-8859-1', 'UTF-8'), 1, 'C', true);
         $pdf->SetXY($xStart + $hourColW, $yStart);
 
         // Colonne GIORNO
@@ -261,44 +275,44 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
             $y    = $pdf->GetY();
 
             if ($cell['subject'] !== null) {
-                // Cella piena
-                $pdf->SetFillColor(214, 234, 248);
+                // Cella piena - Sfondo tenue Bootstrap #e7f1ff
+                $pdf->SetFillColor(231, 241, 255);
+                $pdf->SetDrawColor(222, 226, 230);
                 $pdf->Rect($x, $y, $dayColW, $rowH, 'FD');
 
-                // Materia
-                $pdf->SetFont('Arial', 'B', 8);
-                $pdf->SetXY($x + 1, $y + 1.5);
-                $pdf->MultiCell($dayColW - 2, 4, $cell['subject'], 0, 'C');
+                // Materia - Primary emphasis #0a58ca
+                $pdf->SetFont('Arial', 'B', 8.5);
+                $pdf->SetTextColor(10, 88, 202);
+                $pdf->SetXY($x + 1, $y + 2);
+                $pdf->MultiCell($dayColW - 2, 4, mb_convert_encoding($cell['subject'], 'ISO-8859-1', 'UTF-8'), 0, 'C');
 
-                // Righe secondarie (docenti / classi / coppie classe+docente)
+                // Righe secondarie (docenti / classi) - Dark body text #212529
                 if (!empty($cell['lines'])) {
-                    //$linesStr = implode(', ', $cell['lines']);
                     $linesStr = joinList($cell['lines']);
-                    $pdf->SetFont('Arial', '', 6.5);
-                    $pdf->SetTextColor(50, 50, 50);
-                    $pdf->SetXY($x + 1, $pdf->GetY());
-                    $pdf->MultiCell($dayColW - 2, 3.2, $linesStr, 0, 'C');
-                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('Arial', '', 7);
+                    $pdf->SetTextColor(33, 37, 41);
+                    $pdf->SetXY($x + 1, $pdf->GetY() + 0.5);
+                    $pdf->MultiCell($dayColW - 2, 3.2, mb_convert_encoding($linesStr, 'ISO-8859-1', 'UTF-8'), 0, 'C');
                 }
 
-                // Aula/e
+                // Aula/e - Secondary muted text #6c757d
                 if (!empty($cell['rooms'])) {
-                    //$roomStr = implode(', ', $cell['rooms']);
                     $roomStr = joinList($cell['rooms']);
-                    $pdf->SetFont('Arial', 'I', 6);
-                    $pdf->SetTextColor(100, 100, 100);
+                    $pdf->SetFont('Arial', 'I', 6.5);
+                    $pdf->SetTextColor(108, 117, 125);
                     $pdf->SetXY($x + 1, $y + $rowH - 5);
-                    $pdf->Cell($dayColW - 2, 4, $roomStr, 0, 0, 'C');
-                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->Cell($dayColW - 2, 4, mb_convert_encoding($roomStr, 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
                 }
 
             } else {
                 // Cella vuota
-                $pdf->SetFillColor(250, 250, 250);
+                $pdf->SetFillColor(255, 255, 255);
+                $pdf->SetDrawColor(222, 226, 230);
                 $pdf->Rect($x, $y, $dayColW, $rowH, 'FD');
             }
 
             // Bordo
+            $pdf->SetDrawColor(222, 226, 230);
             $pdf->Rect($x, $y, $dayColW, $rowH, 'D');
             $pdf->SetXY($x + $dayColW, $y);
         }
@@ -309,11 +323,3 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     $pdf->Output('D', $filename);
     exit;
 }
-/*
-function joinList(array $arr): string {
-    if (empty($arr)) return '';
-    if (count($arr) === 1) return $arr[0];
-    $last = array_pop($arr);
-    return implode(', ', $arr) . ' e ' . $last;
-}
-*/

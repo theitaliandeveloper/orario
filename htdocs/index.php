@@ -61,17 +61,16 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
             <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link fw-bold text-reset" href="index.php">Home</a>
+                        <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-house"></i> Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-bold text-reset" href="admin/index.php">Admin</a>
+                        <a class="nav-link fw-bold text-reset" href="admin/index.php"><i class="bi bi-shield"></i> Admin</a>
                     </li>
                 </ul>
             </div>
-
         </div>
     </nav>
-    <h1 class="text-center mb-4">
+    <h1 class="fw-bold text-center mb-4">
         <?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?>
     </h1>
     <?php
@@ -86,12 +85,15 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
     <div class="container">
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-6 col-lg-5">
-                <input
-                    type="text"
-                    id="searchBox"
-                    class="form-control"
-                    placeholder="Cerca classe, docente o laboratorio..."
-                    autocomplete="off">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="searchBox"
+                        class="form-control"
+                        placeholder="Cerca classe, docente o laboratorio..."
+                        autocomplete="off">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                </div>
             </div>
         </div>
         <h2 class="mb-3"><i class="bi bi-calendar"></i> Classi</h2>
@@ -115,7 +117,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
                 $res = $stmt->get_result();
 
                 while ($row = $res->fetch_assoc()) {
-                    echo "<a href='studenti.php?class_id={$row['id']}' class='list-group-item list-group-item-action'>";
+                    echo "<a href='orario.php?view=classe&id={$row['id']}' class='list-group-item list-group-item-action'>";
                     echo htmlspecialchars($row['name']);
                     echo "</a>";
                 }
@@ -143,7 +145,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
                     echo "  <div class='card h-100 shadow-sm'>";
                     echo "    <div class='card-body text-center'>";
                     echo "      <h5 class='card-title'>". normalise_string($teacher_name) ."</h5>";
-                    echo "      <a href='docenti.php?teacher=" . urlencode($teacher_name) . "' class='btn btn-outline-info btn-sm'>";
+                    echo "      <a href='orario.php?view=docente&id=" . urlencode($teacher_name) . "' class='btn btn-outline-info btn-sm'>";
                     echo "          Visualizza orario";
                     echo "      </a>";
                     echo "    </div>";
@@ -167,7 +169,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
                 echo "  <div class='card h-100 shadow-sm'>";
                 echo "    <div class='card-body text-center'>";
                 echo "      <h5 class='card-title'>$room_name</h5>";
-                echo "      <a href='laboratori.php?room=" . urlencode($room_name) . "' class='btn btn-outline-info btn-sm'>";
+                echo "      <a href='orario.php?view=laboratorio&id=" . urlencode($room_name) . "' class='btn btn-outline-info btn-sm'>";
                 echo "          Visualizza orario";
                 echo "      </a>";
                 echo "    </div>";

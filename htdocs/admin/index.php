@@ -45,12 +45,12 @@ if (!isset($_SESSION['admin'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-  <!-- Navbar -->
-   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-reset" href="index.php">
                 <i class="bi bi-clock"></i>&nbsp;
-                <?php echo APP_NAME; ?> <?php echo YEAR; ?>
+                <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
                 <?php if (DEV_MODE) echo " - SVILUPPO"; ?>
                 <?php if (isset($_SESSION['admin']) && MAINTENANCE) echo " - MANUTENZIONE"; ?>
             </a>
@@ -60,45 +60,123 @@ if (!isset($_SESSION['admin'])) {
             <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link fw-bold text-reset" href="../index.php">Torna al sito</a>
+                        <a class="nav-link fw-bold text-reset" href="../index.php"><i class="bi bi-house"></i> Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
+                        <a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>"><i class="bi bi-box-arrow-right"></i> Logout</a>
                     </li>
                 </ul>
             </div>
-
         </div>
     </nav>
+
     <!-- Contenuto Dashboard -->
-    <div class="text-center">
-        <h1 class="fw-bold mb-5">Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
-        <div class="mb-3">
-            <a href="classes.php" class="btn btn-primary">Gestisci Classi</a>
-            <a href="subjects.php" class="btn btn-primary">Gestisci Materie</a>
-            <a href="timetable.php" class="btn btn-primary">Gestisci Orario</a>
+    <div class="container my-4">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold">Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
+            <p class="text-secondary">Cosa facciamo oggi?</p>
         </div>
-        <div class="mb-3">
-            <?php
-                if (defined(API_URL) || API_URL != "") {
-                    echo '<a href="importer.php" class="btn btn-warning">Importa Orario</a>';
-                }
-            ?>
-            <?php
-                if ($_SESSION['auth_type'] === 'local') {
-                    echo '<a href="password.php" class="btn btn-primary">Cambia Password</a>';
-                }
-            ?>
-            <?php
-                if ($_SESSION['auth_type'] === 'local' && $_SESSION['admin'] === 'admin') {
-                    echo '<a href="users.php" class="btn btn-primary">Gestisci Utenti</a>';
-                }
-            ?>
-        </div>
-        <div class="mb-3">
-            <a href="about.php" class="btn btn-info">Informazioni sulla piattaforma</a>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary display-5">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Classi</h4>
+                        <p class="card-text text-muted">Gestisci l'elenco con tutte le classi e le sezioni scolastiche.</p>
+                        <a href="classes.php" class="btn btn-primary w-100">Gestisci Classi</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary display-5">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Materie & Docenti</h4>
+                        <p class="card-text text-muted">Aggiungi, modifica o rimuovi docenti, materie e laboratori.</p>
+                        <a href="subjects.php" class="btn btn-primary w-100">Gestisci Materie</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary display-5">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Orario Scolastico</h4>
+                        <p class="card-text text-muted">Compila e aggiorna la griglia oraria settimanale per ciascuna classe.</p>
+                        <a href="timetable.php" class="btn btn-primary w-100">Gestisci Orario</a>
+                    </div>
+                </div>
+            </div>
+
+            <?php if (defined('API_URL') && API_URL != ""): ?>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-warning display-5">
+                            <i class="bi bi-cloud-arrow-down"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Importatore</h4>
+                        <p class="card-text text-muted">Importa automaticamente l'orario da un sistema esterno tramite API.</p>
+                        <a href="importer.php" class="btn btn-warning text-dark fw-bold w-100">Importa Orario</a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['auth_type'] === 'local'): ?>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary display-5">
+                            <i class="bi bi-key"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Password</h4>
+                        <p class="card-text text-muted">Modifica la password di accesso del tuo account di amministrazione.</p>
+                        <a href="password.php" class="btn btn-secondary w-100">Cambia Password</a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['auth_type'] === 'local' && $_SESSION['admin'] === 'admin'): ?>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary display-5">
+                            <i class="bi bi-person-lock"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Utenti Admin</h4>
+                        <p class="card-text text-muted">Crea e gestisci gli account con privilegi di amministrazione.</p>
+                        <a href="users.php" class="btn btn-secondary w-100">Gestisci Utenti</a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info display-5">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Informazioni Piattaforma</h4>
+                        <p class="card-text text-muted">Visualizza lo stato del sistema, telemetria PHP e dettagli del database.</p>
+                        <a href="about.php" class="btn btn-info text-white w-100">Informazioni</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
     <!-- Footer -->
     <footer class="text-center text-body-secondary small mt-5 mb-3">
         Copyright &copy; 2025-<?php echo date("Y"); ?>

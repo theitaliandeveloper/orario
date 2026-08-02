@@ -75,42 +75,71 @@ else {
 
 if (strtolower(AUTH_TYPE) == 'local') {
 $csrf_field = csrf_field();
+$error_alert = isset($error) ? "<div class='alert alert-danger mt-3 mb-0' role='alert'><i class='bi bi-exclamation-triangle-fill me-2'></i>{$error}</div>" : "";
 echo <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
   <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../css/admin.css">
-  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
 
-  <div class="navbar">
-    <div class="logo">{$name} - Admin Dashboard{$dev}</div>
-    <div class="links">
-      <a href="../index.php">Torna al sito</a>
+  <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold text-reset" href="../index.php">
+        <i class="bi bi-clock"></i>&nbsp;{$name} - Admin{$dev}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-reset" href="../index.php"><i class="bi bi-house"></i> Torna al sito</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <h2 class="card-title text-center fw-bold mb-4"><i class="bi bi-shield-lock"></i> Accedi</h2>
+            <form method="post">
+              {$csrf_field}
+              <div class="mb-3">
+                <label for="username" class="form-label fw-semibold">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label fw-semibold">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="bi bi-box-arrow-in-right me-1"></i> Login</button>
+            </form>
+            {$error_alert}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Container login -->
-  <div class="login-container">
-    <h1>Accedi</h1>
-    <form method="post">
-      {$csrf_field}
-      <input type="text" name="username" placeholder="Username" required><br>
-      <input type="password" name="password" placeholder="Password" required><br>
-      <button type="submit">Login</button>
-    </form>
-HTML;
-if(isset($error)) echo "<br><div class='error'>$error</div>";
-echo <<<HTML
-</div>
-<p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
-        Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
-        Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
-        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
-</p>
+  <footer class="text-center text-body-secondary small mt-5 mb-3">
+    Copyright &copy; 2025-2026 EmmeV. Rilasciato sotto
+    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+  </footer>
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
 HTML;
@@ -146,11 +175,6 @@ else if (strtolower(AUTH_TYPE) === 'oidc') {
         ?? $userinfo->email
         ?? null;
 
-    // Debug (rimuovi dopo i test) TENERE CODICE PER TEST LOGIN
-    /* var_dump($userinfo);
-    var_dump($username);
-    die(); */
-
     if ($username === null) {
         throw new Exception("Il provider OIDC non ha restituito preferred_username, username o email.");
     }
@@ -169,28 +193,50 @@ else if (strtolower(AUTH_TYPE) === 'oidc') {
 <head>
   <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../css/admin.css">
-  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
 
-  <div class="navbar">
-    <div class="logo">{$name} - Admin Dashboard{$dev}</div>
-    <div class="links">
-      <a href="../index.php">Torna al sito</a>
+  <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold text-reset" href="../index.php">
+        <i class="bi bi-clock"></i>&nbsp;{$name} - Admin{$dev}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-reset" href="../index.php"><i class="bi bi-house"></i> Torna al sito</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6">
+        <div class="alert alert-danger shadow-sm text-center p-4" role="alert">
+          <h4 class="alert-heading fw-bold mb-3"><i class="bi bi-shield-x"></i> Accesso Negato</h4>
+          <p class="mb-0">Non sei autorizzato ad accedere a questa parte del sito.</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Container login -->
-  <div class="login-container">
-    <h1>Accedi</h1>
-<br><div class='error'>Non sei autorizzato ad accedere a questa parte del sito.</div>
-</div>
-<p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
-        Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
-        Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
-        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
-</p>
+  <footer class="text-center text-body-secondary small mt-5 mb-3">
+    Copyright &copy; 2025-2026 EmmeV. Rilasciato sotto
+    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+  </footer>
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
 HTML;
@@ -198,41 +244,57 @@ HTML;
   }
   } catch (Exception $e) {
     http_response_code(500);
-      echo <<<HTML
+    $errDetail = DEV_MODE ? "Errore durante l'autenticazione con OpenID Connect. Assicurati di avere impostato i vari parametri correttamente. Ulteriori dettagli: " . htmlspecialchars((string)$e) : "Errore durante l'autenticazione con OpenID Connect. Contatta l'amministratore del sito.";
+    echo <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
   <title>{$name} - Accedi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../css/admin.css">
-  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
 
-  <div class="navbar">
-    <div class="logo">{$name} - Admin Dashboard{$dev}</div>
-    <div class="links">
-      <a href="../index.php">Torna al sito</a>
+  <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold text-reset" href="../index.php">
+        <i class="bi bi-clock"></i>&nbsp;{$name} - Admin{$dev}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-reset" href="../index.php"><i class="bi bi-house"></i> Torna al sito</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8">
+        <div class="alert alert-danger shadow-sm p-4" role="alert">
+          <h4 class="alert-heading fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill"></i> Errore Autenticazione</h4>
+          <p class="mb-0">{$errDetail}</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Container login -->
-  <div class="login-container">
-    <h1>Accedi</h1>
-HTML;
-if (DEV_MODE) {
-  echo "<br><div class='error'>Errore durante l'autenticazione con OpenID Connect. Assicurati di avere impostato i vari parametri correttamente. Ulteriori dettagli: " . $e . "</div>";
-} else {
-  echo "<br><div class='error'>Errore durante l'autenticazione con OpenID Connect. Contatta l'amministratore del sito.</div>";
-}
-echo <<<HTML
-<p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
-        Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
-        Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
-        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
-</p>
-</div>
-
+  <footer class="text-center text-body-secondary small mt-5 mb-3">
+    Copyright &copy; 2025-2026 EmmeV. Rilasciato sotto
+    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+  </footer>
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
 HTML;
