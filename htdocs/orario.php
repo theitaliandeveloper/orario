@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     try {
         const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`);
         if (!res.ok) {
-            document.getElementById("page-title").innerText = "Errore nel caricamento o non trovato";
+            window.location.href = "404.php";
             return;
         }
         
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         if (VIEW_TYPE === "classe") titleName = data.class_name;
         if (VIEW_TYPE === "docente") titleName = data.teacher;
         if (VIEW_TYPE === "laboratorio") titleName = data.room;
-        document.getElementById("page-title").innerText = `Orario ${VIEW_TYPE} ${titleName}`;
+        document.getElementById("page-title").innerText = `Orario ${VIEW_TYPE}: ${titleName}`;
         document.title = `Orario ${titleName}`;
 
         const timetable = data.timetable;

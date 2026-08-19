@@ -15,12 +15,13 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+require_once __DIR__ . "/../lib/misc.php";
 require_once __DIR__ . "/../lib/db.php";
 $res = $conn->query("SELECT DISTINCT teacher FROM subjects ORDER BY teacher");
 $docenti = [];
 while ($row = $res->fetch_assoc()) {
     if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {
-        $docenti[] = $row['teacher'];
+        $docenti[] = normalise_string($row['teacher']);
     }
 }
 header('Content-Type: application/json; charset=utf-8');

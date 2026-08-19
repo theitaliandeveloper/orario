@@ -12,7 +12,7 @@ http_response_code(404);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
-<body class="bg-body-tertiary">
+<body class="bg-body-tertiary d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-reset" href="index.php">
@@ -33,7 +33,7 @@ http_response_code(404);
             </div>
         </div>
     </nav>
-    <main class="container min-vh-100 d-flex align-items-center justify-content-center">
+    <main class="container d-flex align-items-center justify-content-center flex-grow-1">
         <div class="text-center">
             <h1 class="display-1 fw-bold text-danger">
                 404
