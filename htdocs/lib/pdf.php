@@ -32,30 +32,115 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
         6 => "Sesta ora\n12:50 - 13:50",
     ];
 
+    // CONTROLLO TIPO VALIDO
+    if (!in_array($type, ['classe', 'docente', 'laboratorio'], true)) {
+        http_response_code(400);
+        exit("Errore 400: Tipo di ricerca non valido. Usa: classe, docente o laboratorio");
+    }
+
+    // CONTROLLO DI ESISTENZA DELLE RISORSE
+    $title    = '';
+    $filename = '';
+
     switch ($type) {
         case 'classe':
             $class_id = intval($identifier);
-            $stmt = $conn->prepare("SELECT name FROM classes WHERE id = ? LIMIT 1");
+
+            if ($class_id <= 0) {
+                http_response_code(400);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'ID Classe non fornito'
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $stmt = $conn->prepare("SELECT id, name FROM classes WHERE id = ? LIMIT 1");
             $stmt->bind_param("i", $class_id);
             $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                http_response_code(404);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'ID Classe non trovato',
+                    'id' => $class_id
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $row = $result->fetch_assoc();
             $title    = 'Orario classe ' . $row['name'];
             $filename = 'orario_classe_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $row['name']);
+            $stmt->close();
             break;
 
         case 'docente':
+            if (empty($identifier)) {
+                http_response_code(400);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'Nome docente non fornito'
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $stmt = $conn->prepare("SELECT DISTINCT teacher FROM subjects WHERE teacher = ? LIMIT 1");
+            $stmt->bind_param("s", $identifier);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                http_response_code(404);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'Docente non trovato',
+                    'id' => $identifier
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
             $title    = 'Orario docente ' . $identifier;
             $filename = 'orario_docente_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $identifier);
+            $stmt->close();
             break;
 
         case 'laboratorio':
+            if (empty($identifier)) {
+                http_response_code(400);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'Nome laboratorio non fornito'
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $stmt = $conn->prepare("SELECT DISTINCT room FROM subjects WHERE room = ? LIMIT 1");
+            $stmt->bind_param("s", $identifier);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                http_response_code(404);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'Laboratorio non trovato',
+                    'id' => $identifier
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
             $title    = 'Orario ' . $identifier;
             $filename = 'orario_laboratorio_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $identifier);
+            $stmt->close();
             break;
-
-        default:
-            http_response_code(400);
-            exit('Tipo non valido.');
     }
 
     $data = _loadTimetableData($conn, $type, $identifier, $days, array_keys($hours));
@@ -111,6 +196,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         'lines'   => $teachers,
                         'rooms'   => $rooms,
                     ];
+                    $stmt->close();
                     break;
 
                 // ---- DOCENTE ----
@@ -149,6 +235,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         'lines'   => $classes,
                         'rooms'   => $rooms,
                     ];
+                    $stmt->close();
                     break;
 
                 // ---- AULA ----
@@ -182,6 +269,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         'lines'   => array_keys($pairs),
                         'rooms'   => [],
                     ];
+                    $stmt->close();
                     break;
             }
         }
