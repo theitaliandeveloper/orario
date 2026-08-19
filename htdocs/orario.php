@@ -39,7 +39,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <!DOCTYPE html>
 <html>
 <head>
-<title>Orario | <?= APP_NAME ?> <?= YEAR ?></title>
+<title><?= APP_NAME ?> <?= YEAR ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./css/fonts.css">
@@ -65,7 +65,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
                 <li class="nav-item">
                     <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-house"></i> Home</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" id="pdf-export">
                     <?php if (PDF_EXPORT):?>
                         <a class="nav-link fw-bold text-reset" href="api/getOrario.php?type=<?= urlencode($view) ?>&id=<?= urlencode($id) ?>&dl=1" target="_blank" download><i class="bi bi-file-earmark-pdf"></i> Esporta PDF</a>
                     <?php endif;?>
@@ -75,7 +75,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     </div>
 </nav>
 
-<h1 class="fw-bold text-center mt-5 mb-5" id="page-title">Caricamento Orario...</h1>
+<h1 class="fw-bold text-center mt-5 mb-5" id="page-title">Caricamento in corso...</h1>
 
 <!-- Desktop View -->
 <table class="table table-bordered table-striped-columns table-hover text-center d-none d-md-table" id="desktop-table">
@@ -118,9 +118,17 @@ document.addEventListener("DOMContentLoaded", async function() {
     ];
 
     try {
-        const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`);
+        const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(2000) }); // Prova a caricare i dati con timeout di 2 secondi
         if (!res.ok) {
-            window.location.href = "404.php";
+            if (res.status == 404) {
+                location.replace("404.php");
+            }
+            else {
+                document.getElementById("page-title").innerText = "Errore nel caricamento";
+                document.getElementById("desktop-table").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+                document.getElementById("mobile-view").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+                document.getElementById("pdf-export").innerHTML = "";
+            }
             return;
         }
         
@@ -203,6 +211,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     } catch (e) {
         console.error(e);
         document.getElementById("page-title").innerText = "Errore nel caricamento";
+        document.getElementById("desktop-table").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+        document.getElementById("mobile-view").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+        document.getElementById("pdf-export").innerHTML = "";
     }
 });
 </script>
