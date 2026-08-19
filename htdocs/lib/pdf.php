@@ -33,7 +33,7 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
     ];
 
     switch ($type) {
-        case 'class':
+        case 'classe':
             $class_id = intval($identifier);
             $stmt = $conn->prepare("SELECT name FROM classes WHERE id = ? LIMIT 1");
             $stmt->bind_param("i", $class_id);
@@ -43,12 +43,12 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
             $filename = 'orario_classe_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $row['name']);
             break;
 
-        case 'teacher':
+        case 'docente':
             $title    = 'Orario docente ' . $identifier;
             $filename = 'orario_docente_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $identifier);
             break;
 
-        case 'room':
+        case 'laboratorio':
             $title    = 'Orario ' . $identifier;
             $filename = 'orario_laboratorio_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $identifier);
             break;
@@ -76,7 +76,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
             switch ($type) {
 
                 // ---- CLASSE ----
-                case 'class':
+                case 'classe':
                     $class_id = intval($identifier);
                     $stmt = $conn->prepare("
                         SELECT subjects.name, subjects.teacher, subjects.room
@@ -114,7 +114,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                     break;
 
                 // ---- DOCENTE ----
-                case 'teacher':
+                case 'docente':
                     $stmt = $conn->prepare("
                         SELECT subjects.name, classes.name AS class_name, subjects.room
                         FROM timetable
@@ -152,7 +152,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                     break;
 
                 // ---- AULA ----
-                case 'room':
+                case 'laboratorio':
                     $stmt = $conn->prepare("
                         SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
                         FROM timetable
@@ -214,15 +214,6 @@ class _OrarioPDF extends Fpdf\Fpdf
         $this->Cell(0, 5, mb_convert_encoding(APP_NAME . ' - Copyright (C) 2025-' . date('Y') . ' EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
     }
 }
-
-
-/*function joinList(array $arr): string
-{
-    if (empty($arr)) return '';
-    if (count($arr) === 1) return $arr[0];
-    $last = array_pop($arr);
-    return implode(', ', $arr) . ' e ' . $last;
-}*/
 
 
 function _renderPDF(string $title, string $filename, array $days, array $hours, array $data): void
@@ -320,6 +311,14 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
         $pdf->Ln($rowH);
     }
 
-    $pdf->Output('D', $filename);
+    $pdf->Output('I', $filename);
     exit;
+}
+
+function joinList(array $arr): string
+{
+    if (empty($arr)) return '';
+    if (count($arr) === 1) return $arr[0];
+    $last = array_pop($arr);
+    return implode(', ', $arr) . ' e ' . $last;
 }

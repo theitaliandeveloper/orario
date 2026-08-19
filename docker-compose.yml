@@ -18,7 +18,6 @@ services:
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
-      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
       MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---

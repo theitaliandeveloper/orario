@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/lib/db.php";
+require_once __DIR__ . "/lib/variables.php";
 http_response_code(404);
 ?>
 <!DOCTYPE html>

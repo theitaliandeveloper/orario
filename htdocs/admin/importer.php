@@ -1,19 +1,6 @@
-<?php
+﻿<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/db.php";
 require_once __DIR__ . "/../lib/csrf.php";
@@ -21,215 +8,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $now = time();
-if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
     session_unset();
     session_destroy();
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); exit; }
-$message = "";
-$messageType = "";
-
-// Gestione importazione
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
-    $classe_codice = trim($_POST['classe_codice']);
-    $classe_id = intval($_POST['classe_id']);
-    
-    if (empty($classe_codice) || $classe_id === 0) {
-        $message = "Compila tutti i campi obbligatori.";
-        $messageType = "error";
-    } else {
-        try {
-            // Controlli vari a prova di ignorante
-            $baseUrl = rtrim(API_URL, '/');
-            $suffix = str_ends_with($baseUrl, "/classe") ? "" : "/classe";
-            $url = $baseUrl . $suffix . "?classe=" . urlencode($classe_codice);
-            // Chiama l'API Node.js
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            
-            if ($httpCode !== 200) {
-                throw new Exception("Errore nella chiamata API (HTTP $httpCode)");
-            }
-            
-            $data = json_decode($response, true);
-            
-            // Verifica che il dato sia un array (nuovo formato)
-            if (!$data || !is_array($data)) {
-                throw new Exception("Formato JSON non valido o vuoto");
-            }
-            
-            // Cancella l'orario esistente per questa classe
-            $stmt = $conn->prepare("DELETE FROM timetable WHERE class_id = ?");
-            $stmt->bind_param("i", $classe_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            $inserimenti = 0;
-            $materie_create = [];
-            
-            // --- INIZIO LOGICA NUOVO FORMATO ---
-            
-            // Ciclo sui GIORNI (Indice 0 = Lunedì, 1 = Martedì...)
-            foreach ($data as $dayIndex => $dayHours) {
-                $giorno = $dayIndex + 1; // Convertiamo 0-based in 1-based per il DB
-                
-                // Ciclo sulle ORE del giorno (Indice 0 = 1a ora, 1 = 2a ora...)
-                foreach ($dayHours as $hourIndex => $lessons) {
-                    $ora = $hourIndex + 1; // Convertiamo 0-based in 1-based (8:00 = 1)
-                    
-                    // Se l'ora è vuota [], saltiamo
-                    if (empty($lessons)) {
-                        continue;
-                    }
-
-                    // Ciclo sulle LEZIONI nell'ora (solitamente 1, ma supporta eventuali compresentze strutturali)
-                    foreach ($lessons as $lessonData) {
-                        
-                        // Mappatura dei campi dal NUOVO formato
-                        // Ignoriamo 'materia' lunga e usiamo la short, ignoriamo bgcolor, etc.
-                        $materia = $lessonData['materia_short'];
-                        
-                        // 'aule' è già un array nel nuovo formato ["Aula x", "Aula y"]
-                        $laboratori = isset($lessonData['aule']) ? $lessonData['aule'] : [];
-                        
-                        // 'docenti' è un oggetto {"NOME": "NOME"}, prendiamo le chiavi
-                        $docenti = [];
-                        if (isset($lessonData['docenti']) && is_array($lessonData['docenti'])) {
-                            $docenti = array_keys($lessonData['docenti']);
-                        }
-
-                        // Se non ci sono docenti o materia, saltiamo
-                        if (empty($materia) || count($docenti) === 0) {
-                            continue;
-                        }
-
-                        // --- DA QUI IN POI LA TUA LOGICA ORIGINALE RIMANE INVARIATA ---
-                        
-                        // Caso 1: Stesso numero di docenti e laboratori → associazione 1:1
-                        if (count($docenti) === count($laboratori) && count($laboratori) > 0) {
-                            foreach ($docenti as $idx => $docente) {
-                                $laboratorio = $laboratori[$idx];
-                                
-                                // Cerca/crea materia
-                                $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                                $stmt->bind_param("sss", $materia, $docente, $laboratorio);
-                                $stmt->execute();
-                                $result = $stmt->get_result();
-                                
-                                if ($result->num_rows > 0) {
-                                    $subject_id = $result->fetch_assoc()['id'];
-                                } else {
-                                    $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                    $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
-                                    $stmt2->execute();
-                                    $subject_id = $conn->insert_id;
-                                    $stmt2->close();
-                                    $materie_create[] = "$materia ($docente - $laboratorio)";
-                                }
-                                $stmt->close();
-                                
-                                // Inserisci in timetable
-                                $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                                $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
-                                $stmt3->execute();
-                                $stmt3->close();
-                                $inserimenti++;
-                            }
-                        }
-                        // Caso 2: Più docenti, un laboratorio (o nessuno) → stesso laboratorio per tutti
-                        else if (count($laboratori) <= 1) {
-                            $laboratorio = count($laboratori) > 0 ? $laboratori[0] : null;
-                            
-                            foreach ($docenti as $docente) {
-                                // Cerca/crea materia
-                                if ($laboratorio) {
-                                    $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                                    $stmt->bind_param("sss", $materia, $docente, $laboratorio);
-                                } else {
-                                    $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND (room IS NULL OR room = '')");
-                                    $stmt->bind_param("ss", $materia, $docente);
-                                }
-                                
-                                $stmt->execute();
-                                $result = $stmt->get_result();
-                                
-                                if ($result->num_rows > 0) {
-                                    $subject_id = $result->fetch_assoc()['id'];
-                                } else {
-                                    $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                    $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
-                                    $stmt2->execute();
-                                    $subject_id = $conn->insert_id;
-                                    $stmt2->close();
-                                    $materie_create[] = "$materia ($docente" . ($laboratorio ? " - $laboratorio" : "") . ")";
-                                }
-                                $stmt->close();
-                                
-                                // Inserisci in timetable
-                                $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                                $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
-                                $stmt3->execute();
-                                $stmt3->close();
-                                $inserimenti++;
-                            }
-                        }
-                        // Caso 3: Più laboratori che docenti → usa il primo laboratorio per tutti
-                        else {
-                            $laboratorio = $laboratori[0];
-                            
-                            foreach ($docenti as $docente) {
-                                $stmt = $conn->prepare("SELECT id FROM subjects WHERE name = ? AND teacher = ? AND room = ?");
-                                $stmt->bind_param("sss", $materia, $docente, $laboratorio);
-                                $stmt->execute();
-                                $result = $stmt->get_result();
-                                
-                                if ($result->num_rows > 0) {
-                                    $subject_id = $result->fetch_assoc()['id'];
-                                } else {
-                                    $stmt2 = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-                                    $stmt2->bind_param("sss", $materia, $docente, $laboratorio);
-                                    $stmt2->execute();
-                                    $subject_id = $conn->insert_id;
-                                    $stmt2->close();
-                                    $materie_create[] = "$materia ($docente - $laboratorio)";
-                                }
-                                $stmt->close();
-                                
-                                $stmt3 = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-                                $stmt3->bind_param("isii", $classe_id, $giorno, $ora, $subject_id);
-                                $stmt3->execute();
-                                $stmt3->close();
-                                $inserimenti++;
-                            }
-                        }
-                    } // Fine foreach lessons
-                } // Fine foreach ore
-            } // Fine foreach giorni
-            
-            $message = "Importazione completata con successo!<br>";
-            $message .= "- Inserite $inserimenti ore di lezione<br>";
-            if (count($materie_create) > 0) {
-                $message .= "- Create " . count($materie_create) . " nuove materie";
-            }
-            $messageType = "success";
-            
-        } catch (Exception $e) {
-            $message = "Errore durante l'importazione: " . htmlspecialchars($e->getMessage());
-            $messageType = "error";
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -240,9 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
     <link rel="stylesheet" href="../css/fonts.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <script>
+        const CSRF_TOKEN = "<?php echo generate_csrf_token(); ?>";
+    </script>
 </head>
 <body>
-
   <!-- Navbar -->
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
       <div class="container-fluid">
@@ -274,13 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
         <a href="index.php" class="btn btn-outline-info"><i class="bi bi-arrow-left"></i> Torna alla Dashboard</a>
     </div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-<?php echo ($messageType === 'error') ? 'danger' : 'success'; ?> alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-<?php echo ($messageType === 'error') ? 'exclamation-triangle-fill' : 'check-circle-fill'; ?> me-2"></i>
-            <?php echo $message; ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+    <!-- Alert placeholder -->
+    <div id="alert-container"></div>
 
     <div class="alert alert-warning shadow-sm mb-4" role="alert">
         <h5 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle me-1"></i> Attenzione!</h5>
@@ -294,18 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
             <i class="bi bi-gear-fill me-1"></i> Configura Importazione
         </div>
         <div class="card-body p-4">
-            <form method="POST" class="row g-3">
-                <?php echo csrf_field(); ?>
+            <form id="import-form" class="row g-3">
                 <div class="col-12 col-md-6">
                     <label for="classe_id" class="form-label fw-semibold">Classe di destinazione *</label>
                     <select name="classe_id" id="classe_id" class="form-select" required>
                         <option value="">-- Seleziona classe --</option>
-                        <?php
-                        $res = $conn->query("SELECT * FROM classes ORDER BY name ASC");
-                        while ($row = $res->fetch_assoc()) {
-                            echo "<option value='{$row['id']}'>{$row['name']}</option>";
-                        }
-                        ?>
                     </select>
                     <div class="form-text text-muted">Classe nel tuo database dove importare l'orario</div>
                 </div>
@@ -318,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
                 </div>
 
                 <div class="col-12 mt-4 text-end">
-                    <button type="submit" name="import" class="btn btn-warning text-dark fw-bold px-4 py-2">
+                    <button type="submit" id="btn-submit" class="btn btn-warning text-dark fw-bold px-4 py-2">
                         <i class="bi bi-cloud-arrow-down-fill me-1"></i> Importa Orario
                     </button>
                 </div>
@@ -352,12 +130,94 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['import'])) {
 </div>
 
 <footer class="text-center text-body-secondary small mt-5 mb-3">
-    Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto
-    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    Copyright &copy; 2025-<?php echo date("Y"); ?>
+    EmmeV. Rilasciato sotto
+    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
+        target="_blank"
+        class="fw-bold text-decoration-none">
+        Licenza GNU AGPL 3.0
+    </a>.
     <br>
-    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+    Codice sorgente disponibile su
+    <a href="https://git.vichingo455.com/emmev-code/orario"
+        target="_blank"
+        class="fw-bold text-decoration-none">
+        Gitea
+    </a>.
 </footer>
-<script src="../js/theme.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+    const classSelect = document.getElementById("classe_id");
+    const importForm = document.getElementById("import-form");
+    const btnSubmit = document.getElementById("btn-submit");
+    const alertContainer = document.getElementById("alert-container");
+
+    function showAlert(message, type = "success") {
+        alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+    }
+
+    // Load classes dropdown
+    try {
+        const res = await fetch("../api/admin/classes.php");
+        if (!res.ok) throw new Error("Errore nel caricamento delle classi.");
+        const classes = await res.json();
+        
+        classes.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.id;
+            opt.innerText = c.name;
+            classSelect.appendChild(opt);
+        });
+    } catch (e) {
+        showAlert(e.message, "danger");
+    }
+
+    // Handle Form Submit
+    importForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        const classe_id = parseInt(classSelect.value);
+        const classe_codice = document.getElementById("classe_codice").value.trim();
+
+        if (!classe_id || !classe_codice) return;
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Importazione in corso...`;
+        alertContainer.innerHTML = "";
+
+        try {
+            const res = await fetch("../api/admin/importer.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": CSRF_TOKEN
+                },
+                body: JSON.stringify({ classe_id, classe_codice })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Errore durante l'importazione.");
+
+            let msg = `<strong>Importazione completata con successo!</strong><br>`;
+            msg += `- Inserite ${data.inserimenti} ore di lezione.<br>`;
+            if (data.materie_create_count > 0) {
+                msg += `- Create ${data.materie_create_count} nuove materie.`;
+            }
+            showAlert(msg, "success");
+            importForm.reset();
+
+        } catch (e) {
+            showAlert(e.message, "danger");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = `<i class="bi bi-cloud-arrow-down-fill me-1"></i> Importa Orario`;
+        }
+    });
+});
+</script>
 </body>
 </html>

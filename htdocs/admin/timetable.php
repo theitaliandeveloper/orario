@@ -1,19 +1,6 @@
-<?php
+﻿<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/db.php";
 require_once __DIR__ . "/../lib/csrf.php";
@@ -21,69 +8,17 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $now = time();
-if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
     session_unset();
     session_destroy();
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 
-// --- Recupera tutte le materie ---
-$subjects = [];
-$res = $conn->query("SELECT * FROM subjects ORDER BY name ASC");
-while ($r = $res->fetch_assoc()) {
-    $label = $r['name'];
-    if (!empty($r['teacher'])) $label .= " ({$r['teacher']})";
-    if (!empty($r['room']))    $label .= " ({$r['room']})";
-    $subjects[] = ['id' => $r['id'], 'label' => $label];
-}
-
-// --- Salvataggio orario ---
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['class_id']) && isset($_POST['subject'])) {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) { die("Token CSRF non valido."); }
-    $class_id = intval($_POST['class_id']);
-    if ($class_id > 0) {
-        // Cancella solo l'orario di questa classe
-        $stmt_del = $conn->prepare("DELETE FROM timetable WHERE class_id=?");
-        $stmt_del->bind_param("i", $class_id);
-        $stmt_del->execute();
-
-        $stmt_ins = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
-        
-        foreach ($_POST['subject'] as $day => $hours) {
-            foreach ($hours as $hour => $sub_ids) {
-                foreach ($sub_ids as $subject_id) {
-                    $subject_id = intval($subject_id);
-                    if (!empty($subject_id)) {
-                        $stmt_ins->bind_param("isii", $class_id, $day, $hour, $subject_id);
-                        $stmt_ins->execute();
-                    }
-                }
-            }
-        }
-
-        header("Location: timetable.php?class_id=$class_id&saved=1");
-        exit;
-    }
-}
-
-// --- Selezione classe corrente ---
-$class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
-
-// --- Precaricamento dati orario ---
-$preselectedData = [];
-if ($class_id > 0) {
-    $stmt = $conn->prepare("SELECT * FROM timetable WHERE class_id=?");
-    $stmt->bind_param("i", $class_id);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    while ($r = $res->fetch_assoc()) {
-        $preselectedData[$r['day']][$r['hour']][] = $r['subject_id'];
-    }
-}
+$initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
 ?>
 <!DOCTYPE html>
 <html>
@@ -97,6 +32,10 @@ if ($class_id > 0) {
     <style>
         .subject-row select { min-width: 140px; }
     </style>
+    <script>
+        const CSRF_TOKEN = "<?php echo generate_csrf_token(); ?>";
+        const INITIAL_CLASS_ID = <?php echo $initial_class_id; ?>;
+    </script>
 </head>
 <body>
   <!-- Navbar -->
@@ -130,39 +69,26 @@ if ($class_id > 0) {
         <a href="index.php" class="btn btn-outline-info"><i class="bi bi-arrow-left"></i> Torna alla Dashboard</a>
     </div>
 
-    <?php if (isset($_GET['saved'])): ?>
-        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> Orario salvato con successo!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+    <!-- Alert container -->
+    <div id="alert-container"></div>
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-body-tertiary fw-bold">
             <i class="bi bi-funnel me-1"></i> Editor Classe
         </div>
         <div class="card-body">
-            <form method="POST" autocomplete="off">
-                <?php echo csrf_field(); ?>
-                <div class="row align-items-center g-3">
-                    <div class="col-12 col-md-4 col-lg-3">
-                        <label for="class_id_select" class="form-label fw-bold mb-0">Seleziona la classe:</label>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <select id="class_id_select" name="class_id" class="form-select" required onchange="window.location='timetable.php?class_id='+this.value;">
-                            <option value="" disabled <?= $class_id === 0 ? 'selected' : '' ?>>-- Scegli una classe --</option>
-                            <?php
-                            $res = $conn->query("SELECT * FROM classes ORDER BY name ASC");
-                            while ($r = $res->fetch_assoc()) {
-                                $selected = ($class_id == $r['id']) ? 'selected' : '';
-                                echo "<option value='{$r['id']}' $selected>{$r['name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+            <div class="row align-items-center g-3 mb-4">
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label for="class_id_select" class="form-label fw-bold mb-0">Seleziona la classe:</label>
                 </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <select id="class_id_select" name="class_id" class="form-select" required>
+                        <option value="" disabled selected>-- Scegli una classe --</option>
+                    </select>
+                </div>
+            </div>
 
-                <?php if ($class_id > 0): ?> 
+            <form id="timetable-form" class="d-none">
                 <hr class="my-4">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center mb-4">
@@ -177,35 +103,8 @@ if ($class_id > 0) {
                                 <th>Sabato</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php
-                            $days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-                            for ($hour = 1; $hour <= 6; $hour++) {
-                                echo "<tr>";
-                                echo "<td class='fw-bold bg-body-tertiary'>{$hour}ª ora</td>";
-                                foreach ($days as $day) {
-                                    $preselected = $preselectedData[$day][$hour] ?? [''];
-                                    echo "<td class='p-2'>";
-                                    echo "<div class='subject-container' data-day='$day' data-hour='$hour'>";
-                                    foreach ($preselected as $subject_id) {
-                                        echo "<div class='subject-row d-flex align-items-center justify-content-center gap-1 mb-1'>";
-                                        echo "<select name='subject[$day][$hour][]' class='form-select form-select-sm'>";
-                                        echo "<option value=''>-- Nessuna --</option>";
-                                        foreach ($subjects as $s) {
-                                            $sel = ($subject_id == $s['id']) ? 'selected' : '';
-                                            echo "<option value='{$s['id']}' $sel>" . htmlspecialchars($s['label']) . "</option>";
-                                        }
-                                        echo "</select>";
-                                        echo "<button type='button' class='btn btn-sm btn-outline-danger remove-subject py-0 px-2' title='Rimuovi materia'>−</button>";
-                                        echo "</div>";
-                                    }
-                                    echo "<button type='button' class='btn btn-sm btn-outline-success add-subject py-0 px-2 mt-1' title='Aggiungi compresenza / materia'>+</button>";
-                                    echo "</div>";
-                                    echo "</td>";
-                                }
-                                echo "</tr>";
-                            }
-                            ?>
+                        <tbody id="timetable-grid">
+                            <!-- JS Will Render Grid here -->
                         </tbody>
                     </table>
                 </div>
@@ -213,42 +112,204 @@ if ($class_id > 0) {
                 <div class="text-end">
                     <button type="submit" class="btn btn-primary px-4 fw-bold"><i class="bi bi-floppy me-1"></i> Salva orario</button>
                 </div>
-                <?php endif; ?>
             </form>
         </div>
     </div>
 </div>
 
 <footer class="text-center text-body-secondary small mt-5 mb-3">
-    Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto
-    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    Copyright &copy; 2025-<?php echo date("Y"); ?>
+    EmmeV. Rilasciato sotto
+    <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
+        target="_blank"
+        class="fw-bold text-decoration-none">
+        Licenza GNU AGPL 3.0
+    </a>.
     <br>
-    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+    Codice sorgente disponibile su
+    <a href="https://git.vichingo455.com/emmev-code/orario"
+        target="_blank"
+        class="fw-bold text-decoration-none">
+        Gitea
+    </a>.
 </footer>
 
-<script src="../js/theme.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-
 <script>
-document.addEventListener('click', function(e){
-    if(e.target.classList.contains('add-subject')){
-        const container = e.target.closest('.subject-container');
-        const firstRow = container.querySelector('.subject-row');
-        const clone = firstRow.cloneNode(true);
-        clone.querySelector('select').value = '';
-        container.insertBefore(clone, e.target);
+document.addEventListener("DOMContentLoaded", async function() {
+    const classSelect = document.getElementById("class_id_select");
+    const timetableForm = document.getElementById("timetable-form");
+    const timetableGrid = document.getElementById("timetable-grid");
+    const alertContainer = document.getElementById("alert-container");
+
+    const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    
+    let subjects = [];
+
+    function showAlert(message, type = "success") {
+        alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
     }
 
-    if(e.target.classList.contains('remove-subject')){
-        const container = e.target.closest('.subject-container');
-        const rows = container.querySelectorAll('.subject-row');
-        if(rows.length > 1){
-            e.target.closest('.subject-row').remove();
+    // Load initial data (classes and subjects)
+    try {
+        const [classesRes, subjectsRes] = await Promise.all([
+            fetch("../api/admin/classes.php"),
+            fetch("../api/admin/subjects.php")
+        ]);
+
+        if (!classesRes.ok || !subjectsRes.ok) throw new Error("Errore nel caricamento delle configurazioni.");
+
+        const classes = await classesRes.json();
+        subjects = await subjectsRes.json();
+
+        classes.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.id;
+            opt.innerText = c.name;
+            classSelect.appendChild(opt);
+        });
+
+        if (INITIAL_CLASS_ID > 0) {
+            classSelect.value = INITIAL_CLASS_ID;
+            loadClassTimetable(INITIAL_CLASS_ID);
+        }
+
+    } catch (e) {
+        showAlert(e.message, "danger");
+    }
+
+    // Class selection changed
+    classSelect.addEventListener("change", function() {
+        const classId = this.value;
+        if (classId) {
+            loadClassTimetable(classId);
+            // Optional: update URL query parameter quietly
+            history.pushState(null, "", `timetable.php?class_id=${classId}`);
         } else {
-            rows[0].querySelector('select').value = '';
+            timetableForm.classList.add("d-none");
+        }
+    });
+
+    async function loadClassTimetable(classId) {
+        try {
+            timetableForm.classList.add("d-none");
+            const res = await fetch(`../api/admin/timetable.php?class_id=${classId}`);
+            if (!res.ok) throw new Error("Errore nel caricamento dell'orario.");
+            const preselected = await res.json(); // Array of {day, hour, subject_id}
+
+            // Build grid
+            let html = "";
+            for (let hour = 1; hour <= 6; hour++) {
+                html += `<tr>`;
+                html += `<td class="fw-bold bg-body-tertiary">${hour}ª ora</td>`;
+                days.forEach(day => {
+                    const cellSubjects = preselected.filter(item => item.day === day && item.hour === hour);
+                    
+                    // We must have at least one slot select element
+                    const slots = cellSubjects.length > 0 ? cellSubjects.map(s => s.subject_id) : [0];
+
+                    html += `<td class="p-2">
+                        <div class="subject-container" data-day="${day}" data-hour="${hour}">`;
+                    
+                    slots.forEach(subId => {
+                        html += buildSelectRow(subId);
+                    });
+
+                    html += `<button type="button" class="btn btn-sm btn-outline-success add-subject py-0 px-2 mt-1" title="Aggiungi compresenza / materia">+</button>
+                        </div>
+                    </td>`;
+                });
+                html += `</tr>`;
+            }
+
+            timetableGrid.innerHTML = html;
+            timetableForm.classList.remove("d-none");
+
+        } catch (e) {
+            showAlert(e.message, "danger");
         }
     }
+
+    function buildSelectRow(selectedId = 0) {
+        let html = `<div class="subject-row d-flex align-items-center justify-content-center gap-1 mb-1">
+            <select class="form-select form-select-sm">
+                <option value="">-- Nessuna --</option>`;
+        subjects.forEach(s => {
+            const label = s.name + (s.teacher ? ` (${s.teacher})` : "") + (s.room ? ` (${s.room})` : "");
+            const sel = s.id === selectedId ? "selected" : "";
+            html += `<option value="${s.id}" ${sel}>${escapeHtml(label)}</option>`;
+        });
+        html += `</select>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-subject py-0 px-2" title="Rimuovi materia">−</button>
+        </div>`;
+        return html;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    // Dynamic grid interactions
+    document.addEventListener("click", function(e) {
+        if (e.target.classList.contains("add-subject")) {
+            const container = e.target.closest(".subject-container");
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = buildSelectRow(0);
+            container.insertBefore(tempDiv.firstChild, e.target);
+        }
+
+        if (e.target.classList.contains("remove-subject")) {
+            const container = e.target.closest(".subject-container");
+            const rows = container.querySelectorAll(".subject-row");
+            if (rows.length > 1) {
+                e.target.closest(".subject-row").remove();
+            } else {
+                rows[0].querySelector("select").value = "";
+            }
+        }
+    });
+
+    // Form Submit (Save Timetable)
+    timetableForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const classId = classSelect.value;
+        if (!classId) return;
+
+        const assignments = [];
+        document.querySelectorAll(".subject-container").forEach(container => {
+            const day = container.getAttribute("data-day");
+            const hour = parseInt(container.getAttribute("data-hour"));
+            container.querySelectorAll(".subject-row select").forEach(select => {
+                const val = parseInt(select.value);
+                if (val) {
+                    assignments.push({ day, hour, subject_id: val });
+                }
+            });
+        });
+
+        try {
+            const res = await fetch("../api/admin/timetable.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": CSRF_TOKEN
+                },
+                body: JSON.stringify({ class_id: classId, assignments })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Errore durante il salvataggio.");
+
+            showAlert("Orario salvato con successo!", "success");
+            loadClassTimetable(classId);
+        } catch (e) {
+            showAlert(e.message, "danger");
+        }
+    });
 });
 </script>
+<script src="../js/theme.js"></script>
 </body>
 </html>

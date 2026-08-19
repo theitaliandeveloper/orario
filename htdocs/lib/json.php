@@ -21,15 +21,6 @@ require_once __DIR__ . "/variables.php";
 
 function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
 {
-    if (!OPEN_DATA) {
-        http_response_code(403);
-        if (DEV_MODE) {
-            echo "Non puoi accedere a questo JSON perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
-        } else {
-            echo "Non puoi accedere a questo JSON perchè non hai i permessi necessari per farlo.";
-        }
-        exit;
-    }
 
     header('Content-Type: application/json; charset=utf-8');
 
