@@ -16,6 +16,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
+// Configurazione dell'utente
+require __DIR__ . "/../config/config.php";
+
 // Queste variabili sono per sviluppatori
 if (!defined('VERSION')) {
     define('VERSION', 'dev'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
@@ -30,9 +33,6 @@ if (!DEV_MODE) {
 } else {
     ini_set('error_reporting','E_ALL'); // In development show everything
 }
-
-// Configurazione dell'utente
-require __DIR__ . "/../config/config.php";
 
 // Controllo sulle variabili impostate dall'utente (quelle critiche)
 if (!defined('PHP_MAX_RAM')) {
