@@ -113,57 +113,6 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
             Gitea
         </a>.
     </footer>
-    <script>
-    document.addEventListener("DOMContentLoaded", async function() {
-
-        // Fetch Classi
-        try {
-            const res = await fetch("api/getClassi.php");
-            const classi = await res.json();
-            
-            const years = { 1: "Prime", 2: "Seconde", 3: "Terze", 4: "Quarte", 5: "Quinte" };
-            let html = "";
-            for (let y = 1; y <= 5; y++) {
-                const filtered = classi.filter(c => c.name.startsWith(y.toString()));
-                html += `<div class="col-12 col-sm-6 col-md-4 col-lg"><div class="card h-100"><div class="card-body">
-                         <h5 class="card-title">${years[y]}</h5><div class="list-group list-group-flush">`;
-                filtered.forEach(c => {
-                    html += `<a href="orario.php?view=classe&id=${c.id}" class="list-group-item list-group-item-action">${c.name}</a>`;
-                });
-                html += `</div></div></div></div>`;
-            }
-            document.getElementById("classes-container").innerHTML = html;
-        } catch (e) { console.error("Error loading classes", e); }
-
-        // Fetch Docenti
-        try {
-            const res = await fetch("api/getDocenti.php");
-            const docenti = await res.json();
-            let html = "";
-            docenti.forEach(d => {
-                html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3"><div class="card h-100 shadow-sm"><div class="card-body text-center">
-                         <h5 class="card-title">${d}</h5>
-                         <a href="orario.php?view=docente&id=${encodeURIComponent(d)}" class="btn btn-outline-info btn-sm">Visualizza orario</a>
-                         </div></div></div>`;
-            });
-            document.getElementById("teachers-container").innerHTML = html;
-        } catch (e) { console.error("Error loading teachers", e); }
-
-        // Fetch Labs
-        try {
-            const res = await fetch("api/getLabs.php");
-            const labs = await res.json();
-            let html = "";
-            labs.forEach(l => {
-                html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3"><div class="card h-100 shadow-sm"><div class="card-body text-center">
-                         <h5 class="card-title">${l}</h5>
-                         <a href="orario.php?view=laboratorio&id=${encodeURIComponent(l)}" class="btn btn-outline-info btn-sm">Visualizza orario</a>
-                         </div></div></div>`;
-            });
-            document.getElementById("labs-container").innerHTML = html;
-        } catch (e) { console.error("Error loading labs", e); }
-    });
-    </script>
     <script src="js/index.js"></script>
     <script src="js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>

@@ -1,3 +1,72 @@
+/*
+Orario Scuola, Copyright (C) 2025-2026 EmmeV.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/.
+*/
+
+// Caricamento homepage
+document.addEventListener("DOMContentLoaded", async function() {
+
+        // Fetch Classi
+        try {
+            const res = await fetch("api/getClassi.php");
+            const classi = await res.json();
+            
+            const years = { 1: "Prime", 2: "Seconde", 3: "Terze", 4: "Quarte", 5: "Quinte" };
+            let html = "";
+            for (let y = 1; y <= 5; y++) {
+                const filtered = classi.filter(c => c.name.startsWith(y.toString()));
+                html += `<div class="col-12 col-sm-6 col-md-4 col-lg"><div class="card h-100"><div class="card-body">
+                         <h5 class="card-title">${years[y]}</h5><div class="list-group list-group-flush">`;
+                filtered.forEach(c => {
+                    html += `<a href="orario.php?view=classe&id=${c.id}" class="list-group-item list-group-item-action">${c.name}</a>`;
+                });
+                html += `</div></div></div></div>`;
+            }
+            document.getElementById("classes-container").innerHTML = html;
+        } catch (e) { console.error("Error loading classes", e); }
+
+        // Fetch Docenti
+        try {
+            const res = await fetch("api/getDocenti.php");
+            const docenti = await res.json();
+            let html = "";
+            docenti.forEach(d => {
+                html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3"><div class="card h-100 shadow-sm"><div class="card-body text-center">
+                         <h5 class="card-title">${d}</h5>
+                         <a href="orario.php?view=docente&id=${encodeURIComponent(d)}" class="btn btn-outline-info btn-sm">Visualizza orario</a>
+                         </div></div></div>`;
+            });
+            document.getElementById("teachers-container").innerHTML = html;
+        } catch (e) { console.error("Error loading teachers", e); }
+
+        // Fetch Labs
+        try {
+            const res = await fetch("api/getLabs.php");
+            const labs = await res.json();
+            let html = "";
+            labs.forEach(l => {
+                html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3"><div class="card h-100 shadow-sm"><div class="card-body text-center">
+                         <h5 class="card-title">${l}</h5>
+                         <a href="orario.php?view=laboratorio&id=${encodeURIComponent(l)}" class="btn btn-outline-info btn-sm">Visualizza orario</a>
+                         </div></div></div>`;
+            });
+            document.getElementById("labs-container").innerHTML = html;
+        } catch (e) { console.error("Error loading labs", e); }
+    });
+
+// Ricerca
 document.getElementById("searchBox").addEventListener("input", function () {
     const query = this.value.toLowerCase().trim();
 
