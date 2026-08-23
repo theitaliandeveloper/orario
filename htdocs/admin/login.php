@@ -66,12 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(AUTH_TYPE) == 'local') {
     }
 }
 $name = APP_NAME;
-if (DEV_MODE){
-  $dev = " - SVILUPPO";
-}
-else {
-  $dev = "";
-}
+$year = YEAR;
 
 if (strtolower(AUTH_TYPE) == 'local') {
 $csrf_field = csrf_field();
@@ -92,7 +87,7 @@ echo <<<HTML
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold text-reset" href="../index.php">
-        <i class="bi bi-clock"></i>&nbsp;{$name} - Admin{$dev}
+        <i class="bi bi-clock"></i>&nbsp; {$name} {$year} - Admin
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
         <span class="navbar-toggler-icon"></span>
@@ -203,7 +198,7 @@ else if (strtolower(AUTH_TYPE) === 'oidc') {
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold text-reset" href="../index.php">
-        <i class="bi bi-clock"></i>&nbsp;{$name} - Admin{$dev}
+        <i class="bi bi-clock"></i>&nbsp; {$name} {$year} - Admin
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
         <span class="navbar-toggler-icon"></span>
@@ -261,7 +256,7 @@ HTML;
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold text-reset" href="../index.php">
-        <i class="bi bi-clock"></i>&nbsp;{$name} - Admin{$dev}
+        <i class="bi bi-clock"></i>&nbsp; {$name} {$year} - Admin
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
         <span class="navbar-toggler-icon"></span>
