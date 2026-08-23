@@ -73,7 +73,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       <div class="card-body">
         <form id="add-class-form" class="row g-3 align-items-center">
           <div class="col-12 col-sm-8 col-md-9">
-            <input type="text" class="form-control" name="name" id="class-name-input" placeholder="Nome Classe (es. 1A, 3BIN, 5AINF)" required>
+            <input type="text" class="form-control" name="name" id="class-name-input" placeholder="Nome Classe (es. 1A, 3BIN, 5ACM)" required>
           </div>
           <div class="col-12 col-sm-4 col-md-3">
             <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Aggiungi</button>

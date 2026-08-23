@@ -112,7 +112,7 @@ else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); 
             <ol class="mb-4">
                 <li>Assicurati che il server Node.js sia avviato (<code>node server.js</code>)</li>
                 <li>Seleziona la classe di destinazione nel tuo database</li>
-                <li>Inserisci il codice della classe nel sistema esterno (es: 3BIN, 1A, 5AINF)</li>
+                <li>Inserisci il codice della classe nel sistema esterno (es: 3BIN, 1A, 5ACM)</li>
                 <li>Clicca su "Importa Orario"</li>
                 <li>Il sistema cancellerà l'orario esistente e importerà i nuovi dati</li>
             </ol>
@@ -218,5 +218,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     });
 });
 </script>
+<script src="../js/theme.js"></script>
 </body>
 </html>
