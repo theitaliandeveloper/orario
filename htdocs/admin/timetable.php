@@ -44,7 +44,6 @@ $initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
           <a class="navbar-brand fw-bold text-reset" href="index.php">
               <i class="bi bi-clock"></i>&nbsp;
               <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
-              <?php if (DEV_MODE) echo " - SVILUPPO"; ?>
               <?php if (isset($_SESSION['admin']) && MAINTENANCE) echo " - MANUTENZIONE"; ?>
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
