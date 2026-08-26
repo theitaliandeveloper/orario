@@ -17,7 +17,12 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/misc.php";
 require_once __DIR__ . "/../lib/db.php";
-$res = $conn->query("SELECT DISTINCT teacher FROM subjects ORDER BY teacher");
+$res = $conn->query(
+    "SELECT DISTINCT t.name AS teacher
+     FROM teachers t
+     INNER JOIN timetable_lesson_teachers tlt ON tlt.teacher_id = t.id
+     ORDER BY t.name"
+);
 $docenti = [];
 while ($row = $res->fetch_assoc()) {
     if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {

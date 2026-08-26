@@ -72,17 +72,9 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       <div class="card-body">
         <form id="edit-subject-form" class="row g-3">
           <input type="hidden" name="id" id="edit-id-input">
-          <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-8">
             <label class="form-label fw-semibold">Materia</label>
             <input type="text" class="form-control" name="name" id="edit-name-input" required placeholder="Materia (es. Informatica)">
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Docente</label>
-            <input type="text" class="form-control" name="teacher" id="edit-teacher-input" required placeholder="Docente (Cognome Nome)">
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Laboratorio / Aula</label>
-            <input type="text" class="form-control" name="room" id="edit-room-input" placeholder="Laboratorio (opzionale)">
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salva modifiche</button>
@@ -99,14 +91,8 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       </div>
       <div class="card-body">
         <form id="add-subject-form" class="row g-3">
-          <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-8">
             <input type="text" class="form-control" name="name" id="add-name-input" placeholder="Materia (es. Informatica)" required>
-          </div>
-          <div class="col-12 col-md-4">
-            <input type="text" class="form-control" name="teacher" id="add-teacher-input" placeholder="Docente (Cognome Nome)" required>
-          </div>
-          <div class="col-12 col-md-4">
-            <input type="text" class="form-control" name="room" id="add-room-input" placeholder="Laboratorio (opzionale)">
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Aggiungi Materia</button>
@@ -116,7 +102,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
     </div>
 
     <!-- Elenco Materie -->
-    <h2 class="h4 fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-1"></i> Elenco Materie e Docenti</h2>
+    <h2 class="h4 fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-1"></i> Elenco Materie</h2>
     <div id="subjects-container">
         <div class="alert alert-secondary text-center my-4">Caricamento in corso...</div>
     </div>
@@ -167,47 +153,25 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                   return;
               }
 
-              // Group by subject name
-              const grouped = {};
-              allSubjects.forEach(s => {
-                  if (!grouped[s.name]) grouped[s.name] = [];
-                  grouped[s.name].push(s);
-              });
-
-              let html = "";
-              for (const subjectName in grouped) {
-                  html += `<div class="card shadow-sm border-0 mb-3">
-                      <div class="card-header bg-body-tertiary fw-bold text-primary-emphasis border-start border-primary border-4 fs-5">
-                          ${subjectName}
-                      </div>
-                      <div class="card-body">
-                          <div class="row g-3">`;
-                  
-                  grouped[subjectName].forEach(row => {
-                      html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                          <div class="card h-100 border bg-body-tertiary">
-                              <div class="card-body d-flex flex-column justify-content-between p-3">
-                                  <div>
-                                      <div class="fw-bold text-secondary mb-1">
-                                          <i class="bi bi-person-badge me-1"></i> ${row.teacher}
-                                      </div>
-                                      ${row.room ? `<span class="badge border border-info text-info"><i class="bi bi-door-open me-1"></i> ${row.room}</span>` : ''}
-                                  </div>
-                                  <div class="mt-3 d-flex gap-2 justify-content-end">
-                                      <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${row.id}">
-                                          <i class="bi bi-pencil"></i> Modifica
-                                      </button>
-                                      <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${row.id}" data-teacher="${row.teacher}" data-name="${row.name}">
-                                          <i class="bi bi-trash"></i> Elimina
-                                      </button>
-                                  </div>
+              let html = `<div class="card shadow-sm border-0"><div class="card-body"><div class="row g-3">`;
+              allSubjects.forEach(row => {
+                  html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                      <div class="card h-100 border bg-body-tertiary">
+                          <div class="card-body d-flex flex-column justify-content-between p-3">
+                              <div class="fw-semibold fs-5 text-primary-emphasis">${row.name}</div>
+                              <div class="mt-3 d-flex gap-2 justify-content-end">
+                                  <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${row.id}">
+                                      <i class="bi bi-pencil"></i> Modifica
+                                  </button>
+                                  <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${row.id}" data-name="${row.name}">
+                                      <i class="bi bi-trash"></i> Elimina
+                                  </button>
                               </div>
                           </div>
-                      </div>`;
-                  });
-                  
-                  html += `</div></div></div>`;
-              }
+                      </div>
+                  </div>`;
+              });
+              html += `</div></div></div>`;
               container.innerHTML = html;
           } catch (e) {
               container.innerHTML = `<div class="alert alert-danger text-center my-4">${e.message}</div>`;
@@ -218,8 +182,6 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       addForm.addEventListener("submit", async function(e) {
           e.preventDefault();
           const name = document.getElementById("add-name-input").value.trim();
-          const teacher = document.getElementById("add-teacher-input").value.trim();
-          const room = document.getElementById("add-room-input").value.trim();
 
           try {
               const res = await fetch("../api/admin/subjects.php", {
@@ -228,7 +190,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                       "Content-Type": "application/json",
                       "X-CSRF-Token": CSRF_TOKEN
                   },
-                  body: JSON.stringify({ name, teacher, room })
+                  body: JSON.stringify({ name })
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante il salvataggio.");
@@ -253,8 +215,6 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
           document.getElementById("edit-id-input").value = subject.id;
           document.getElementById("edit-id-label").innerText = subject.id;
           document.getElementById("edit-name-input").value = subject.name;
-          document.getElementById("edit-teacher-input").value = subject.teacher;
-          document.getElementById("edit-room-input").value = subject.room || "";
 
           editCard.classList.remove("d-none");
           editCard.scrollIntoView({ behavior: "smooth" });
@@ -271,8 +231,6 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
           e.preventDefault();
           const id = parseInt(document.getElementById("edit-id-input").value);
           const name = document.getElementById("edit-name-input").value.trim();
-          const teacher = document.getElementById("edit-teacher-input").value.trim();
-          const room = document.getElementById("edit-room-input").value.trim();
 
           try {
               const res = await fetch("../api/admin/subjects.php", {
@@ -281,7 +239,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                       "Content-Type": "application/json",
                       "X-CSRF-Token": CSRF_TOKEN
                   },
-                  body: JSON.stringify({ id, name, teacher, room })
+                  body: JSON.stringify({ id, name })
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'aggiornamento.");
@@ -302,9 +260,8 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 
           const id = btn.getAttribute("data-id");
           const name = btn.getAttribute("data-name");
-          const teacher = btn.getAttribute("data-teacher");
 
-          if (!confirm(`Sei sicuro di voler eliminare l'insegnamento di ${name} per ${teacher}?`)) return;
+          if (!confirm(`Sei sicuro di voler eliminare la materia ${name}?`)) return;
 
           try {
               const res = await fetch(`../api/admin/subjects.php?id=${id}`, {

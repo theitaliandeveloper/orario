@@ -35,7 +35,7 @@ if ($res = $conn->query("SELECT COUNT(*) as cnt FROM subjects")) {
 }
 
 $timetableCount = 0;
-if ($res = $conn->query("SELECT COUNT(*) as cnt FROM timetable")) {
+if ($res = $conn->query("SELECT COUNT(*) as cnt FROM timetable_lessons")) {
     $timetableCount = (int)$res->fetch_assoc()['cnt'];
 }
 

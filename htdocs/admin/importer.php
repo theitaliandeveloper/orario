@@ -119,7 +119,7 @@ else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); 
             <h5 class="fw-bold text-primary mb-3">Note tecniche</h5>
             <ul class="mb-0">
                 <li>Ogni slot orario viene inserito UNA SOLA VOLTA nella tabella timetable</li>
-                <li>Le informazioni su docenti e aule dall'API vengono estratte ma non salvate (la tabella timetable contiene solo: class_id, day, hour, subject_id)</li>
+                <li>Le informazioni su docenti e aule dall'API vengono salvate nel nuovo modello normalizzato (slot, lezioni, docenti e aule).</li>
                 <li>Le materie vengono create automaticamente se non esistono già</li>
                 <li>Gli slot vuoti nell'orario vengono saltati</li>
             </ul>

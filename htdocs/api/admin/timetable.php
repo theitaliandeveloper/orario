@@ -17,20 +17,32 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . "/auth_check.php";
+require_once __DIR__ . "/../../lib/timetable_model.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $class_id = intval($_GET['class_id'] ?? 0);
     $timetable = [];
     if ($class_id > 0) {
-        $stmt = $conn->prepare("SELECT day, hour, subject_id FROM timetable WHERE class_id=?");
+        $stmt = $conn->prepare(
+            "SELECT ts.day, ts.hour, tl.subject_id
+             FROM timetable_slots ts
+             INNER JOIN timetable_lessons tl ON tl.slot_id = ts.id
+             WHERE ts.class_id = ?
+             ORDER BY ts.day ASC, ts.hour ASC, tl.sort_order ASC, tl.id ASC"
+        );
         $stmt->bind_param("i", $class_id);
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
+            $dayLabel = timetable_day_to_label((int)$row['day']);
+            if ($dayLabel === null) {
+                continue;
+            }
+
             $timetable[] = [
-                'day' => $row['day'],
+                'day' => $dayLabel,
                 'hour' => (int)$row['hour'],
-                'subject_id' => (int)$row['subject_id']
+                'subject_id' => (int)($row['subject_id'] ?? 0)
             ];
         }
         $stmt->close();
@@ -50,28 +62,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $conn->begin_transaction();
     try {
-        $stmt_del = $conn->prepare("DELETE FROM timetable WHERE class_id=?");
+        $stmt_del = $conn->prepare("DELETE FROM timetable_slots WHERE class_id=?");
         $stmt_del->bind_param("i", $class_id);
         $stmt_del->execute();
         $stmt_del->close();
         
         $assignments = $input['assignments'] ?? [];
         if (!empty($assignments)) {
-            $stmt_ins = $conn->prepare("INSERT INTO timetable (class_id, day, hour, subject_id) VALUES (?, ?, ?, ?)");
+            $slotOrder = [];
             foreach ($assignments as $a) {
-                $day = $a['day'] ?? '';
+                $dayLabel = trim((string)($a['day'] ?? ''));
                 $hour = intval($a['hour'] ?? 0);
-                $subject_id = intval($a['subject_id'] ?? 0);
-                if (!empty($day) && $hour > 0 && $subject_id > 0) {
-                    $stmt_ins->bind_param("isii", $class_id, $day, $hour, $subject_id);
-                    $stmt_ins->execute();
+                $subjectId = intval($a['subject_id'] ?? 0);
+                $day = timetable_label_to_day($dayLabel);
+                if ($day !== null && $hour > 0 && $subjectId > 0) {
+                    $slotId = ensure_timetable_slot($conn, $class_id, $day, $hour);
+                    $slotKey = $day . ':' . $hour;
+                    $sortOrder = $slotOrder[$slotKey] ?? 0;
+                    create_lesson($conn, $slotId, $subjectId, [], [], $sortOrder, false);
+                    $slotOrder[$slotKey] = $sortOrder + 1;
                 }
             }
-            $stmt_ins->close();
         }
         $conn->commit();
         echo json_encode(["success" => true]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $conn->rollback();
         http_response_code(500);
         echo json_encode(["error" => "Errore durante il salvataggio: " . $e->getMessage()]);

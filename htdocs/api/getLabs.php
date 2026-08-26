@@ -16,7 +16,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/db.php";
-$res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room IS NOT NULL AND room != '' ORDER BY room");
+$res = $conn->query(
+    "SELECT DISTINCT r.name AS room
+     FROM rooms r
+     INNER JOIN timetable_lesson_rooms tlr ON tlr.room_id = r.id
+     ORDER BY r.name"
+);
 $rooms = [];
 while ($row = $res->fetch_assoc()) {
     $rooms[] = $row['room'];

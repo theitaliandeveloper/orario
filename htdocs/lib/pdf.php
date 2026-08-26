@@ -18,11 +18,12 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . "/variables.php";
+require_once __DIR__ . "/timetable_model.php";
 
 
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
 {
-    $days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+    $days = array_values(timetable_day_map());
     $hours = [
         1 => "Prima ora\n7:50 - 8:50",
         2 => "Seconda ora\n8:50 - 9:45",
@@ -89,7 +90,7 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
                 exit;
             }
 
-            $stmt = $conn->prepare("SELECT DISTINCT teacher FROM subjects WHERE teacher = ? LIMIT 1");
+            $stmt = $conn->prepare("SELECT 1 FROM teachers WHERE name = ? LIMIT 1");
             $stmt->bind_param("s", $identifier);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -121,7 +122,7 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
                 exit;
             }
 
-            $stmt = $conn->prepare("SELECT DISTINCT room FROM subjects WHERE room = ? LIMIT 1");
+            $stmt = $conn->prepare("SELECT 1 FROM rooms WHERE name = ? LIMIT 1");
             $stmt->bind_param("s", $identifier);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -154,7 +155,10 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
     foreach ($days as $d) {
         $data[$d] = [];
-        $escaped_d = $conn->real_escape_string($d);
+        $dayNum = timetable_label_to_day($d);
+        if ($dayNum === null) {
+            continue;
+        }
 
         foreach ($hournums as $hnum) {
 
@@ -164,14 +168,16 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                 case 'classe':
                     $class_id = intval($identifier);
                     $stmt = $conn->prepare("
-                        SELECT subjects.name, subjects.teacher, subjects.room
-                        FROM timetable
-                        LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                        WHERE timetable.class_id = ?
-                          AND timetable.day = ?
-                          AND timetable.hour = ?
+                                                SELECT tl.id AS lesson_id, s.name AS subject_name
+                                                FROM timetable_slots ts
+                                                INNER JOIN timetable_lessons tl ON tl.slot_id = ts.id
+                                                LEFT JOIN subjects s ON s.id = tl.subject_id
+                                                WHERE ts.class_id = ?
+                                                    AND ts.day = ?
+                                                    AND ts.hour = ?
+                                                ORDER BY tl.sort_order ASC, tl.id ASC
                     ");
-                    $stmt->bind_param("isi", $class_id, $d, $hnum);
+                                        $stmt->bind_param("iii", $class_id, $dayNum, $hnum);
                     $stmt->execute();
                     $q = $stmt->get_result();
 
@@ -180,15 +186,43 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                     $rooms    = [];
 
                     while ($row = $q->fetch_assoc()) {
-                        if ($subject === null) {
-                            $subject = $row['name'];
+                        if ($subject === null && !empty($row['subject_name'])) {
+                            $subject = $row['subject_name'];
                         }
-                        if (!empty($row['teacher']) && !in_array($row['teacher'], $teachers)) {
-                            $teachers[] = $row['teacher'];
+
+                        $lessonId = (int)$row['lesson_id'];
+
+                        $tstmt = $conn->prepare(
+                            "SELECT t.name
+                             FROM timetable_lesson_teachers tlt
+                             INNER JOIN teachers t ON t.id = tlt.teacher_id
+                             WHERE tlt.lesson_id = ?"
+                        );
+                        $tstmt->bind_param("i", $lessonId);
+                        $tstmt->execute();
+                        $tres = $tstmt->get_result();
+                        while ($trow = $tres->fetch_assoc()) {
+                            if (!in_array($trow['name'], $teachers, true)) {
+                                $teachers[] = $trow['name'];
+                            }
                         }
-                        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
-                            $rooms[] = $row['room'];
+                        $tstmt->close();
+
+                        $rstmt = $conn->prepare(
+                            "SELECT r.name
+                             FROM timetable_lesson_rooms tlr
+                             INNER JOIN rooms r ON r.id = tlr.room_id
+                             WHERE tlr.lesson_id = ?"
+                        );
+                        $rstmt->bind_param("i", $lessonId);
+                        $rstmt->execute();
+                        $rres = $rstmt->get_result();
+                        while ($rrow = $rres->fetch_assoc()) {
+                            if (!in_array($rrow['name'], $rooms, true)) {
+                                $rooms[] = $rrow['name'];
+                            }
                         }
+                        $rstmt->close();
                     }
 
                     $data[$d][$hnum] = [
@@ -202,15 +236,19 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                 // ---- DOCENTE ----
                 case 'docente':
                     $stmt = $conn->prepare("
-                        SELECT subjects.name, classes.name AS class_name, subjects.room
-                        FROM timetable
-                        LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                        LEFT JOIN classes  ON timetable.class_id   = classes.id
-                        WHERE subjects.teacher = ?
-                        AND timetable.day    = ?
-                        AND timetable.hour   = ?
+                        SELECT tl.id AS lesson_id, s.name AS subject_name, c.name AS class_name
+                        FROM teachers t
+                        INNER JOIN timetable_lesson_teachers tlt ON tlt.teacher_id = t.id
+                        INNER JOIN timetable_lessons tl ON tl.id = tlt.lesson_id
+                        INNER JOIN timetable_slots ts ON ts.id = tl.slot_id
+                        INNER JOIN classes c ON c.id = ts.class_id
+                        LEFT JOIN subjects s ON s.id = tl.subject_id
+                        WHERE t.name = ?
+                          AND ts.day = ?
+                          AND ts.hour = ?
+                        ORDER BY tl.sort_order ASC, tl.id ASC
                     ");
-                    $stmt->bind_param("ssi", $identifier, $d, $hnum);
+                    $stmt->bind_param("sii", $identifier, $dayNum, $hnum);
                     $stmt->execute();
                     $q = $stmt->get_result();
 
@@ -219,15 +257,29 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                     $rooms   = [];
 
                     while ($row = $q->fetch_assoc()) {
-                        if ($subject === null) {
-                            $subject = $row['name'];
+                        if ($subject === null && !empty($row['subject_name'])) {
+                            $subject = $row['subject_name'];
                         }
-                        if (!empty($row['class_name']) && !in_array($row['class_name'], $classes)) {
+                        if (!empty($row['class_name']) && !in_array($row['class_name'], $classes, true)) {
                             $classes[] = $row['class_name'];
                         }
-                        if (!empty($row['room']) && !in_array($row['room'], $rooms)) {
-                            $rooms[] = $row['room'];
+
+                        $lessonId = (int)$row['lesson_id'];
+                        $rstmt = $conn->prepare(
+                            "SELECT r.name
+                             FROM timetable_lesson_rooms tlr
+                             INNER JOIN rooms r ON r.id = tlr.room_id
+                             WHERE tlr.lesson_id = ?"
+                        );
+                        $rstmt->bind_param("i", $lessonId);
+                        $rstmt->execute();
+                        $rres = $rstmt->get_result();
+                        while ($rrow = $rres->fetch_assoc()) {
+                            if (!empty($rrow['name']) && !in_array($rrow['name'], $rooms, true)) {
+                                $rooms[] = $rrow['name'];
+                            }
                         }
+                        $rstmt->close();
                     }
 
                     $data[$d][$hnum] = [
@@ -241,15 +293,19 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                 // ---- AULA ----
                 case 'laboratorio':
                     $stmt = $conn->prepare("
-                        SELECT subjects.name AS subject_name, subjects.teacher, classes.name AS class_name
-                        FROM timetable
-                        LEFT JOIN subjects ON timetable.subject_id = subjects.id
-                        LEFT JOIN classes  ON timetable.class_id   = classes.id
-                        WHERE subjects.room = ?
-                          AND timetable.day = ?
-                          AND timetable.hour = ?
+                                                SELECT tl.id AS lesson_id, s.name AS subject_name, c.name AS class_name
+                                                FROM rooms r
+                                                INNER JOIN timetable_lesson_rooms tlr ON tlr.room_id = r.id
+                                                INNER JOIN timetable_lessons tl ON tl.id = tlr.lesson_id
+                                                INNER JOIN timetable_slots ts ON ts.id = tl.slot_id
+                                                INNER JOIN classes c ON c.id = ts.class_id
+                                                LEFT JOIN subjects s ON s.id = tl.subject_id
+                                                WHERE r.name = ?
+                                                    AND ts.day = ?
+                                                    AND ts.hour = ?
+                                                ORDER BY tl.sort_order ASC, tl.id ASC
                     ");
-                    $stmt->bind_param("ssi", $identifier, $d, $hnum);
+                                        $stmt->bind_param("sii", $identifier, $dayNum, $hnum);
                     $stmt->execute();
                     $q = $stmt->get_result();
 
@@ -257,11 +313,32 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                     $pairs   = [];
 
                     while ($row = $q->fetch_assoc()) {
-                        if ($subject === null) {
+                        if ($subject === null && !empty($row['subject_name'])) {
                             $subject = $row['subject_name'];
                         }
-                        $pair = $row['class_name'] . ' (' . $row['teacher'] . ')';
-                        $pairs[$pair] = true;
+
+                        $lessonId = (int)$row['lesson_id'];
+                        $tstmt = $conn->prepare(
+                            "SELECT t.name
+                             FROM timetable_lesson_teachers tlt
+                             INNER JOIN teachers t ON t.id = tlt.teacher_id
+                             WHERE tlt.lesson_id = ?"
+                        );
+                        $tstmt->bind_param("i", $lessonId);
+                        $tstmt->execute();
+                        $tres = $tstmt->get_result();
+
+                        $hasTeacher = false;
+                        while ($trow = $tres->fetch_assoc()) {
+                            $hasTeacher = true;
+                            $pair = $row['class_name'] . ' (' . $trow['name'] . ')';
+                            $pairs[$pair] = true;
+                        }
+                        $tstmt->close();
+
+                        if (!$hasTeacher) {
+                            $pairs[$row['class_name']] = true;
+                        }
                     }
 
                     $data[$d][$hnum] = [

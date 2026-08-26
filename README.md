@@ -51,14 +51,14 @@ php generate_hash.php <password>
 cd orario\utils
 C:\xampp\php\php.exe generate_hash.php <password>
 ```
-- Modifica quindi questa linea nel file ``schema.sql``, sostituendo l'hash predefinito con quello generato prima:
+- Modifica quindi questa linea nel file ``new_schema.sql``, sostituendo l'hash predefinito con quello generato prima:
 ```sql
 VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi');
 ```
-5. **Importa il file ``schema.sql`` nel tuo database MySQL**
+5. **Importa il file ``new_schema.sql`` nel tuo database MySQL**
 - Esempio Debian:
 ```bash
-mysql -u root -p < orario/schema.sql
+mysql -u root -p < orario/new_schema.sql
 ```
 
 6. **Crea il file ``config/config.php`` inserendo i valori richiesti**
@@ -133,6 +133,39 @@ if (!defined('API_URL')) {
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
 
+## Note API amministrative (schema nuovo)
+- ``GET /api/admin/subjects.php`` restituisce l'elenco materie nel formato: ``[{"id": 1, "name": "Informatica"}]``
+- ``POST /api/admin/subjects.php`` accetta payload JSON: ``{"name": "Informatica"}``
+- ``PUT /api/admin/subjects.php`` accetta payload JSON: ``{"id": 1, "name": "Informatica"}``
+- L'associazione docenti/aule è legata alle lezioni importate/salvate in orario, non a una tabella separata di assegnazioni.
+
+## Migrazione da schema legacy (opzionale)
+### Metodo consigliato (PHP, in-place)
+Questo metodo migra lo schema direttamente nel database configurato in ``config/config.php`` senza creare un nuovo database.
+
+Comando:
+```bash
+php utils/migrate_in_place.php --yes
+```
+
+Cosa fa lo script:
+- rinomina automaticamente le tabelle legacy ``classes``, ``subjects``, ``timetable`` in copie ``*_legacy_YYYYmmdd_HHMMSS``
+- crea le nuove tabelle normalizzate nello stesso database
+- migra dati di classi, materie, docenti, aule, slot, lezioni e relazioni
+- lascia le tabelle legacy per rollback manuale
+
+### Metodo alternativo (SQL)
+Se hai dati esistenti nello schema vecchio, puoi usare ``migration_legacy_to_new.sql``.
+
+Passi consigliati:
+1. Esegui backup completo del database.
+2. Rinomina le tabelle legacy:
+```sql
+RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
+```
+3. Importa ``new_schema.sql``.
+4. Esegui ``migration_legacy_to_new.sql`` per popolare il nuovo modello.
+
 ## Installazione con Docker
 1. Installa Curl, Git e Docker
 ```bash
@@ -141,7 +174,7 @@ curl -fsSL https://get.docker.com | bash
 ```
 2. Scarica i file richiesti:
 ```bash
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/new_schema.sql
 wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose.yml
 ```
 

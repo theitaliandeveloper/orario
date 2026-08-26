@@ -19,14 +19,14 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 require_once __DIR__ . "/auth_check.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $res = $conn->query("SELECT id, name, teacher, room FROM subjects ORDER BY name ASC");
+    $res = $conn->query("SELECT id, name FROM subjects ORDER BY name ASC");
     $subjects = [];
     while ($row = $res->fetch_assoc()) {
         $subjects[] = [
             'id' => (int)$row['id'],
             'name' => $row['name'],
-            'teacher' => $row['teacher'],
-            'room' => $row['room']
+            'teacher' => '',
+            'room' => ''
         ];
     }
     echo json_encode($subjects);
@@ -36,17 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $name = trim($input['name'] ?? $_POST['name'] ?? '');
-    $teacher = trim($input['teacher'] ?? $_POST['teacher'] ?? '');
-    $room = trim($input['room'] ?? $_POST['room'] ?? '');
 
     if (empty($name)) {
         http_response_code(400);
-        echo json_encode(["error" => "Nome materia obbligatorio."]);
+        echo json_encode(["error" => "Materia obbligatoria."]);
         exit;
     }
 
-    $stmt = $conn->prepare("INSERT INTO subjects (name, teacher, room) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $name, $teacher, $room);
+    $stmt = $conn->prepare("INSERT INTO subjects (name) VALUES (?)");
+    $stmt->bind_param("s", $name);
     if ($stmt->execute()) {
         echo json_encode(["success" => true, "id" => $conn->insert_id]);
     } else {
@@ -60,17 +58,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
     $id = intval($input['id'] ?? 0);
     $name = trim($input['name'] ?? '');
-    $teacher = trim($input['teacher'] ?? '');
-    $room = trim($input['room'] ?? '');
 
     if ($id <= 0 || empty($name)) {
         http_response_code(400);
-        echo json_encode(["error" => "ID e nome materia sono obbligatori."]);
+        echo json_encode(["error" => "ID e materia sono obbligatori."]);
         exit;
     }
 
-    $stmt = $conn->prepare("UPDATE subjects SET name=?, teacher=?, room=? WHERE id=?");
-    $stmt->bind_param("sssi", $name, $teacher, $room, $id);
+    $stmt = $conn->prepare("UPDATE subjects SET name = ? WHERE id = ?");
+    $stmt->bind_param("si", $name, $id);
     if ($stmt->execute()) {
         echo json_encode(["success" => true]);
     } else {
@@ -85,6 +81,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     if ($id <= 0) {
         http_response_code(400);
         echo json_encode(["error" => "ID materia non valido."]);
+        exit;
+    }
+
+    $used = $conn->prepare("SELECT 1 FROM timetable_lessons WHERE subject_id = ? LIMIT 1");
+    $used->bind_param("i", $id);
+    $used->execute();
+    $inUse = $used->get_result()->num_rows > 0;
+    $used->close();
+
+    if ($inUse) {
+        http_response_code(409);
+        echo json_encode(["error" => "Materia in uso nell'orario: rimuovila prima dalle classi."]);
         exit;
     }
 
