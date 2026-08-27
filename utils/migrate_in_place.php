@@ -209,8 +209,8 @@ try {
                 FROM `{$subjectsLegacy}`
                 WHERE teacher IS NOT NULL
                   AND TRIM(teacher) <> ''
-                  AND teacher <> 'No Lezione'
-                  AND teacher <> 'sconosciuto'");
+                  AND teacher COLLATE utf8mb4_unicode_ci <> 'No Lezione'
+                  AND teacher COLLATE utf8mb4_unicode_ci <> 'sconosciuto'");
 
     run($conn, "INSERT INTO rooms (name)
                 SELECT DISTINCT room
@@ -233,7 +233,7 @@ try {
                     t.hour
                 FROM `{$timetableLegacy}` t
                 INNER JOIN `{$classesLegacy}` cl ON cl.id = t.class_id
-                INNER JOIN classes c ON c.name = cl.name
+                INNER JOIN classes c ON c.name COLLATE utf8mb4_unicode_ci = cl.name COLLATE utf8mb4_unicode_ci
                 WHERE t.hour >= 1
                   AND t.subject_id IS NOT NULL
                   AND CASE t.day
@@ -258,9 +258,9 @@ try {
                     ) - 1
                 FROM `{$timetableLegacy}` t
                 INNER JOIN `{$classesLegacy}` cl ON cl.id = t.class_id
-                INNER JOIN classes c ON c.name = cl.name
+                INNER JOIN classes c ON c.name COLLATE utf8mb4_unicode_ci = cl.name COLLATE utf8mb4_unicode_ci
                 INNER JOIN `{$subjectsLegacy}` sl ON sl.id = t.subject_id
-                INNER JOIN subjects s ON s.name = sl.name
+                INNER JOIN subjects s ON s.name COLLATE utf8mb4_unicode_ci = sl.name COLLATE utf8mb4_unicode_ci
                 INNER JOIN timetable_slots ts
                     ON ts.class_id = c.id
                    AND ts.hour = t.hour
@@ -300,9 +300,9 @@ try {
                     sl.room
                 FROM `{$timetableLegacy}` t
                 INNER JOIN `{$classesLegacy}` cl ON cl.id = t.class_id
-                INNER JOIN classes c ON c.name = cl.name
+                INNER JOIN classes c ON c.name COLLATE utf8mb4_unicode_ci = cl.name COLLATE utf8mb4_unicode_ci
                 INNER JOIN `{$subjectsLegacy}` sl ON sl.id = t.subject_id
-                INNER JOIN subjects s ON s.name = sl.name
+                INNER JOIN subjects s ON s.name COLLATE utf8mb4_unicode_ci = sl.name COLLATE utf8mb4_unicode_ci
                 INNER JOIN timetable_slots ts
                     ON ts.class_id = c.id
                    AND ts.hour = t.hour
@@ -360,7 +360,7 @@ try {
                     lm.lesson_id,
                     t.id
                 FROM tmp_lesson_map lm
-                INNER JOIN teachers t ON t.name = lm.teacher_name
+                INNER JOIN teachers t ON t.name COLLATE utf8mb4_unicode_ci = lm.teacher_name COLLATE utf8mb4_unicode_ci
                 WHERE lm.teacher_name IS NOT NULL
                   AND TRIM(lm.teacher_name) <> ''
                   AND lm.teacher_name <> 'No Lezione'
@@ -371,7 +371,7 @@ try {
                     lm.lesson_id,
                     r.id
                 FROM tmp_lesson_map lm
-                INNER JOIN rooms r ON r.name = lm.room_name
+                INNER JOIN rooms r ON r.name COLLATE utf8mb4_unicode_ci = lm.room_name COLLATE utf8mb4_unicode_ci
                 WHERE lm.room_name IS NOT NULL
                   AND TRIM(lm.room_name) <> ''");
 

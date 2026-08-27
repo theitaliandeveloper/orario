@@ -34,13 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         try {
-            foreach ($legacyNames as $current => $backup) {
-                if (schema_table_exists($conn, $backup)) {
-                    throw new RuntimeException("La tabella {$backup} esiste già.");
+            $legacyTablesAlreadyRenamed = schema_table_exists($conn, 'classes_legacy')
+                && schema_table_exists($conn, 'subjects_legacy')
+                && schema_table_exists($conn, 'timetable_legacy');
+
+            if (!$legacyTablesAlreadyRenamed) {
+                foreach ($legacyNames as $current => $backup) {
+                    if (schema_table_exists($conn, $backup)) {
+                        throw new RuntimeException("La tabella {$backup} esiste già.");
+                    }
                 }
+
+                $conn->query('RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy');
             }
 
-            $conn->query('RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy');
+            $conn->query('ALTER TABLE classes_legacy CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+            $conn->query('ALTER TABLE subjects_legacy CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+            $conn->query('ALTER TABLE timetable_legacy CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
 
             $schemaPath = __DIR__ . '/../../schema.sql';
             $migrationPath = __DIR__ . '/../../migration_legacy_to_new.sql';
@@ -51,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $schemaSql = file_get_contents($schemaPath);
             $schemaSql = preg_replace('/CREATE DATABASE IF NOT EXISTS school_timetable.*?;\s*/is', '', $schemaSql);
             $schemaSql = preg_replace('/USE school_timetable\s*;\s*/i', '', $schemaSql);
+            $schemaSql = preg_replace('/CREATE TABLE admin\s*\(.*?\);\s*/is', '', $schemaSql);
             if ($schemaSql === null || !$conn->multi_query($schemaSql)) {
                 throw new RuntimeException('Impossibile creare il nuovo schema.');
             }

@@ -15,10 +15,15 @@ function schema_table_exists(mysqli $conn, string $table): bool
 
 function legacy_schema_detected(mysqli $conn): bool
 {
-    return schema_table_exists($conn, 'classes')
+    $legacyTables = schema_table_exists($conn, 'classes_legacy')
+        && schema_table_exists($conn, 'subjects_legacy')
+        && schema_table_exists($conn, 'timetable_legacy');
+
+    $oldTables = schema_table_exists($conn, 'classes')
         && schema_table_exists($conn, 'subjects')
-        && schema_table_exists($conn, 'timetable')
-        && !schema_table_exists($conn, 'timetable_slots');
+        && schema_table_exists($conn, 'timetable');
+
+    return ($legacyTables || $oldTables) && !schema_table_exists($conn, 'timetable_slots');
 }
 
 function normalized_schema_detected(mysqli $conn): bool

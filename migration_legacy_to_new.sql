@@ -32,8 +32,8 @@ SELECT DISTINCT s.teacher
 FROM subjects_legacy s
 WHERE s.teacher IS NOT NULL
   AND TRIM(s.teacher) <> ''
-  AND s.teacher <> 'No Lezione'
-  AND s.teacher <> 'sconosciuto';
+  AND s.teacher COLLATE utf8mb4_unicode_ci <> 'No Lezione'
+  AND s.teacher COLLATE utf8mb4_unicode_ci <> 'sconosciuto';
 
 -- 4) Aule/Laboratori
 INSERT INTO rooms (name)
@@ -53,7 +53,7 @@ CREATE TEMPORARY TABLE tmp_class_map (
 INSERT INTO tmp_class_map (old_class_id, new_class_id)
 SELECT cl.id, c.id
 FROM classes_legacy cl
-INNER JOIN classes c ON c.name = cl.name;
+INNER JOIN classes c ON c.name COLLATE utf8mb4_unicode_ci = cl.name COLLATE utf8mb4_unicode_ci;
 
 -- 6) Mapping materie legacy -> nuova materia (per nome)
 DROP TEMPORARY TABLE IF EXISTS tmp_subject_map;
@@ -66,7 +66,7 @@ CREATE TEMPORARY TABLE tmp_subject_map (
 INSERT INTO tmp_subject_map (old_subject_id, new_subject_id)
 SELECT sl.id, MIN(s.id) AS new_subject_id
 FROM subjects_legacy sl
-INNER JOIN subjects s ON s.name = sl.name
+INNER JOIN subjects s ON s.name COLLATE utf8mb4_unicode_ci = sl.name COLLATE utf8mb4_unicode_ci
 GROUP BY sl.id;
 
 -- 7) Crea snapshot lezioni legacy con giorno numerico
@@ -239,7 +239,7 @@ SELECT
   lnk.lesson_id,
   t.id
 FROM tmp_legacy_new_lessons lnk
-INNER JOIN teachers t ON t.name = lnk.teacher_name
+INNER JOIN teachers t ON t.name COLLATE utf8mb4_unicode_ci = lnk.teacher_name COLLATE utf8mb4_unicode_ci
 WHERE lnk.teacher_name IS NOT NULL
   AND TRIM(lnk.teacher_name) <> ''
   AND lnk.teacher_name <> 'No Lezione'
@@ -251,7 +251,7 @@ SELECT
   lnk.lesson_id,
   r.id
 FROM tmp_legacy_new_lessons lnk
-INNER JOIN rooms r ON r.name = lnk.room_name
+INNER JOIN rooms r ON r.name COLLATE utf8mb4_unicode_ci = lnk.room_name COLLATE utf8mb4_unicode_ci
 WHERE lnk.room_name IS NOT NULL
   AND TRIM(lnk.room_name) <> '';
 
