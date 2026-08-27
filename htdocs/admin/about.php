@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     const envBody = document.getElementById("env-body");
 
     try {
-        const res = await fetch("../api/admin/about.php");
+        const res = await fetch("../api/admin/about.php",{ signal: AbortSignal.timeout(2000) });
         if (!res.ok) throw new Error("Errore nel caricamento delle informazioni.");
         const d = await res.json();
 

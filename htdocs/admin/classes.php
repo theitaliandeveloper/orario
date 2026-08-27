@@ -138,7 +138,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 
       async function loadClasses() {
           try {
-              const res = await fetch("../api/admin/classes.php");
+              const res = await fetch("../api/admin/classes.php",{ signal: AbortSignal.timeout(2000) });
               if (!res.ok) throw new Error("Errore nel recupero delle classi.");
               const classes = await res.json();
               if (classes.length === 0) {
@@ -176,7 +176,8 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                       "Content-Type": "application/json",
                       "X-CSRF-Token": CSRF_TOKEN
                   },
-                  body: JSON.stringify({ name })
+                  body: JSON.stringify({ name }),
+                  signal: AbortSignal.timeout(2000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'aggiunta.");
@@ -204,7 +205,8 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                   method: "DELETE",
                   headers: {
                       "X-CSRF-Token": CSRF_TOKEN
-                  }
+                  },
+                  signal: AbortSignal.timeout(2000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'eliminazione.");

@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         // Fetch Classi
         try {
-            const res = await fetch("api/getClassi.php");
+            const res = await fetch("api/getClassi.php",{ signal: AbortSignal.timeout(2000) });
             const classi = await res.json();
             
             const years = { 1: "Prime", 2: "Seconde", 3: "Terze", 4: "Quarte", 5: "Quinte" };
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         // Fetch Docenti
         try {
-            const res = await fetch("api/getDocenti.php");
+            const res = await fetch("api/getDocenti.php",{ signal: AbortSignal.timeout(2000) });
             const docenti = await res.json();
             let html = "";
             docenti.forEach(d => {
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         // Fetch Labs
         try {
-            const res = await fetch("api/getLabs.php");
+            const res = await fetch("api/getLabs.php",{ signal: AbortSignal.timeout(2000) });
             const labs = await res.json();
             let html = "";
             labs.forEach(l => {

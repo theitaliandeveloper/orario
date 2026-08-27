@@ -146,7 +146,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": CSRF_TOKEN
                 },
-                body: JSON.stringify({ old_password, new_password, confirm_password })
+                body: JSON.stringify({ old_password, new_password, confirm_password }),
+                signal: AbortSignal.timeout(2000)
             });
 
             const data = await res.json();
