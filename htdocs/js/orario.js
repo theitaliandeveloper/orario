@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     ];
 
     try {
-        const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(2000) }); // Prova a caricare i dati con timeout di 2 secondi
+        const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(3000) }); // Prova a caricare i dati con timeout di 2 secondi
         if (!res.ok) {
             if (res.status == 404) {
                 location.replace("404.php");

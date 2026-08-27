@@ -183,10 +183,10 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Load initial data (classes and subjects)
     try {
         const [classesRes, subjectsRes, teachersRes, roomsRes] = await Promise.all([
-            fetch("../api/admin/classes.php", { signal: AbortSignal.timeout(2000) }),
-            fetch("../api/admin/subjects.php", { signal: AbortSignal.timeout(2000) }),
-            fetch("../api/admin/teachers.php", { signal: AbortSignal.timeout(2000) }),
-            fetch("../api/admin/rooms.php", { signal: AbortSignal.timeout(2000) })
+            fetch("../api/admin/classes.php", { signal: AbortSignal.timeout(3000) }),
+            fetch("../api/admin/subjects.php", { signal: AbortSignal.timeout(3000) }),
+            fetch("../api/admin/teachers.php", { signal: AbortSignal.timeout(3000) }),
+            fetch("../api/admin/rooms.php", { signal: AbortSignal.timeout(3000) })
         ]);
 
         if (!classesRes.ok || !subjectsRes.ok || !teachersRes.ok || !roomsRes.ok) {
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     async function loadClassTimetable(classId) {
         try {
             timetableForm.classList.add("d-none");
-            const res = await fetch(`../api/admin/timetable.php?class_id=${classId}`, { signal: AbortSignal.timeout(2000) });
+            const res = await fetch(`../api/admin/timetable.php?class_id=${classId}`, { signal: AbortSignal.timeout(3000) });
             if (!res.ok) throw new Error("Errore nel caricamento dell'orario.");
             const preselected = await res.json();
 
@@ -376,7 +376,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     "X-CSRF-Token": CSRF_TOKEN
                 },
                 body: JSON.stringify({ class_id: Number(classId), assignments }),
-                signal: AbortSignal.timeout(2000)
+                signal: AbortSignal.timeout(3000)
             });
 
             const responseText = await res.text();

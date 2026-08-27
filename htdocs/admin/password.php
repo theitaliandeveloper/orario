@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     "X-CSRF-Token": CSRF_TOKEN
                 },
                 body: JSON.stringify({ old_password, new_password, confirm_password }),
-                signal: AbortSignal.timeout(2000)
+                signal: AbortSignal.timeout(3000)
             });
 
             const data = await res.json();

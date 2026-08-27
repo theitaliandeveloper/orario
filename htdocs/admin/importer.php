@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Load classes dropdown
     try {
-        const res = await fetch("../api/admin/classes.php",{ signal: AbortSignal.timeout(2000) });
+        const res = await fetch("../api/admin/classes.php",{ signal: AbortSignal.timeout(3000) });
         if (!res.ok) throw new Error("Errore nel caricamento delle classi.");
         const classes = await res.json();
         
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     "X-CSRF-Token": CSRF_TOKEN
                 },
                 body: JSON.stringify({ classe_id, classe_codice }),
-                signal: AbortSignal.timeout(2000)
+                signal: AbortSignal.timeout(10000)
             });
 
             const data = await res.json();

@@ -231,7 +231,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 
       async function loadSubjects() {
           try {
-              const res = await fetch("../api/admin/subjects.php",{ signal: AbortSignal.timeout(2000) });
+              const res = await fetch("../api/admin/subjects.php",{ signal: AbortSignal.timeout(3000) });
               if (!res.ok) throw new Error("Errore nel caricamento delle materie.");
               allSubjects = await res.json();
 
@@ -268,7 +268,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       async function loadResource(type) {
           const container = type === "teachers" ? teachersContainer : roomsContainer;
           try {
-              const res = await fetch(`../api/admin/${type}.php`, { signal: AbortSignal.timeout(2000) });
+              const res = await fetch(`../api/admin/${type}.php`, { signal: AbortSignal.timeout(3000) });
               if (!res.ok) throw new Error("Errore nel caricamento.");
               const resources = await res.json();
               if (resources.length === 0) {
@@ -303,7 +303,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
               method: "POST",
               headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
               body: JSON.stringify({ name }),
-              signal: AbortSignal.timeout(2000)
+              signal: AbortSignal.timeout(3000)
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Errore durante l'aggiunta.");
@@ -359,7 +359,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                   const res = await fetch(`../api/admin/${type}.php?id=${deleteButton.dataset.id}`, {
                       method: "DELETE",
                       headers: { "X-CSRF-Token": CSRF_TOKEN },
-                      signal: AbortSignal.timeout(2000)
+                      signal: AbortSignal.timeout(3000)
                   });
                   const data = await res.json();
                   if (!res.ok) throw new Error(data.error || "Errore durante l'eliminazione.");
@@ -374,7 +374,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                 method: "PUT",
                 headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
                 body: JSON.stringify({ id, name }),
-                signal: AbortSignal.timeout(2000)
+                signal: AbortSignal.timeout(3000)
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Errore durante l'aggiornamento.");
@@ -428,7 +428,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                       "X-CSRF-Token": CSRF_TOKEN
                   },
                   body: JSON.stringify({ name }),
-                  signal: AbortSignal.timeout(2000)
+                  signal: AbortSignal.timeout(3000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante il salvataggio.");
@@ -478,7 +478,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                       "X-CSRF-Token": CSRF_TOKEN
                   },
                   body: JSON.stringify({ id, name }),
-                  signal: AbortSignal.timeout(2000)
+                  signal: AbortSignal.timeout(3000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'aggiornamento.");
@@ -508,7 +508,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                   headers: {
                       "X-CSRF-Token": CSRF_TOKEN
                   },
-                  signal: AbortSignal.timeout(2000)
+                  signal: AbortSignal.timeout(3000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'eliminazione.");
