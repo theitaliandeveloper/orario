@@ -1,5 +1,6 @@
 -- Orario Scuola
--- Schema nuovo
+-- Copyright (C) 2025-2026 EmmeV. All rights reserved.
+-- Esegui questo script nel tuo database MySQL prima di usare il progetto.
 
 CREATE DATABASE IF NOT EXISTS school_timetable
     CHARACTER SET utf8mb4

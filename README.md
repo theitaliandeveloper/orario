@@ -133,27 +133,20 @@ if (!defined('API_URL')) {
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
 
-## Migrazione da schema legacy (opzionale)
-### Metodo consigliato (PHP, in-place)
-Questo metodo migra lo schema direttamente nel database configurato in ``config/config.php`` senza creare un nuovo database.
+## Migrazione da schema legacy
+Per usare nuove versioni della piattaforma, è necessario migrare il database dallo schema vecchio a quello nuovo.
+Prima di iniziare la migrazione, assicurarsi di avere un backup del database.
 
-Comando:
+### Migrazione da CLI
 ```bash
-php utils/migrate_in_place.php --yes
+php utils/migrate.php --yes
 ```
-
-Cosa fa lo script:
-- rinomina automaticamente le tabelle legacy ``classes``, ``subjects``, ``timetable`` in copie ``*_legacy_YYYYmmdd_HHMMSS``
-- crea le nuove tabelle normalizzate nello stesso database
-- migra dati di classi, materie, docenti, aule, slot, lezioni e relazioni
-- lascia le tabelle legacy per rollback manuale
 
 ### Migrazione dal browser
 Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
-La pagina richiede la conferma ``YES`` ed esegue la stessa migrazione nel database corrente, senza creare un nuovo database.
 
-### Metodo alternativo (SQL)
-Se hai dati esistenti nello schema vecchio, puoi usare ``migration_legacy_to_new.sql``.
+### Migrazione manuale
+Se vuoi fare la migrazione manuale, puoi usare ``migrate_sql.sql``.
 
 Passi consigliati:
 1. Esegui backup completo del database.
@@ -161,8 +154,8 @@ Passi consigliati:
 ```sql
 RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
 ```
-3. Importa ``new_schema.sql``.
-4. Esegui ``migration_legacy_to_new.sql`` per popolare il nuovo modello.
+3. Importa ``schema.sql``.
+4. Esegui ``migrate_sql.sql`` per popolare il nuovo modello.
 
 ## Installazione con Docker
 1. Installa Curl, Git e Docker
