@@ -30,7 +30,35 @@ $initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
-        .subject-row select { min-width: 140px; }
+        .subject-row .subject-select { min-width: 180px; }
+        .subject-row .resource-select { min-width: 145px; }
+        .subject-row select[multiple] { min-height: 58px; }
+        .subject-field {
+            min-width: 180px;
+        }
+        .subject-field .subject-select {
+            width: 100%;
+        }
+        .teacher-checkboxes {
+            min-width: 180px;
+            max-width: 240px;
+            max-height: 90px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .teacher-checkboxes .form-check {
+            min-height: 1.25rem;
+        }
+        .room-checkboxes {
+            min-width: 180px;
+            max-width: 240px;
+            max-height: 90px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .room-checkboxes .form-check {
+            min-height: 1.25rem;
+        }
     </style>
     <script>
         const CSRF_TOKEN = "<?php echo generate_csrf_token(); ?>";
@@ -142,6 +170,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     
     let subjects = [];
+    let teachers = [];
+    let rooms = [];
 
     function showAlert(message, type = "success") {
         alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
@@ -152,15 +182,21 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Load initial data (classes and subjects)
     try {
-        const [classesRes, subjectsRes] = await Promise.all([
+        const [classesRes, subjectsRes, teachersRes, roomsRes] = await Promise.all([
             fetch("../api/admin/classes.php"),
-            fetch("../api/admin/subjects.php")
+            fetch("../api/admin/subjects.php"),
+            fetch("../api/admin/teachers.php"),
+            fetch("../api/admin/rooms.php")
         ]);
 
-        if (!classesRes.ok || !subjectsRes.ok) throw new Error("Errore nel caricamento delle configurazioni.");
+        if (!classesRes.ok || !subjectsRes.ok || !teachersRes.ok || !roomsRes.ok) {
+            throw new Error("Errore nel caricamento delle configurazioni.");
+        }
 
         const classes = await classesRes.json();
         subjects = await subjectsRes.json();
+        teachers = await teachersRes.json();
+        rooms = await roomsRes.json();
 
         classes.forEach(c => {
             const opt = document.createElement("option");
@@ -195,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             timetableForm.classList.add("d-none");
             const res = await fetch(`../api/admin/timetable.php?class_id=${classId}`);
             if (!res.ok) throw new Error("Errore nel caricamento dell'orario.");
-            const preselected = await res.json(); // Array of {day, hour, subject_id}
+            const preselected = await res.json();
 
             // Build grid
             let html = "";
@@ -206,13 +242,13 @@ document.addEventListener("DOMContentLoaded", async function() {
                     const cellSubjects = preselected.filter(item => item.day === day && item.hour === hour);
                     
                     // We must have at least one slot select element
-                    const slots = cellSubjects.length > 0 ? cellSubjects.map(s => s.subject_id) : [0];
+                    const slots = cellSubjects.length > 0 ? cellSubjects : [{ subject_id: 0, teacher_ids: [], room_ids: [] }];
 
                     html += `<td class="p-2">
                         <div class="subject-container" data-day="${day}" data-hour="${hour}">`;
                     
-                    slots.forEach(subId => {
-                        html += buildSelectRow(subId);
+                    slots.forEach(lesson => {
+                        html += buildSelectRow(lesson.subject_id, lesson.teacher_ids || [], lesson.room_ids || []);
                     });
 
                     html += `<button type="button" class="btn btn-sm btn-outline-success add-subject py-0 px-2 mt-1" title="Aggiungi compresenza / materia">+</button>
@@ -230,23 +266,53 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     }
 
-    function buildSelectRow(selectedId = 0) {
+    function buildSelectRow(selectedId = 0, selectedTeacherIds = [], selectedRoomIds = []) {
         let html = `<div class="subject-row d-flex align-items-center justify-content-center gap-1 mb-1">
-            <select class="form-select form-select-sm">
+            <div class="subject-field">
+                <div class="small text-body-secondary mb-1">Materia</div>
+                <select class="form-select form-select-sm subject-select" title="Materia">
                 <option value="">-- Nessuna --</option>`;
         subjects.forEach(s => {
-            const label = s.name + (s.teacher ? ` (${s.teacher})` : "") + (s.room ? ` (${s.room})` : "");
             const sel = s.id === selectedId ? "selected" : "";
-            html += `<option value="${s.id}" ${sel}>${escapeHtml(label)}</option>`;
+            html += `<option value="${s.id}" ${sel}>${escapeHtml(s.name)}</option>`;
         });
         html += `</select>
+            </div>
+            <div class="teacher-checkboxes border rounded p-1" title="Docenti">
+                <div class="small text-body-secondary mb-1">Docenti</div>`;
+        if (teachers.length === 0) {
+            html += `<div class="small text-body-tertiary">Nessun docente</div>`;
+        } else {
+            teachers.forEach(t => {
+                const checked = selectedTeacherIds.includes(Number(t.id)) ? "checked" : "";
+                html += `<label class="form-check small mb-0">
+                    <input class="form-check-input teacher-checkbox" type="checkbox" value="${t.id}" ${checked}>
+                    <span class="form-check-label">${escapeHtml(t.name)}</span>
+                </label>`;
+            });
+        }
+        html += `</div>
+            <div class="room-checkboxes border rounded p-1" title="Laboratori e aule">
+                <div class="small text-body-secondary mb-1">Laboratori/Aule</div>`;
+        if (rooms.length === 0) {
+            html += `<div class="small text-body-tertiary">Nessun laboratorio</div>`;
+        } else {
+            rooms.forEach(r => {
+                const checked = selectedRoomIds.includes(Number(r.id)) ? "checked" : "";
+                html += `<label class="form-check small mb-0">
+                    <input class="form-check-input room-checkbox" type="checkbox" value="${r.id}" ${checked}>
+                    <span class="form-check-label">${escapeHtml(r.name)}</span>
+                </label>`;
+            });
+        }
+        html += `</div>
             <button type="button" class="btn btn-sm btn-outline-danger remove-subject py-0 px-2" title="Rimuovi materia">−</button>
         </div>`;
         return html;
     }
 
     function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        return String(str ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     // Dynamic grid interactions
@@ -275,14 +341,29 @@ document.addEventListener("DOMContentLoaded", async function() {
         const classId = classSelect.value;
         if (!classId) return;
 
+        const saveButton = timetableForm.querySelector("button[type=submit]");
+        saveButton.disabled = true;
+        const originalButtonHtml = saveButton.innerHTML;
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Salvataggio...';
+
         const assignments = [];
         document.querySelectorAll(".subject-container").forEach(container => {
             const day = container.getAttribute("data-day");
             const hour = parseInt(container.getAttribute("data-hour"));
-            container.querySelectorAll(".subject-row select").forEach(select => {
-                const val = parseInt(select.value);
-                if (val) {
-                    assignments.push({ day, hour, subject_id: val });
+            container.querySelectorAll(".subject-row").forEach(row => {
+                const subjectId = parseInt(row.querySelector(".subject-select").value);
+                if (subjectId) {
+                    const teacherIds = Array.from(row.querySelectorAll(".teacher-checkbox:checked"))
+                        .map(checkbox => Number(checkbox.value));
+                    const roomIds = Array.from(row.querySelectorAll(".room-checkbox:checked"))
+                        .map(checkbox => Number(checkbox.value));
+                    assignments.push({
+                        day,
+                        hour,
+                        subject_id: Number(subjectId),
+                        teacher_ids: teacherIds,
+                        room_ids: roomIds
+                    });
                 }
             });
         });
@@ -294,16 +375,25 @@ document.addEventListener("DOMContentLoaded", async function() {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": CSRF_TOKEN
                 },
-                body: JSON.stringify({ class_id: classId, assignments })
+                body: JSON.stringify({ class_id: Number(classId), assignments })
             });
 
-            const data = await res.json();
+            const responseText = await res.text();
+            let data;
+            try {
+                data = responseText ? JSON.parse(responseText) : {};
+            } catch (parseError) {
+                throw new Error(responseText || "Risposta non valida dal server.");
+            }
             if (!res.ok) throw new Error(data.error || "Errore durante il salvataggio.");
 
             showAlert("Orario salvato con successo!", "success");
-            loadClassTimetable(classId);
+            await loadClassTimetable(classId);
         } catch (e) {
             showAlert(e.message, "danger");
+        } finally {
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalButtonHtml;
         }
     });
 });

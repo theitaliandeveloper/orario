@@ -10,6 +10,8 @@ the Free Software Foundation, either version 3 of the License, or
 require_once __DIR__ . "/lib/variables.php";
 require_once __DIR__ . "/lib/csrf.php";
 require_once __DIR__ . "/lib/misc.php";
+require_once __DIR__ . "/lib/db.php";
+require_once __DIR__ . "/lib/schema.php";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -26,6 +28,8 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
     header("Location: manutenzione.php");
     exit;
 }
+
+$legacySchemaDetected = legacy_schema_detected($conn);
 ?>
 <!DOCTYPE html>
 <html>
@@ -72,6 +76,23 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
     <?php
     }
     ?>
+    <?php
+    if ($legacySchemaDetected) {
+        if (!isset($_SESSION['admin'])) {
+        ?>
+            <div class="alert alert-danger text-center" role="alert">
+                <strong>Errore database!</strong> Lo schema SQL installato è obsoleto. Accedi all'area amministrativa per aggiornarlo e ripristinare il normale funzionamento della piattaforma.
+            </div>
+        <?php
+        } else {
+        ?>
+            <div class="alert alert-danger text-center" role="alert">
+                <strong>Errore database!</strong> Lo schema SQL installato è obsoleto. <a href="admin/migrate.php" class="alert-link">Aggiornalo ora</a> per ripristinare il normale funzionamento della piattaforma.
+            </div>
+        <?php
+        }
+    } else {
+    ?>
     <div class="container">
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-6 col-lg-5">
@@ -95,6 +116,9 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
         <h2 class="mb-3 mt-4"><i class="bi bi-flask"></i> Laboratori</h2>
         <div class="row g-3" id="labs-container"></div>
     </div>
+    <?php
+    }
+    ?>
     <footer class="text-center text-body-secondary small mt-5 mb-3">
         Copyright &copy; 2025-<?php echo date("Y"); ?>
         EmmeV. Rilasciato sotto
@@ -111,7 +135,13 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
             Gitea
         </a>.
     </footer>
-    <script src="js/index.js"></script>
+    <?php
+    if (!$legacySchemaDetected) {
+    ?>
+        <script src="js/index.js"></script>
+    <?php
+    }
+    ?>
     <script src="js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>

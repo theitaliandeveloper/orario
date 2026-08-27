@@ -17,6 +17,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require __DIR__ . "/../lib/variables.php";
 require_once __DIR__ . "/../lib/csrf.php";
+require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/schema.php";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -31,6 +33,11 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { //
 $_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
+    exit;
+}
+
+if (legacy_schema_detected($conn)) {
+    header("Location: migrate.php");
     exit;
 }
 ?>
@@ -97,7 +104,7 @@ if (!isset($_SESSION['admin'])) {
                         </div>
                         <h4 class="card-title fw-bold mb-2">Materie & Docenti</h4>
                         <p class="card-text text-muted">Aggiungi, modifica o rimuovi docenti, materie e laboratori.</p>
-                        <a href="subjects.php" class="btn btn-primary w-100">Gestisci Materie</a>
+                        <a href="subjects.php" class="btn btn-primary w-100">Gestisci Materie e Docenti</a>
                     </div>
                 </div>
             </div>

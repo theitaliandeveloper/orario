@@ -84,10 +84,10 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       </div>
     </div>
 
-    <!-- Form Aggiunta -->
+        <!-- Aggiungi Materia -->
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-header bg-body-tertiary fw-bold">
-        <i class="bi bi-plus-circle me-1"></i> Aggiungi Nuova Materia
+                <i class="bi bi-plus-circle me-1"></i> Aggiungi Materia
       </div>
       <div class="card-body">
         <form id="add-subject-form" class="row g-3">
@@ -101,11 +101,81 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       </div>
     </div>
 
-    <!-- Elenco Materie -->
-    <h2 class="h4 fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-1"></i> Elenco Materie</h2>
-    <div id="subjects-container">
-        <div class="alert alert-secondary text-center my-4">Caricamento in corso...</div>
-    </div>
+        <!-- Aggiungi Docente -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-body-tertiary fw-bold">
+                <i class="bi bi-plus-circle me-1"></i> Aggiungi Docente
+            </div>
+            <div class="card-body">
+                <form id="add-teacher-form" class="row g-3">
+                    <div class="col-12 col-md-8"><input type="text" class="form-control" id="teacher-name-input" placeholder="Nome docente" required></div>
+                    <div class="col-12 text-end"><button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Aggiungi Docente</button></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Aggiungi Laboratorio -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-body-tertiary fw-bold">
+                <i class="bi bi-plus-circle me-1"></i> Aggiungi laboratorio
+            </div>
+            <div class="card-body">
+                <form id="add-room-form" class="row g-3">
+                    <div class="col-12 col-md-8"><input type="text" class="form-control" id="room-name-input" placeholder="Nome laboratorio o aula" required></div>
+                    <div class="col-12 text-end"><button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Aggiungi laboratorio</button></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Elenco Materie -->
+        <h2 class="h4 fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-1"></i> Elenco Materie</h2>
+        <div id="subjects-container" class="mb-5">
+                <div class="alert alert-secondary text-center">Caricamento in corso...</div>
+        </div>
+
+        <!-- Sezione Docenti -->
+        <div class="card border-primary shadow-sm mb-4 d-none" id="edit-teacher-card">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="bi bi-pencil-square me-1"></i> Modifica Docente #<span id="edit-teacher-id-label"></span>
+            </div>
+            <div class="card-body">
+                <form id="edit-teacher-form" class="row g-3">
+                    <input type="hidden" id="edit-teacher-id-input">
+                    <div class="col-12 col-md-8">
+                        <label class="form-label fw-semibold" for="edit-teacher-name-input">Nome docente</label>
+                        <input type="text" class="form-control" id="edit-teacher-name-input" required>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salva modifiche</button>
+                        <button type="button" class="btn btn-secondary ms-2" id="cancel-teacher-edit-btn"><i class="bi bi-x-lg"></i> Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <h2 class="h4 fw-bold mb-3"><i class="bi bi-person-badge me-1"></i> Elenco Docenti</h2>
+        <div id="teachers-container" class="mb-5"><div class="alert alert-secondary text-center">Caricamento in corso...</div></div>
+
+        <!-- Sezione Laboratori e Aule -->
+        <div class="card border-primary shadow-sm mb-4 d-none" id="edit-room-card">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="bi bi-pencil-square me-1"></i> Modifica Laboratorio/Aula #<span id="edit-room-id-label"></span>
+            </div>
+            <div class="card-body">
+                <form id="edit-room-form" class="row g-3">
+                    <input type="hidden" id="edit-room-id-input">
+                    <div class="col-12 col-md-8">
+                        <label class="form-label fw-semibold" for="edit-room-name-input">Nome laboratorio o aula</label>
+                        <input type="text" class="form-control" id="edit-room-name-input" required>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salva modifiche</button>
+                        <button type="button" class="btn btn-secondary ms-2" id="cancel-room-edit-btn"><i class="bi bi-x-lg"></i> Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <h2 class="h4 fw-bold mb-3"><i class="bi bi-door-open me-1"></i> Elenco Laboratori</h2>
+        <div id="rooms-container" class="mb-5"><div class="alert alert-secondary text-center">Caricamento in corso...</div></div>
   </div>
 
 <footer class="text-center text-body-secondary small mt-5 mb-3">
@@ -132,6 +202,14 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       const editCard = document.getElementById("edit-subject-card");
       const editForm = document.getElementById("edit-subject-form");
       const alertContainer = document.getElementById("alert-container");
+    const teachersContainer = document.getElementById("teachers-container");
+    const roomsContainer = document.getElementById("rooms-container");
+    const addTeacherForm = document.getElementById("add-teacher-form");
+    const addRoomForm = document.getElementById("add-room-form");
+    const editTeacherCard = document.getElementById("edit-teacher-card");
+    const editTeacherForm = document.getElementById("edit-teacher-form");
+    const editRoomCard = document.getElementById("edit-room-card");
+    const editRoomForm = document.getElementById("edit-room-form");
       
       let allSubjects = []; // Local cache to populate edit form easily
 
@@ -142,6 +220,15 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
           </div>`;
       }
 
+      function escapeHtml(value) {
+          return String(value ?? "")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+      }
+
       async function loadSubjects() {
           try {
               const res = await fetch("../api/admin/subjects.php");
@@ -149,7 +236,7 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
               allSubjects = await res.json();
 
               if (allSubjects.length === 0) {
-                  container.innerHTML = '<div class="alert alert-secondary text-center my-4">Nessuna materia presente nel database.</div>';
+                  container.innerHTML = '<div class="alert alert-secondary text-center">Nessuna materia presente nel database.</div>';
                   return;
               }
 
@@ -158,12 +245,12 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
                   html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3">
                       <div class="card h-100 border bg-body-tertiary">
                           <div class="card-body d-flex flex-column justify-content-between p-3">
-                              <div class="fw-semibold fs-5 text-primary-emphasis">${row.name}</div>
+                              <div class="fw-semibold fs-5 text-primary-emphasis">${escapeHtml(row.name)}</div>
                               <div class="mt-3 d-flex gap-2 justify-content-end">
                                   <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${row.id}">
                                       <i class="bi bi-pencil"></i> Modifica
                                   </button>
-                                  <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${row.id}" data-name="${row.name}">
+                                  <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${row.id}" data-name="${escapeHtml(row.name)}">
                                       <i class="bi bi-trash"></i> Elimina
                                   </button>
                               </div>
@@ -177,6 +264,153 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
               container.innerHTML = `<div class="alert alert-danger text-center my-4">${e.message}</div>`;
           }
       }
+
+      async function loadResource(type) {
+          const container = type === "teachers" ? teachersContainer : roomsContainer;
+          try {
+              const res = await fetch(`../api/admin/${type}.php`);
+              if (!res.ok) throw new Error("Errore nel caricamento.");
+              const resources = await res.json();
+              if (resources.length === 0) {
+                  const label = type === "teachers" ? "docente" : "laboratorio";
+                  container.innerHTML = `<div class="alert alert-secondary text-center">Nessun ${label} presente nel database.</div>`;
+                  return;
+              }
+
+              container.innerHTML = `<div class="card shadow-sm border-0"><div class="card-body"><div class="row g-3">${resources.map(resource => `
+                  <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                      <div class="card h-100 border bg-body-tertiary">
+                          <div class="card-body d-flex flex-column justify-content-between p-3">
+                              <div class="fw-semibold fs-5 text-primary-emphasis">${escapeHtml(resource.name)}</div>
+                              <div class="mt-3 d-flex gap-2 justify-content-end">
+                                  <button type="button" class="btn btn-sm btn-outline-primary edit-resource" data-type="${type}" data-id="${resource.id}" data-name="${escapeHtml(resource.name)}">
+                                      <i class="bi bi-pencil"></i> Modifica
+                                  </button>
+                                  <button type="button" class="btn btn-sm btn-outline-danger delete-resource" data-type="${type}" data-id="${resource.id}" data-name="${escapeHtml(resource.name)}">
+                                      <i class="bi bi-trash"></i> Elimina
+                                  </button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>`).join("")}</div></div></div>`;
+          } catch (e) {
+              container.innerHTML = `<div class="text-danger">${escapeHtml(e.message)}</div>`;
+          }
+      }
+
+      async function addResource(type, name) {
+          const res = await fetch(`../api/admin/${type}.php`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
+              body: JSON.stringify({ name })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Errore durante l'aggiunta.");
+          await loadResource(type);
+      }
+
+      addTeacherForm.addEventListener("submit", async function(e) {
+          e.preventDefault();
+          const input = document.getElementById("teacher-name-input");
+          try {
+              await addResource("teachers", input.value.trim());
+              input.value = "";
+              showAlert("Docente aggiunto con successo!", "success");
+          } catch (e) { showAlert(e.message); }
+      });
+
+      addRoomForm.addEventListener("submit", async function(e) {
+          e.preventDefault();
+          const input = document.getElementById("room-name-input");
+          try {
+              await addResource("rooms", input.value.trim());
+              input.value = "";
+              showAlert("Laboratorio aggiunto con successo!", "success");
+          } catch (e) { showAlert(e.message); }
+      });
+
+      document.addEventListener("click", async function(e) {
+          const editButton = e.target.closest(".edit-resource");
+          const deleteButton = e.target.closest(".delete-resource");
+
+          if (editButton) {
+              const type = editButton.dataset.type;
+              const card = type === "teachers" ? editTeacherCard : editRoomCard;
+              const idInput = type === "teachers"
+                  ? document.getElementById("edit-teacher-id-input")
+                  : document.getElementById("edit-room-id-input");
+              const nameInput = type === "teachers"
+                  ? document.getElementById("edit-teacher-name-input")
+                  : document.getElementById("edit-room-name-input");
+
+              idInput.value = editButton.dataset.id;
+              nameInput.value = editButton.dataset.name;
+              document.getElementById(type === "teachers" ? "edit-teacher-id-label" : "edit-room-id-label").innerText = editButton.dataset.id;
+              card.classList.remove("d-none");
+              card.scrollIntoView({ behavior: "smooth", block: "center" });
+              nameInput.focus();
+          }
+
+          if (deleteButton) {
+              const type = deleteButton.dataset.type;
+              if (!confirm(`Sei sicuro di voler eliminare ${deleteButton.dataset.name}?`)) return;
+              try {
+                  const res = await fetch(`../api/admin/${type}.php?id=${deleteButton.dataset.id}`, {
+                      method: "DELETE",
+                      headers: { "X-CSRF-Token": CSRF_TOKEN }
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || "Errore durante l'eliminazione.");
+                  await loadResource(type);
+                  showAlert("Elemento eliminato con successo!", "success");
+              } catch (error) { showAlert(error.message); }
+          }
+      });
+
+      async function updateResource(type, id, name) {
+          const res = await fetch(`../api/admin/${type}.php`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
+              body: JSON.stringify({ id, name })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Errore durante l'aggiornamento.");
+          await loadResource(type);
+      }
+
+      editTeacherForm.addEventListener("submit", async function(e) {
+          e.preventDefault();
+          const id = Number(document.getElementById("edit-teacher-id-input").value);
+          const name = document.getElementById("edit-teacher-name-input").value.trim();
+          try {
+              await updateResource("teachers", id, name);
+              editTeacherCard.classList.add("d-none");
+              editTeacherForm.reset();
+              showAlert("Docente aggiornato con successo!", "success");
+          } catch (error) { showAlert(error.message); }
+      });
+
+      editRoomForm.addEventListener("submit", async function(e) {
+          e.preventDefault();
+          const id = Number(document.getElementById("edit-room-id-input").value);
+          const name = document.getElementById("edit-room-name-input").value.trim();
+          try {
+              await updateResource("rooms", id, name);
+              editRoomCard.classList.add("d-none");
+              editRoomForm.reset();
+              showAlert("Laboratorio aggiornato con successo!", "success");
+          } catch (error) { showAlert(error.message); }
+      });
+
+      document.getElementById("cancel-teacher-edit-btn").addEventListener("click", function() {
+          editTeacherCard.classList.add("d-none");
+          editTeacherForm.reset();
+      });
+
+      document.getElementById("cancel-room-edit-btn").addEventListener("click", function() {
+          editRoomCard.classList.add("d-none");
+          editRoomForm.reset();
+      });
 
       // Add Subject
       addForm.addEventListener("submit", async function(e) {
@@ -281,6 +515,8 @@ if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
       });
 
       loadSubjects();
+      loadResource("teachers");
+      loadResource("rooms");
   });
   </script>
   <script src="../js/theme.js"></script>

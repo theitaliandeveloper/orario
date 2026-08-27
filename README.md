@@ -51,14 +51,14 @@ php generate_hash.php <password>
 cd orario\utils
 C:\xampp\php\php.exe generate_hash.php <password>
 ```
-- Modifica quindi questa linea nel file ``new_schema.sql``, sostituendo l'hash predefinito con quello generato prima:
+- Modifica quindi questa linea nel file ``schema.sql``, sostituendo l'hash predefinito con quello generato prima:
 ```sql
 VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi');
 ```
-5. **Importa il file ``new_schema.sql`` nel tuo database MySQL**
+5. **Importa il file ``schema.sql`` nel tuo database MySQL**
 - Esempio Debian:
 ```bash
-mysql -u root -p < orario/new_schema.sql
+mysql -u root -p < orario/schema.sql
 ```
 
 6. **Crea il file ``config/config.php`` inserendo i valori richiesti**
@@ -133,12 +133,6 @@ if (!defined('API_URL')) {
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
 
-## Note API amministrative (schema nuovo)
-- ``GET /api/admin/subjects.php`` restituisce l'elenco materie nel formato: ``[{"id": 1, "name": "Informatica"}]``
-- ``POST /api/admin/subjects.php`` accetta payload JSON: ``{"name": "Informatica"}``
-- ``PUT /api/admin/subjects.php`` accetta payload JSON: ``{"id": 1, "name": "Informatica"}``
-- L'associazione docenti/aule è legata alle lezioni importate/salvate in orario, non a una tabella separata di assegnazioni.
-
 ## Migrazione da schema legacy (opzionale)
 ### Metodo consigliato (PHP, in-place)
 Questo metodo migra lo schema direttamente nel database configurato in ``config/config.php`` senza creare un nuovo database.
@@ -153,6 +147,10 @@ Cosa fa lo script:
 - crea le nuove tabelle normalizzate nello stesso database
 - migra dati di classi, materie, docenti, aule, slot, lezioni e relazioni
 - lascia le tabelle legacy per rollback manuale
+
+### Migrazione dal browser
+Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
+La pagina richiede la conferma ``YES`` ed esegue la stessa migrazione nel database corrente, senza creare un nuovo database.
 
 ### Metodo alternativo (SQL)
 Se hai dati esistenti nello schema vecchio, puoi usare ``migration_legacy_to_new.sql``.

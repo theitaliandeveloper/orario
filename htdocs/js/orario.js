@@ -54,6 +54,42 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         const timetable = data.timetable;
 
+        function dayKey(day) {
+            return day.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function slotDetails(slot) {
+            if (VIEW_TYPE === 'classe') {
+                return {
+                    secondary: (slot.teachers || []).join(", "),
+                    rooms: (slot.rooms || []).join(", ")
+                };
+            }
+
+            if (VIEW_TYPE === 'docente') {
+                return {
+                    secondary: (slot.classes || []).join(", "),
+                    rooms: (slot.rooms || []).join(", ")
+                };
+            }
+
+            return {
+                secondary: (slot.classes || [])
+                    .map(item => item.teacher ? `${item.class} (${item.teacher})` : item.class)
+                    .join(", "),
+                rooms: ""
+            };
+        }
+
         // Render Desktop
         let dHead = `<th>Ora/Giorno</th>`;
         days.forEach(d => dHead += `<th>${d}</th>`);
@@ -63,20 +99,17 @@ document.addEventListener("DOMContentLoaded", async function() {
         for (let i = 1; i <= 6; i++) {
             dBody += `<tr><td class="fw-bold">${hours[i-1]}</td>`;
             days.forEach(d => {
-                const dayClean = d.replace("ì", "i"); // getOrario cleans accents in JSON keys! Lunedi instead of Lunedì
+                const dayClean = dayKey(d);
                 const slot = (timetable[dayClean] && timetable[dayClean][i]) ? timetable[dayClean][i] : null;
                 if (slot && slot.subject) {
-                    let secondary = "";
-                    if (VIEW_TYPE === 'classe' && slot.teachers) secondary = slot.teachers.join(", ");
-                    if (VIEW_TYPE === 'docente' && slot.classes) secondary = slot.classes.join(", ");
-                    if (VIEW_TYPE === 'laboratorio' && slot.classes) secondary = slot.classes.map(c => `${c.class} (${c.teacher})`).join(", ");
-
-                    let rooms = slot.rooms ? slot.rooms.join(", ") : "";
+                    const details = slotDetails(slot);
+                    const secondary = details.secondary;
+                    const rooms = details.rooms;
                     
                     dBody += `<td data-label="${d}">
-                        <div class="subject fw-bold text-primary-emphasis">${slot.subject}</div>
-                        ${secondary ? `<div class="teacher small">${secondary}</div>` : ''}
-                        ${rooms ? `<div class="room text-secondary-emphasis small">${rooms}</div>` : ''}
+                        <div class="subject fw-bold text-primary-emphasis">${escapeHtml(slot.subject)}</div>
+                        ${secondary ? `<div class="teacher small">${escapeHtml(secondary)}</div>` : ''}
+                        ${rooms ? `<div class="room text-secondary-emphasis small">${escapeHtml(rooms)}</div>` : ''}
                     </td>`;
                 } else {
                     dBody += `<td data-label="${d}"></td>`;
@@ -89,24 +122,21 @@ document.addEventListener("DOMContentLoaded", async function() {
         // Render Mobile
         let mBody = "";
         days.forEach(d => {
-            const dayClean = d.replace("ì", "i");
-            mBody += `<div class="card mb-3 shadow-sm"><div class="card-header fw-semibold">${d}</div><div class="list-group list-group-flush">`;
+            const dayClean = dayKey(d);
+            mBody += `<div class="card mb-3 shadow-sm"><div class="card-header fw-semibold">${escapeHtml(d)}</div><div class="list-group list-group-flush">`;
             for (let i = 1; i <= 6; i++) {
                 const slot = (timetable[dayClean] && timetable[dayClean][i]) ? timetable[dayClean][i] : null;
                 const hlabel = hours[i-1].replace("<br>", " ");
                 if (slot && slot.subject) {
-                    let secondary = "";
-                    if (VIEW_TYPE === 'classe' && slot.teachers) secondary = slot.teachers.join(", ");
-                    if (VIEW_TYPE === 'docente' && slot.classes) secondary = slot.classes.join(", ");
-                    if (VIEW_TYPE === 'laboratorio' && slot.classes) secondary = slot.classes.map(c => `${c.class} (${c.teacher})`).join(", ");
-
-                    let rooms = slot.rooms ? slot.rooms.join(", ") : "";
+                    const details = slotDetails(slot);
+                    const secondary = details.secondary;
+                    const rooms = details.rooms;
                     
                     mBody += `<div class="list-group-item">
-                        <div class="small text-body-secondary">${hlabel}</div>
-                        <div class="fw-semibold text-primary-emphasis">${slot.subject}</div>
-                        ${secondary ? `<div class="text-secondary-emphasis">${secondary}</div>` : ''}
-                        ${rooms ? `<span class="badge border border-info text-info mt-1">${rooms}</span>` : ''}
+                        <div class="small text-body-secondary">${escapeHtml(hlabel)}</div>
+                        <div class="fw-semibold text-primary-emphasis">${escapeHtml(slot.subject)}</div>
+                        ${secondary ? `<div class="text-secondary-emphasis">${escapeHtml(secondary)}</div>` : ''}
+                        ${rooms ? `<span class="badge border border-info text-info mt-1">${escapeHtml(rooms)}</span>` : ''}
                     </div>`;
                 } else {
                     mBody += `<div class="list-group-item text-body-tertiary">

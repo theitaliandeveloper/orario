@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $timetable = [];
     if ($class_id > 0) {
         $stmt = $conn->prepare(
-            "SELECT ts.day, ts.hour, tl.subject_id
+            "SELECT ts.day, ts.hour, tl.subject_id, tl.id AS lesson_id
              FROM timetable_slots ts
              INNER JOIN timetable_lessons tl ON tl.slot_id = ts.id
              WHERE ts.class_id = ?
@@ -42,8 +42,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $timetable[] = [
                 'day' => $dayLabel,
                 'hour' => (int)$row['hour'],
-                'subject_id' => (int)($row['subject_id'] ?? 0)
+                'subject_id' => (int)($row['subject_id'] ?? 0),
+                'teacher_ids' => [],
+                'room_ids' => []
             ];
+
+            $last = count($timetable) - 1;
+            $lessonId = (int)$row['lesson_id'];
+
+            $teacherStmt = $conn->prepare("SELECT teacher_id FROM timetable_lesson_teachers WHERE lesson_id = ?");
+            $teacherStmt->bind_param('i', $lessonId);
+            $teacherStmt->execute();
+            $teacherResult = $teacherStmt->get_result();
+            while ($teacherRow = $teacherResult->fetch_assoc()) {
+                $timetable[$last]['teacher_ids'][] = (int)$teacherRow['teacher_id'];
+            }
+            $teacherStmt->close();
+
+            $roomStmt = $conn->prepare("SELECT room_id FROM timetable_lesson_rooms WHERE lesson_id = ?");
+            $roomStmt->bind_param('i', $lessonId);
+            $roomStmt->execute();
+            $roomResult = $roomStmt->get_result();
+            while ($roomRow = $roomResult->fetch_assoc()) {
+                $timetable[$last]['room_ids'][] = (int)$roomRow['room_id'];
+            }
+            $roomStmt->close();
         }
         $stmt->close();
     }
@@ -59,6 +82,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(["error" => "ID classe non valido."]);
         exit;
     }
+
+    if (!is_array($input['assignments'] ?? [])) {
+        http_response_code(400);
+        echo json_encode(["error" => "Formato assegnazioni non valido."]);
+        exit;
+    }
+
+    $classCheck = $conn->prepare("SELECT 1 FROM classes WHERE id = ? LIMIT 1");
+    $classCheck->bind_param("i", $class_id);
+    $classCheck->execute();
+    $classExists = $classCheck->get_result()->num_rows > 0;
+    $classCheck->close();
+    if (!$classExists) {
+        http_response_code(404);
+        echo json_encode(["error" => "Classe non trovata."]);
+        exit;
+    }
     
     $conn->begin_transaction();
     try {
@@ -67,10 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_del->execute();
         $stmt_del->close();
         
-        $assignments = $input['assignments'] ?? [];
+        $assignments = $input['assignments'];
         if (!empty($assignments)) {
             $slotOrder = [];
             foreach ($assignments as $a) {
+                if (!is_array($a)) {
+                    throw new InvalidArgumentException('Una delle assegnazioni non è valida.');
+                }
                 $dayLabel = trim((string)($a['day'] ?? ''));
                 $hour = intval($a['hour'] ?? 0);
                 $subjectId = intval($a['subject_id'] ?? 0);
@@ -79,8 +122,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $slotId = ensure_timetable_slot($conn, $class_id, $day, $hour);
                     $slotKey = $day . ':' . $hour;
                     $sortOrder = $slotOrder[$slotKey] ?? 0;
-                    create_lesson($conn, $slotId, $subjectId, [], [], $sortOrder, false);
+                    $teacherIdsInput = $a['teacher_ids'] ?? [];
+                    $roomIdsInput = $a['room_ids'] ?? [];
+                    if (!is_array($teacherIdsInput) || !is_array($roomIdsInput)) {
+                        throw new InvalidArgumentException('Docenti o laboratori non validi.');
+                    }
+                    $teacherIds = array_values(array_filter(array_map('intval', $teacherIdsInput)));
+                    $roomIds = array_values(array_filter(array_map('intval', $roomIdsInput)));
+                    create_lesson($conn, $slotId, $subjectId, $teacherIds, $roomIds, $sortOrder, false);
                     $slotOrder[$slotKey] = $sortOrder + 1;
+                } elseif ($dayLabel !== '' || $hour > 0 || $subjectId > 0) {
+                    throw new InvalidArgumentException('Giorno, ora o materia non validi.');
                 }
             }
         }
