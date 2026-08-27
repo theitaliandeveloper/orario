@@ -52,6 +52,24 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <link rel="stylesheet" href="./css/fonts.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<style>
+    #desktop-table th,
+    #desktop-table td,
+    #mobile-view .list-group-item,
+    #mobile-view .subject,
+    #mobile-view .teacher,
+    #mobile-view .room {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    #mobile-view .badge {
+        white-space: normal;
+        text-align: left;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+</style>
 <script>
     const VIEW_TYPE = "<?php echo $view; ?>";
     const VIEW_ID = "<?php echo htmlspecialchars($id); ?>";
