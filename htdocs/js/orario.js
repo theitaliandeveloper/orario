@@ -67,25 +67,37 @@ document.addEventListener("DOMContentLoaded", async function() {
                 .replace(/'/g, "&#039;");
         }
 
+        const joinWithAnd = items => {
+            if (items.length === 0) return "";
+            if (items.length === 1) return items[0];
+            if (items.length === 2) return `${items[0]} e ${items[1]}`;
+            return `${items.slice(0, -1).join(", ")} e ${items[items.length - 1]}`;
+        };
+
+
         function slotDetails(slot) {
             if (VIEW_TYPE === 'classe') {
                 return {
-                    secondary: (slot.teachers || []).join(", "),
-                    rooms: (slot.rooms || []).join(", ")
+                    secondary: joinWithAnd(slot.teachers || []),
+                    rooms: joinWithAnd(slot.rooms || [])
                 };
             }
 
             if (VIEW_TYPE === 'docente') {
                 return {
-                    secondary: (slot.classes || []).join(", "),
-                    rooms: (slot.rooms || []).join(", ")
+                    secondary: joinWithAnd(slot.classes || []),
+                    rooms: joinWithAnd(slot.rooms || [])
                 };
             }
 
             return {
-                secondary: (slot.classes || [])
-                    .map(item => item.teacher ? `${item.class} (${item.teacher})` : item.class)
-                    .join(", "),
+                secondary: joinWithAnd(
+                    (slot.classes || [])
+                        .map(item => item.teacher
+                            ? `${item.class} (${item.teacher})`
+                            : item.class
+                        )
+                ),
                 rooms: ""
             };
         }
