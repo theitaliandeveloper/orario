@@ -10,6 +10,8 @@ the Free Software Foundation, either version 3 of the License, or
 require_once __DIR__ . "/lib/variables.php";
 require_once __DIR__ . "/lib/csrf.php";
 require_once __DIR__ . "/lib/misc.php";
+require_once __DIR__ . "/lib/db.php";
+require_once __DIR__ . "/lib/schema.php";
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -26,6 +28,11 @@ $_SESSION['discard_after'] = $now + SESSION_LIFETIME;
 
 if (!isset($_SESSION['admin']) && MAINTENANCE) {
     header("Location: manutenzione.php");
+    exit;
+}
+
+if (legacy_schema_detected($conn)) {
+    header("Location: index.php");
     exit;
 }
 
