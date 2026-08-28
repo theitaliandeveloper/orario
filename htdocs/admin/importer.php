@@ -163,22 +163,22 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
 </footer>
 
 <script>
+const classSelect = document.getElementById("classe_id");
+const importForm = document.getElementById("import-form");
+const btnSubmit = document.getElementById("btn-submit");
+const alertContainer = document.getElementById("alert-container");
+
+function closeAlert() {
+    alertContainer.innerHTML = "";
+}
+
+function showAlert(message, type = "success") {
+    alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeAlert()"></button>
+    </div>`;
+}
 document.addEventListener("DOMContentLoaded", async function() {
-    const classSelect = document.getElementById("classe_id");
-    const importForm = document.getElementById("import-form");
-    const btnSubmit = document.getElementById("btn-submit");
-    const alertContainer = document.getElementById("alert-container");
-
-    function showAlert(message, type = "success") {
-        alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeAlert()"></button>
-        </div>`;
-    }
-
-    function closeAlert() {
-        alertContainer.innerHTML = "";
-    }
 
     // Load classes dropdown
     try {
