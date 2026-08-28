@@ -65,6 +65,49 @@ function get_or_create_subject(mysqli $conn, string $name): int
     return $id;
 }
 
+function get_or_create_import_subject(mysqli $conn, string $externalId, string $name, ?string $fullName, ?string $bgColor, ?string $textColor): int
+{
+    $externalId = trim($externalId);
+    $id = 0;
+
+    if ($externalId !== '') {
+        $stmt = $conn->prepare('SELECT id FROM subjects WHERE external_id = ? LIMIT 1');
+        $stmt->bind_param('s', $externalId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $id = (int)$result->fetch_assoc()['id'];
+        }
+        $stmt->close();
+    }
+
+    if ($id === 0) {
+        $stmt = $conn->prepare('SELECT id FROM subjects WHERE name = ? ORDER BY id ASC LIMIT 1');
+        $stmt->bind_param('s', $name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $id = (int)$result->fetch_assoc()['id'];
+        }
+        $stmt->close();
+    }
+
+    if ($id > 0) {
+        $update = $conn->prepare('UPDATE subjects SET external_id = NULLIF(?, \'\'), name = ?, full_name = ?, bg_color = ?, text_color = ? WHERE id = ?');
+        $update->bind_param('sssssi', $externalId, $name, $fullName, $bgColor, $textColor, $id);
+        $update->execute();
+        $update->close();
+        return $id;
+    }
+
+    $insert = $conn->prepare('INSERT INTO subjects (external_id, name, full_name, bg_color, text_color) VALUES (NULLIF(?, \'\'), ?, ?, ?, ?)');
+    $insert->bind_param('sssss', $externalId, $name, $fullName, $bgColor, $textColor);
+    $insert->execute();
+    $id = (int)$conn->insert_id;
+    $insert->close();
+    return $id;
+}
+
 function get_or_create_teacher(mysqli $conn, string $name): int
 {
     $stmt = $conn->prepare('SELECT id FROM teachers WHERE name = ? ORDER BY id ASC LIMIT 1');
@@ -87,6 +130,49 @@ function get_or_create_teacher(mysqli $conn, string $name): int
     return $id;
 }
 
+function get_or_create_import_teacher(mysqli $conn, string $externalId, string $name): int
+{
+    $externalId = trim($externalId);
+    $id = 0;
+
+    if ($externalId !== '') {
+        $stmt = $conn->prepare('SELECT id FROM teachers WHERE external_id = ? LIMIT 1');
+        $stmt->bind_param('s', $externalId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $id = (int)$result->fetch_assoc()['id'];
+        }
+        $stmt->close();
+    }
+
+    if ($id === 0) {
+        $stmt = $conn->prepare('SELECT id FROM teachers WHERE name = ? ORDER BY id ASC LIMIT 1');
+        $stmt->bind_param('s', $name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $id = (int)$result->fetch_assoc()['id'];
+        }
+        $stmt->close();
+    }
+
+    if ($id > 0) {
+        $update = $conn->prepare('UPDATE teachers SET external_id = NULLIF(?, \'\'), name = ? WHERE id = ?');
+        $update->bind_param('ssi', $externalId, $name, $id);
+        $update->execute();
+        $update->close();
+        return $id;
+    }
+
+    $insert = $conn->prepare('INSERT INTO teachers (external_id, name) VALUES (NULLIF(?, \'\'), ?)');
+    $insert->bind_param('ss', $externalId, $name);
+    $insert->execute();
+    $id = (int)$conn->insert_id;
+    $insert->close();
+    return $id;
+}
+
 function get_or_create_room(mysqli $conn, string $name): int
 {
     $stmt = $conn->prepare('SELECT id FROM rooms WHERE name = ? ORDER BY id ASC LIMIT 1');
@@ -106,6 +192,49 @@ function get_or_create_room(mysqli $conn, string $name): int
     $id = (int)$conn->insert_id;
     $ins->close();
 
+    return $id;
+}
+
+function get_or_create_import_room(mysqli $conn, string $externalId, string $name): int
+{
+    $externalId = trim($externalId);
+    $id = 0;
+
+    if ($externalId !== '') {
+        $stmt = $conn->prepare('SELECT id FROM rooms WHERE external_id = ? LIMIT 1');
+        $stmt->bind_param('s', $externalId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $id = (int)$result->fetch_assoc()['id'];
+        }
+        $stmt->close();
+    }
+
+    if ($id === 0) {
+        $stmt = $conn->prepare('SELECT id FROM rooms WHERE name = ? ORDER BY id ASC LIMIT 1');
+        $stmt->bind_param('s', $name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $id = (int)$result->fetch_assoc()['id'];
+        }
+        $stmt->close();
+    }
+
+    if ($id > 0) {
+        $update = $conn->prepare('UPDATE rooms SET external_id = NULLIF(?, \'\'), name = ? WHERE id = ?');
+        $update->bind_param('ssi', $externalId, $name, $id);
+        $update->execute();
+        $update->close();
+        return $id;
+    }
+
+    $insert = $conn->prepare('INSERT INTO rooms (external_id, name) VALUES (NULLIF(?, \'\'), ?)');
+    $insert->bind_param('ss', $externalId, $name);
+    $insert->execute();
+    $id = (int)$conn->insert_id;
+    $insert->close();
     return $id;
 }
 

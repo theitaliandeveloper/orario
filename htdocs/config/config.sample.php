@@ -73,6 +73,6 @@ if (!defined('SESSION_LIFETIME')) {
 }
 // Labs (funzioni interne)
 if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
+    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/orario
 }
 ?>

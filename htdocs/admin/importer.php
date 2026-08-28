@@ -172,8 +172,12 @@ document.addEventListener("DOMContentLoaded", async function() {
     function showAlert(message, type = "success") {
         alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
             ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeAlert()"></button>
         </div>`;
+    }
+
+    function closeAlert() {
+        alertContainer.innerHTML = "";
     }
 
     // Load classes dropdown
@@ -203,7 +207,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Importazione in corso...`;
-        alertContainer.innerHTML = "";
+        closeAlert();
 
         try {
             const res = await fetch("../api/admin/importer.php", {
@@ -222,8 +226,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             let msg = `<strong>Importazione completata con successo!</strong><br>`;
             msg += `- Inserite ${data.inserimenti} ore di lezione.<br>`;
             if (data.materie_create_count > 0) {
-                msg += `- Create ${data.materie_create_count} nuove materie.`;
+                msg += `- Create ${data.materie_create_count} nuove materie.<br>`;
             }
+            msg += `- Importati ${data.docenti_importati?.length || 0} docenti e ${data.laboratori_importati?.length || 0} laboratori.`;
             showAlert(msg, "success");
             importForm.reset();
 
