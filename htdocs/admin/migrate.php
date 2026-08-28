@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1 class="h3 fw-bold">Aggiornamento database necessario!</h1>
 
                 <p>Il database utilizza ancora la struttura precedente, per cui è necessario un aggiornamento per poter utilizzare la versione corrente della piattaforma.</p>
-                <p>Nel database applicati i seguenti aggiornamenti:</p>
+                <p>Nel database verranno applicati i seguenti aggiornamenti:</p>
                 <ul>
                 <?php
                 for ($v = $schemaVersion === null ? 0 : $schemaVersion; $v < CURRENT_SCHEMA_VERSION; $v++) {
