@@ -10,6 +10,20 @@ USE school_timetable;
 
 
 -- =========================================================
+-- VERSIONE SCHEMA
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS schema_versions (
+    version INT UNSIGNED NOT NULL PRIMARY KEY,
+    description VARCHAR(255) NOT NULL,
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO schema_versions (version, description)
+VALUES (1, 'Schema normalizzato iniziale');
+
+
+-- =========================================================
 -- ADMIN
 -- =========================================================
 

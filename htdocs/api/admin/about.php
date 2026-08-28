@@ -17,6 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . "/auth_check.php";
+require_once __DIR__ . "/../../lib/schema.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -61,6 +62,8 @@ echo json_encode([
     'adminsCount' => $adminsCount,
     'authType' => $_SESSION['auth_type'],
     'dbVersion' => $dbVersion,
+    'schemaVersion' => get_schema_version($conn),
+    'currentSchemaVersion' => CURRENT_SCHEMA_VERSION,
     'dbSizeMB' => round($dbSizeMB, 2),
     'memoryLimit' => $memoryLimit,
     'phpVersion' => PHP_VERSION,

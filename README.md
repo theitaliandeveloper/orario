@@ -133,7 +133,7 @@ if (!defined('API_URL')) {
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
 
-## Migrazione da schema legacy
+## Migrazione dello schema
 Per usare nuove versioni della piattaforma, è necessario migrare il database dallo schema vecchio a quello nuovo.
 Prima di iniziare la migrazione, assicurarsi di avere un backup del database.
 

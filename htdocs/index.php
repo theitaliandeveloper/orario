@@ -29,7 +29,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
     exit;
 }
 
-$legacySchemaDetected = legacy_schema_detected($conn);
+$legacySchemaDetected = schema_update_required($conn);
 ?>
 <!DOCTYPE html>
 <html>
@@ -77,17 +77,17 @@ $legacySchemaDetected = legacy_schema_detected($conn);
     }
     ?>
     <?php
-    if ($legacySchemaDetected) {
+    if ($legacySchemaDetected && MANDATORY_SCHEMA_UPDATE) {
         if (!isset($_SESSION['admin'])) {
         ?>
             <div class="alert alert-danger text-center" role="alert">
-                <strong>Errore database!</strong> Lo schema SQL installato è obsoleto. Accedi all'area amministrativa per aggiornarlo e ripristinare il normale funzionamento della piattaforma.
+                <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. Accedi all'area amministrativa per aggiornarlo e ripristinare il normale funzionamento oppure contatta l'amministratore della piattaforma.
             </div>
         <?php
         } else {
         ?>
             <div class="alert alert-danger text-center" role="alert">
-                <strong>Errore database!</strong> Lo schema SQL installato è obsoleto. <a href="admin/migrate.php" class="alert-link">Aggiornalo ora</a> per ripristinare il normale funzionamento della piattaforma.
+                <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. <a href="admin/migrate.php" class="alert-link">Aggiornalo ora</a> per ripristinare il normale funzionamento della piattaforma.
             </div>
         <?php
         }

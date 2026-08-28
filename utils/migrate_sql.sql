@@ -14,6 +14,12 @@
 
 START TRANSACTION;
 
+CREATE TABLE IF NOT EXISTS schema_versions (
+  version INT UNSIGNED NOT NULL PRIMARY KEY,
+  description VARCHAR(255) NOT NULL,
+  applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 1) Classi
 INSERT INTO classes (name, section)
 SELECT DISTINCT c.name, c.section
@@ -254,6 +260,9 @@ FROM tmp_legacy_new_lessons lnk
 INNER JOIN rooms r ON r.name COLLATE utf8mb4_unicode_ci = lnk.room_name COLLATE utf8mb4_unicode_ci
 WHERE lnk.room_name IS NOT NULL
   AND TRIM(lnk.room_name) <> '';
+
+INSERT IGNORE INTO schema_versions (version, description)
+VALUES (1, 'Schema normalizzato iniziale');
 
 COMMIT;
 

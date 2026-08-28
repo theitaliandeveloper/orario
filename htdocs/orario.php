@@ -31,7 +31,7 @@ if (!isset($_SESSION['admin']) && MAINTENANCE) {
     exit;
 }
 
-if (legacy_schema_detected($conn)) {
+if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     header("Location: index.php");
     exit;
 }

@@ -30,6 +30,10 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
 }
 $_SESSION['discard_after'] = $now + SESSION_LIFETIME;
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
+if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
+    header("Location: migrate.php?backto=about.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -201,6 +205,12 @@ document.addEventListener("DOMContentLoaded", async function() {
         const maintBadge = d.maintenance
             ? `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Attivata (in manutenzione)</span>`
             : `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Disattivata (normale)</span>`;
+        const schemaIsUpdated = d.schemaVersion !== null && Number(d.schemaVersion) === Number(d.currentSchemaVersion);
+        const sanifiedSchemaVersion = d.schemaVersion === null ? '0' : d.schemaVersion;
+        const schemaBadge = schemaIsUpdated
+            ? `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Versione ${sanifiedSchemaVersion} (aggiornata)</span>`
+            : `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Versione ${sanifiedSchemaVersion} (non aggiornata)</span>`;
+        const schemaVersionLabel = d.schemaVersion === null ? 'N/D' : d.schemaVersion;
 
         envBody.innerHTML = `
             <tr>
@@ -222,6 +232,14 @@ document.addEventListener("DOMContentLoaded", async function() {
             <tr>
                 <td class="fw-semibold"><i class="bi bi-database"></i> Versione Database</td>
                 <td><code>${d.dbVersion}</code></td>
+            </tr>
+            <tr>
+                <td class="fw-semibold"><i class="bi bi-layers"></i> Versione Schema</td>
+                <td>
+                    <a href="migrate.php?backto=about.php" class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover">
+                        ${schemaBadge}
+                    </a>
+                </td>
             </tr>
             <tr>
                 <td class="fw-semibold"><i class="bi bi-device-hdd"></i> Dimensione Database</td>

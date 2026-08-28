@@ -36,7 +36,7 @@ if (!isset($_SESSION['admin'])) {
     exit;
 }
 
-if (legacy_schema_detected($conn)) {
+if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     header("Location: migrate.php");
     exit;
 }
@@ -81,6 +81,11 @@ if (legacy_schema_detected($conn)) {
             <h1 class="fw-bold">Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
             <p class="text-secondary">Cosa facciamo oggi?</p>
         </div>
+        <?php if (schema_update_required($conn)): ?>
+            <div class="alert alert-warning text-center" role="alert">
+                <strong>Attenzione!</strong> È disponibile un aggiornamento dello schema del database. <a href="migrate.php" class="alert-link">Aggiorna ora</a> per migliorare le prestazioni, la stabilità e la sicurezza della piattaforma.
+            </div>
+        <?php endif; ?>
 
         <div class="row g-4 justify-content-center">
             <div class="col-12 col-md-6 col-lg-4">
