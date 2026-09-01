@@ -126,7 +126,6 @@ if (!defined('API_URL')) {
     define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
 }
 ?>
-?>
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
 
