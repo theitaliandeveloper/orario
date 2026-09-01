@@ -10,14 +10,14 @@ Una piattaforma web per visualizzare gli orari scolastici delle classi, degli in
 - Server web (consigliati nginx o apache2 per Linux, XAMPP per Windows)
 - PHP 8.0 o successivo (configurato nel tuo server web)
 - Composer
-- MySQL ultima versione
+- MariaDB 10/11/12
 
 ## Installazione
 1. **Clona la repository e copia la cartella htdocs in una cartella accessibile dal server web**
 - Esempio (Debian):
 ```bash
 git clone https://git.vichingo455.com/emmev-code/orario
-git checkout dev # Per cambiare al ramo di sviluppo
+git checkout dev # Ramo di sviluppo
 cp -r orario/htdocs/* /var/www/html/
 ```
 
@@ -160,18 +160,17 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       # --- Impostazioni sito ---
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
-      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
       MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
-      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o keycloak
+      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o oidc
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
 
-      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è Keycloak) ---
-      OIDC_ISSUER: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
-      OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
-      OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è oidc) ---
+      OIDC_ISSUER: "" # OIDC Issuer, ad esempio https://sso.tuosito.com/realms/master
+      OIDC_CLIENT_ID: "" # Client ID per OIDC, ad esempio orario
+      OIDC_CLIENT_SECRET: "" # Client Secret per OIDC, ad esempio abcde12345
       OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
       OIDC_NO_LOGOUT: false # Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
 
@@ -188,6 +187,19 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
 ## Migrazione dello schema
 Per usare nuove versioni della piattaforma, potrebbe necessario migrare il database dallo schema vecchio a quello nuovo.
 Prima di iniziare la migrazione, assicurarsi di avere un backup del database. Le tabelle vecchie verranno mantenute aggiungendogli il suffisso ``_legacy``.
+
+### Requisiti (solo installazione manuale)
+Supponendo che la cartella di installazione sia ``/var/www/html``:
+- Assicurarsi che la cartella ``/var/www/utils`` esista e contenga i file richiesti(richiesta solo per la migrazione). Per correggere:
+```bash
+mkdir /var/www/utils
+cp -r orario/utils/* /var/www/utils/
+```
+- Assicurarsi che il file ``/var/www/schema.sql esista`` (richiesto solo durante la migrazione). Per correggere:
+```bash
+cp orario/schema.sql /var/www/schema.sql
+```
+- Una volta eseguita la migrazione questi file possono essere eliminati
 
 ### Migrazione dal browser (Docker e installazione manuale)
 Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
