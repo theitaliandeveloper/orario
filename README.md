@@ -182,6 +182,19 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
 Per usare nuove versioni della piattaforma, potrebbe necessario migrare il database dallo schema vecchio a quello nuovo.
 Prima di iniziare la migrazione, assicurarsi di avere un backup del database. Le tabelle vecchie verranno mantenute aggiungendogli il suffisso ``_legacy``.
 
+### Requisiti (solo installazione manuale)
+Supponendo che la cartella di installazione sia ``/var/www/html``:
+- Assicurarsi che la cartella ``/var/www/utils`` esista e contenga i file richiesti(richiesta solo per la migrazione). Per correggere:
+```bash
+mkdir /var/www/utils
+cp -r orario/utils/* /var/www/utils/
+```
+- Assicurarsi che il file ``/var/www/schema.sql esista`` (richiesto solo durante la migrazione). Per correggere:
+```bash
+cp orario/schema.sql /var/www/schema.sql
+```
+- Una volta eseguita la migrazione questi file possono essere eliminati
+
 ### Migrazione dal browser (Docker e installazione manuale)
 Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
 Quella pagina mostrerà una descrizione breve dei cambiamenti effettuati. Basterà premere il pulsante "Avvia aggiornamento" e il database verrà aggiornato.
