@@ -88,9 +88,6 @@ if (!defined('YEAR')) {
 if (!defined('PDF_EXPORT')) {
     define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
 }
-if (!defined('OPEN_DATA')) {
-    define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
-}
 if (!defined('MAINTENANCE')) {
     define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
 }
@@ -133,30 +130,6 @@ if (!defined('API_URL')) {
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
 
-## Migrazione dello schema
-Per usare nuove versioni della piattaforma, è necessario migrare il database dallo schema vecchio a quello nuovo.
-Prima di iniziare la migrazione, assicurarsi di avere un backup del database.
-
-### Migrazione da CLI
-```bash
-php utils/migrate.php --yes
-```
-
-### Migrazione dal browser
-Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
-
-### Migrazione manuale
-Se vuoi fare la migrazione manuale, puoi usare ``migrate_sql.sql``.
-
-Passi consigliati:
-1. Esegui backup completo del database.
-2. Rinomina le tabelle legacy:
-```sql
-RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
-```
-3. Importa ``schema.sql``.
-4. Esegui ``migrate_sql.sql`` per popolare il nuovo modello.
-
 ## Installazione con Docker
 1. Installa Curl, Git e Docker
 ```bash
@@ -165,7 +138,7 @@ curl -fsSL https://get.docker.com | bash
 ```
 2. Scarica i file richiesti:
 ```bash
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/new_schema.sql
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
 wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose.yml
 ```
 
@@ -190,7 +163,6 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       YEAR: "2025/26" # Anno scolastico corrente
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
-      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
       MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
@@ -214,8 +186,33 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
 ```
 
-## Segnalare un problema
-Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.qzz.io/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.qzz.io/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
+## Migrazione dello schema
+Per usare nuove versioni della piattaforma, potrebbe necessario migrare il database dallo schema vecchio a quello nuovo.
+Prima di iniziare la migrazione, assicurarsi di avere un backup del database. Le tabelle vecchie verranno mantenute aggiungendogli il suffisso ``_legacy``.
+
+### Migrazione dal browser (Docker e installazione manuale)
+Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
+Quella pagina mostrerà una descrizione breve dei cambiamenti effettuati. Basterà premere il pulsante "Avvia aggiornamento" e il database verrà aggiornato.
+
+### Migrazione da CLI (solo installazione manuale)
+Per migrare da riga di comando, è possibile usare lo strumento incluso con la piattaforma:
+```bash
+php utils/migrate.php
+```
+Lo strumento chiederà il permesso a procedere e vi informerà del risultato della migrazione.
+
+### Migrazione manuale (Docker e installazione manuale)
+Se vuoi fare la migrazione manuale, puoi usare ``migrate_sql.sql``.
+
+Passi consigliati:
+1. Esegui backup completo del database.
+2. Rinomina le tabelle legacy:
+```sql
+USE school_timetable;
+RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
+```
+3. Importa ``schema.sql``.
+4. Esegui ``migrate_sql.sql`` per popolare il nuovo modello.
 
 ## Licenza
 **Orario Scuola, Copyright (C) 2025-2026 EmmeV.**

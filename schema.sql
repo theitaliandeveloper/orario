@@ -27,7 +27,7 @@ VALUES (1, 'Schema normalizzato iniziale');
 -- ADMIN
 -- =========================================================
 
-CREATE TABLE admin (
+CREATE TABLE IF NOT EXISTS admin (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
@@ -38,7 +38,7 @@ CREATE TABLE admin (
 -- CLASSI
 -- =========================================================
 
-CREATE TABLE classes (
+CREATE TABLE IF NOT EXISTS classes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     name VARCHAR(50) NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE classes (
 -- MATERIE
 -- =========================================================
 
-CREATE TABLE subjects (
+CREATE TABLE IF NOT EXISTS subjects (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     external_id VARCHAR(100) DEFAULT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE subjects (
 -- DOCENTI
 -- =========================================================
 
-CREATE TABLE teachers (
+CREATE TABLE IF NOT EXISTS teachers (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     external_id VARCHAR(100) DEFAULT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE teachers (
 -- AULE
 -- =========================================================
 
-CREATE TABLE rooms (
+CREATE TABLE IF NOT EXISTS rooms (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     external_id VARCHAR(100) DEFAULT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE rooms (
 -- 1A / Tuesday / 3
 -- =========================================================
 
-CREATE TABLE timetable_slots (
+CREATE TABLE IF NOT EXISTS timetable_slots (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     class_id INT UNSIGNED NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE timetable_slots (
 -- nello stesso giorno e ora.
 -- =========================================================
 
-CREATE TABLE timetable_lessons (
+CREATE TABLE IF NOT EXISTS timetable_lessons (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     slot_id BIGINT UNSIGNED NOT NULL,
@@ -189,7 +189,7 @@ CREATE TABLE timetable_lessons (
 --   - VERDI MICHELE
 -- =========================================================
 
-CREATE TABLE timetable_lesson_teachers (
+CREATE TABLE IF NOT EXISTS timetable_lesson_teachers (
     lesson_id BIGINT UNSIGNED NOT NULL,
     teacher_id INT UNSIGNED NOT NULL,
 
@@ -214,7 +214,7 @@ CREATE TABLE timetable_lesson_teachers (
 -- Una lezione può avere zero, una o più aule.
 -- =========================================================
 
-CREATE TABLE timetable_lesson_rooms (
+CREATE TABLE IF NOT EXISTS timetable_lesson_rooms (
     lesson_id BIGINT UNSIGNED NOT NULL,
     room_id INT UNSIGNED NOT NULL,
 
@@ -233,7 +233,11 @@ CREATE TABLE timetable_lesson_rooms (
 );
 
 
--- Utente admin predefinito (username: admin, password: admin)
 INSERT INTO admin (username, password)
-VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi')
-ON DUPLICATE KEY UPDATE username = username;
+SELECT 'admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi'
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM admin
+    WHERE username = 'admin'
+);

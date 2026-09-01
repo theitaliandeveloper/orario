@@ -137,7 +137,8 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                 <p class="mb-0 text-body-secondary">
                     Questa piattaforma è rilasciata sotto i termini della licenza <strong>GNU Affero General Public License versione 3.0 (AGPL-3.0)</strong>.
                     Ciò significa che puoi liberamente studiare, modificare e distribuire il codice sorgente, a patto che ogni modifica apportata
-                    venga resa pubblica e condivisa sotto la medesima licenza qualora il servizio sia reso disponibile in rete.
+                    venga resa pubblica e condivisa sotto la medesima licenza qualora il servizio sia reso disponibile in rete.<br>
+                    Il tema della piattaforma è stato realizzato con Bootstrap 5 e le icone sono fornite da Bootstrap Icons.
                 </p>
             </div>
         </div>
@@ -201,8 +202,8 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         // Version badge
         const versionBadge = d.version === 'dev'
-            ? `<span class="badge bg-warning text-dark"><i class="bi bi-code-slash"></i> Sviluppo</span>`
-            : `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> ${d.version}</span>`;
+            ? `<a href="https://git.vichingo455.com/emmev-code/orario/src/branch/dev/" target="_blank" rel="noopener noreferrer"><span class="badge bg-warning text-dark"><i class="bi bi-code-slash"></i> Sviluppo</span></a>`
+            : `<a href="https://git.vichingo455.com/emmev-code/orario/releases/tag/v${d.version}" target="_blank" rel="noopener noreferrer"><span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> ${d.version}</span></a>`;
         const maintBadge = d.maintenance
             ? `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Attivata (in manutenzione)</span>`
             : `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Disattivata (normale)</span>`;

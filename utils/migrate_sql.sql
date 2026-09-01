@@ -12,6 +12,8 @@
 -- RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
 -- Poi importa new_schema.sql e quindi esegui questo file.
 
+USE school_timetable;
+
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS schema_versions (

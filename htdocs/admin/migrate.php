@@ -47,20 +47,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageType = 'warning';
     } else {
         try {
-            $result = migrate_v1(
-                $conn,
-                dirname(__DIR__, 2),
-                static function (string $step): void {
-                }
-            );
-
-            $legacyDetected = false;
-            $normalizedDetected = true;
-            $schemaVersion = (int)$result['version'];
-            $versionNeedsUpdate = false;
-            $versionSupported = true;
-            $message .= 'Migrazione alla v' . $schemaVersion . ' completata. Le tabelle legacy sono state conservate come backup.';
-            $messageType = 'success';
+            if ($schemaVersion < 1) {
+                $result = migrate_v1(
+                    $conn,
+                    dirname(__DIR__, 2),
+                    static function (string $step): void {
+                    }
+                );
+                $legacyDetected = false;
+                $normalizedDetected = true;
+                $schemaVersion = (int)$result['version'];
+                $versionNeedsUpdate = false;
+                $versionSupported = true;
+                $message .= 'Migrazione alla v' . $schemaVersion . ' completata. Le tabelle legacy sono state conservate come backup.';
+                $messageType = 'success';
+            } else {
+                throw new RuntimeException('Nessuna migrazione disponibile per lo stato/versione attuale del database.');
+            }
         } catch (Throwable $error) {
             $message = 'Migrazione alla v' . CURRENT_SCHEMA_VERSION . ' non completata: ' . $error->getMessage();
             $messageType = 'danger';
