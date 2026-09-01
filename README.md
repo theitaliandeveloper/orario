@@ -131,8 +131,8 @@ curl -fsSL https://get.docker.com | bash
 ```
 2. Scarica i file richiesti:
 ```bash
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose.yml
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/stable/schema.sql
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/stable/docker-compose.yml
 ```
 
 3. Avvia il container:
