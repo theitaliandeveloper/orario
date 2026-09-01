@@ -1,1 +1,4 @@
 docker-compose.override.yml
+vendor/
+htdocs/config/config.php
+htdocs/composer.lock

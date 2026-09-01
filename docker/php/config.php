@@ -73,14 +73,6 @@ if (!defined('PDF_EXPORT')) {
         define('PDF_EXPORT', true);
     }
 }
-if (!defined('OPEN_DATA')) {
-    $val = getenv('OPEN_DATA');
-    if ($val !== false && $val !== '') {
-        define('OPEN_DATA', filter_var($val, FILTER_VALIDATE_BOOLEAN));
-    } else {
-        define('OPEN_DATA', true);
-    }
-}
 if (!defined('MAINTENANCE')) {
     $val = getenv('MAINTENANCE');
     if ($val !== false && $val !== '') {

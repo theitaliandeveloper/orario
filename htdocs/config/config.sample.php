@@ -38,9 +38,6 @@ if (!defined('YEAR')) {
 if (!defined('PDF_EXPORT')) {
     define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
 }
-if (!defined('OPEN_DATA')) {
-    define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
-}
 if (!defined('MAINTENANCE')) {
     define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
 }
@@ -76,6 +73,6 @@ if (!defined('SESSION_LIFETIME')) {
 }
 // Labs (funzioni interne)
 if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
+    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/orario
 }
 ?>

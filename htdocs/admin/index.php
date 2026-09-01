@@ -17,6 +17,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require __DIR__ . "/../lib/variables.php";
 require_once __DIR__ . "/../lib/csrf.php";
+require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/schema.php";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -33,57 +35,176 @@ if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit;
 }
+
+if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
+    header("Location: migrate.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title><?php echo APP_NAME; ?> - Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/admin.css">
-    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../css/fonts.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> - Admin Dashboard<?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
-    <div class="links">
-      <a href="../index.php">Torna al sito</a>
-      <a href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>">Logout</a>
-    </div>
-  </div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-reset" href="index.php">
+                <i class="bi bi-clock"></i>&nbsp;
+                <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-reset" href="../index.php"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-  <!-- Contenuto Dashboard -->
-  <div class="dashboard">
-    <h1>Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
-    <p>
-      <a href="classes.php" class="buttons">Gestisci Classi</a>
-      <a href="subjects.php" class="buttons">Gestisci Materie</a>
-      <a href="timetable.php" class="buttons">Gestisci Orario</a>
-      <?php
-          if (defined(API_URL) || API_URL != "") {
-            echo '<a href="importer.php" class="buttons">Importa Orario</a>';
-          }
-      ?>
-      <?php
-      if ($_SESSION['auth_type'] === 'local') {
-        echo '<a href="password.php" class="buttons">Cambia Password</a>';
-      }
-      ?>
-      <?php
-      if ($_SESSION['auth_type'] === 'local' && $_SESSION['admin'] === 'admin') {
-        echo '<a href="users.php" class="buttons">Gestisci Utenti</a>';
-      }
-      ?>
-      <a href="about.php" class="buttons">Informazioni sulla piattaforma</a>
-    </p>
-    <p class="only-mobile">
-      Nota: Questa pagina si vede meglio da computer desktop. Se sei da computer, puoi ignorare questo messaggio.
-    </p>
-    <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
-        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
-        Codice sorgente disponibile su <a href="https://git.vichingo455.qzz.io/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
-        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
-    </p>
-  </div>
+    <!-- Contenuto Dashboard -->
+    <div class="container my-4">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold">Benvenuto, <?php echo htmlspecialchars($_SESSION['admin']); ?>!</h1>
+            <p class="text-secondary">Cosa facciamo oggi?</p>
+        </div>
+        <?php if (schema_update_required($conn)): ?>
+            <div class="alert alert-warning text-center" role="alert">
+                <strong>Attenzione!</strong> È disponibile un aggiornamento dello schema del database. <a href="migrate.php" class="alert-link">Aggiorna ora</a> per migliorare le prestazioni, la stabilità e la sicurezza della piattaforma.
+            </div>
+        <?php endif; ?>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary display-5">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Classi</h4>
+                        <p class="card-text text-muted">Gestisci l'elenco con tutte le classi e le sezioni scolastiche.</p>
+                        <a href="classes.php" class="btn btn-primary w-100">Gestisci Classi</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary display-5">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Materie & Docenti</h4>
+                        <p class="card-text text-muted">Aggiungi, modifica o rimuovi docenti, materie e laboratori.</p>
+                        <a href="subjects.php" class="btn btn-primary w-100">Gestisci Materie e Docenti</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary display-5">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Orario Scolastico</h4>
+                        <p class="card-text text-muted">Compila e aggiorna la griglia oraria settimanale per ciascuna classe.</p>
+                        <a href="timetable.php" class="btn btn-primary w-100">Gestisci Orario</a>
+                    </div>
+                </div>
+            </div>
+
+            <?php if (defined('API_URL') && API_URL != ""): ?>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-warning display-5">
+                            <i class="bi bi-cloud-arrow-down"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Importatore</h4>
+                        <p class="card-text text-muted">Importa automaticamente l'orario da un sistema esterno tramite API.</p>
+                        <a href="importer.php" class="btn btn-warning text-dark fw-bold w-100">Importa Orario</a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['auth_type'] === 'local'): ?>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary display-5">
+                            <i class="bi bi-key"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Password</h4>
+                        <p class="card-text text-muted">Modifica la password di accesso del tuo account di amministrazione.</p>
+                        <a href="password.php" class="btn btn-secondary w-100">Cambia Password</a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['auth_type'] === 'local' && $_SESSION['admin'] === 'admin'): ?>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary display-5">
+                            <i class="bi bi-person-lock"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Utenti Admin</h4>
+                        <p class="card-text text-muted">Crea e gestisci gli account con privilegi di amministrazione.</p>
+                        <a href="users.php" class="btn btn-secondary w-100">Gestisci Utenti</a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info display-5">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-2">Informazioni Piattaforma</h4>
+                        <p class="card-text text-muted">Visualizza lo stato del sistema, telemetria PHP e dettagli del database.</p>
+                        <a href="about.php" class="btn btn-info text-white w-100">Informazioni</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-body-secondary small mt-5 mb-3">
+        Copyright &copy; 2025-<?php echo date("Y"); ?>
+        EmmeV. Rilasciato sotto
+        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
+            target="_blank"
+            class="fw-bold text-decoration-none">
+            Licenza GNU AGPL 3.0
+        </a>.
+        <br>
+        Codice sorgente disponibile su
+        <a href="https://git.vichingo455.com/emmev-code/orario"
+            target="_blank"
+            class="fw-bold text-decoration-none">
+            Gitea
+        </a>.
+    </footer>
+    <script src="../js/theme.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>

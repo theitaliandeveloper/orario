@@ -15,26 +15,23 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+require_once __DIR__ . "/../lib/misc.php";
 require_once __DIR__ . "/../lib/db.php";
-if (OPEN_DATA) {
-    $res = $conn->query("SELECT DISTINCT teacher FROM subjects ORDER BY teacher");
-    $docenti = [];
-    while ($row = $res->fetch_assoc()) {
-        $docenti[] = $row['teacher'];
+$res = $conn->query(
+    "SELECT DISTINCT t.name AS teacher
+     FROM teachers t
+     INNER JOIN timetable_lesson_teachers tlt ON tlt.teacher_id = t.id
+     ORDER BY t.name"
+);
+$docenti = [];
+while ($row = $res->fetch_assoc()) {
+    if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {
+        $docenti[] = normalise_string($row['teacher']);
     }
-    header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST');
-    header("Access-Control-Allow-Headers: X-Requested-With");
-    echo json_encode($docenti, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    exit();
-} else {
-    http_response_code(403);
-    if (DEV_MODE) {
-        echo "Non puoi accedere a questa API perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
-    }
-    else {
-        echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
-    }
-    exit();
 }
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: X-API-Key, X-Requested-With");
+echo json_encode($docenti, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+exit();

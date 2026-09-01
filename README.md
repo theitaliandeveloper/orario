@@ -5,7 +5,7 @@ Una piattaforma web per visualizzare gli orari scolastici delle classi, degli in
 - Server web (consigliati nginx o apache2 per Linux, XAMPP per Windows)
 - PHP 8.0 o successivo (configurato nel tuo server web)
 - Composer
-- MySQL ultima versione
+- MariaDB 10/11/12
 
 ## Installazione
 1. **Clona la repository e copia la cartella htdocs in una cartella accessibile dal server web**
@@ -13,7 +13,6 @@ Una piattaforma web per visualizzare gli orari scolastici delle classi, degli in
 ```bash
 git clone https://git.vichingo455.com/emmev-code/orario
 cp -r orario/htdocs/* /var/www/html/
-mv /var/www/html/config/config.sample.php /var/www/html/config/config.php
 ```
 
 2. **Installa ``composer`` e le estensioni di php**
@@ -56,9 +55,10 @@ VALUES ('admin', '$2y$10$IS9v8CJNJnRXslV1NWDSquAjJ0GgU1sm6spBmGp6mjTLiNApfGcQi')
 mysql -u root -p < orario/schema.sql
 ```
 
-6. **Modifica il file ``config/config.php`` inserendo i valori richiesti**
-- Esempio file ``config/config.php``:
+6. **Crea il file ``config/config.php`` inserendo i valori richiesti**
+- Esempio file ``config/config.php`` (trovi il file base sotto ``config/config.sample.php``):
 ```php
+<?php
 // Impostazioni Database
 if (!defined('DB_HOST')) {
     define('DB_HOST', '<MYSQL_HOST>'); // Host del database (ad esempio localhost)
@@ -81,9 +81,6 @@ if (!defined('YEAR')) {
 }
 if (!defined('PDF_EXPORT')) {
     define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
-}
-if (!defined('OPEN_DATA')) {
-    define('OPEN_DATA', true); // Abilita gli Open Data (API e JSON delle tabelle).
 }
 if (!defined('MAINTENANCE')) {
     define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
@@ -134,15 +131,14 @@ curl -fsSL https://get.docker.com | bash
 ```
 2. Scarica i file richiesti:
 ```bash
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/stable/schema.sql
-wget https://git.vichingo455.com/emmev-code/orario/raw/branch/stable/docker-compose.yml
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/schema.sql
+wget https://git.vichingo455.com/emmev-code/orario/raw/branch/dev/docker-compose.yml
 ```
 
 3. Avvia il container:
 ```bash
 docker compose up -d
 ```
-
 4. Il container dovrebbe diventare disponibile su ``http://localhost:8080``
 
 ### Personalizzare l'istanza
@@ -159,7 +155,6 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       APP_NAME: "Orario Scuola" # Nome del sito
       YEAR: "2025/26" # Anno scolastico corrente
       PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
-      OPEN_DATA: true # Abilita gli Open Data (API e tabelle in JSON)
       MAINTENANCE: false # Abilita la modalità di manutenzione
 
       # --- Impostazioni Autenticazione ---
@@ -167,9 +162,9 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
 
       # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è oidc) ---
-      OIDC_ISSUER: "" # Dominio di Keycloak, ad esempio sso.tuosito.com
-      OIDC_CLIENT_ID: "" # Client ID per Keycloak, ad esempio orario
-      OIDC_CLIENT_SECRET: "" # Client Secret per Keycloak, ad esempio abcde12345
+      OIDC_ISSUER: "" # OIDC Issuer, ad esempio https://sso.tuosito.com/realms/master
+      OIDC_CLIENT_ID: "" # Client ID per OIDC, ad esempio orario
+      OIDC_CLIENT_SECRET: "" # Client Secret per OIDC, ad esempio abcde12345
       OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
       OIDC_NO_LOGOUT: false # Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
 
@@ -183,8 +178,33 @@ Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` co
       API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
 ```
 
-## Segnalare un problema
-Per segnalare un problema puoi usare [Bugzilla](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola). Clicca [qui](https://bugs.vichingo455.freeddns.org/describecomponents.cgi?product=Orario%20Scuola) per andare a Bugzilla.
+## Migrazione dello schema
+Per usare nuove versioni della piattaforma, potrebbe necessario migrare il database dallo schema vecchio a quello nuovo.
+Prima di iniziare la migrazione, assicurarsi di avere un backup del database. Le tabelle vecchie verranno mantenute aggiungendogli il suffisso ``_legacy``.
+
+### Migrazione dal browser (Docker e installazione manuale)
+Quando un amministratore accede al dashboard con lo schema legacy ancora attivo, viene aperta automaticamente la pagina ``admin/migrate.php``.
+Quella pagina mostrerà una descrizione breve dei cambiamenti effettuati. Basterà premere il pulsante "Avvia aggiornamento" e il database verrà aggiornato.
+
+### Migrazione da CLI (solo installazione manuale)
+Per migrare da riga di comando, è possibile usare lo strumento incluso con la piattaforma:
+```bash
+php utils/migrate.php
+```
+Lo strumento chiederà il permesso a procedere e vi informerà del risultato della migrazione.
+
+### Migrazione manuale (Docker e installazione manuale)
+Se vuoi fare la migrazione manuale, puoi usare ``migrate_sql.sql``.
+
+Passi consigliati:
+1. Esegui backup completo del database.
+2. Rinomina le tabelle legacy:
+```sql
+USE school_timetable;
+RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
+```
+3. Importa ``schema.sql``.
+4. Esegui ``migrate_sql.sql`` per popolare il nuovo modello.
 
 ## Licenza
 **Orario Scuola, Copyright (C) 2025-2026 EmmeV.**

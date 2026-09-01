@@ -16,25 +16,19 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/db.php";
-if (OPEN_DATA) {
-    $res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room IS NOT NULL AND room != '' ORDER BY room");
-    $rooms = [];
-    while ($row = $res->fetch_assoc()) {
-        $rooms[] = $row['room'];
-    }
-    header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST');
-    header("Access-Control-Allow-Headers: X-Requested-With");
-    echo json_encode($rooms, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    exit();
-} else {
-    http_response_code(403);
-    if (DEV_MODE) {
-        echo "Non puoi accedere a questa API perchè gli Open Data in questa istanza sono disattivati. Per attivarli, apri il file config.php e modifica OPEN_DATA su true.";
-    }
-    else {
-        echo "Non puoi accedere a questa API perchè non hai i permessi necessari per farlo.";
-    }
-    exit();
+$res = $conn->query(
+    "SELECT DISTINCT r.name AS room
+     FROM rooms r
+     INNER JOIN timetable_lesson_rooms tlr ON tlr.room_id = r.id
+     ORDER BY r.name"
+);
+$rooms = [];
+while ($row = $res->fetch_assoc()) {
+    $rooms[] = $row['room'];
 }
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: X-API-Key, X-Requested-With");
+echo json_encode($rooms, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+exit();

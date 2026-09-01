@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
@@ -6,194 +6,143 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-require_once __DIR__ . "/lib/db.php";
+require_once __DIR__ . "/lib/variables.php";
 require_once __DIR__ . "/lib/csrf.php";
+require_once __DIR__ . "/lib/misc.php";
+require_once __DIR__ . "/lib/db.php";
+require_once __DIR__ . "/lib/schema.php";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $now = time();
-if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { 
     session_unset();
     session_destroy();
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+$_SESSION['discard_after'] = $now + SESSION_LIFETIME; 
 if (!isset($_SESSION['admin']) && MAINTENANCE) {
-  header("Location: manutenzione.php");
-  exit;
+    header("Location: manutenzione.php");
+    exit;
 }
+
+$legacySchemaDetected = schema_update_required($conn);
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-  <title><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/home.css">
-  <link rel="stylesheet" href="css/navbar.css">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <title><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./css/fonts.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
+
 <body>
-<div class="navbar">
-    <div class="logo"><?php echo APP_NAME; ?> <?php echo YEAR; ?><?php if (DEV_MODE){echo " - SVILUPPO";}?><?php if (isset($_SESSION['admin']) && MAINTENANCE){echo " - MANUTENZIONE";}?></div>
-    <div class="links">
-      <a href="index.php">Home</a>
-      <a href="admin/index.php">Admin</a>
-    </div>
-  </div>
-  <h1><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></h1>
-
-  <?php
-  if (MAINTENANCE) {
-    echo "<p class='centered' style='color: red; font-size: 18px;'>ATTENZIONE! MODALITA' DI MANUTENZIONE ATTIVA!</p>";
-  }
-  ?>
-
-  <!-- Search Box -->
-  <div class="search-container">
-    <input type="text" id="searchBox" placeholder="Cerca classe, docente o laboratorio..." autocomplete="off">
-  </div>
-
-  <!-- Sezione Classi -->
-  <h2>Classi</h2>
-  <div class="grid">
+    <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-reset" href="index.php">
+                <i class="bi bi-clock"></i>&nbsp;
+                <?php echo APP_NAME; ?> <?php echo YEAR; ?>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold text-reset" href="admin/index.php"><i class="bi bi-shield"></i> Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <h1 class="fw-bold text-center mb-4">
+        <?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?>
+    </h1>
     <?php
-    $years = [1=>"Prime",2=>"Seconde",3=>"Terze",4=>"Quarte",5=>"Quinte"];
-    foreach($years as $year=>$label){
-      echo "<ul><li><b>$label</b></li>";
-      $likeYear = $year . '%';
-      $stmt = $conn->prepare("SELECT * FROM classes WHERE name LIKE ? ORDER BY name");
-      $stmt->bind_param("s", $likeYear);
-      $stmt->execute();
-      $res = $stmt->get_result();
-      while($row = $res->fetch_assoc()){
-        echo "<li><a href='studenti.php?class_id={$row['id']}' class='littlebutton'>" . htmlspecialchars($row['name']) . "</a></li>";
-      }
-      echo "</ul>";
+    if (MAINTENANCE) {
+    ?>
+        <div class="alert alert-warning text-center" role="alert">
+            <strong>Attenzione!</strong> Modalità di manutenzione attiva.
+        </div>
+    <?php
     }
     ?>
-  </div>
-
-  <!-- Sezione Docenti -->
-  <h2>Docenti</h2>
-  <div class="grid">
     <?php
-    $res = $conn->query("SELECT DISTINCT teacher FROM subjects ORDER BY teacher");
-    while($row = $res->fetch_assoc()){
-      if ($row['teacher'] != "No Lezione" && $row['teacher'] != "sconosciuto") {
-	$teacher_name = htmlspecialchars($row['teacher']);
-      	echo "<ul><li><b>$teacher_name</b></li>";
-      	echo "<li><a href='docenti.php?teacher=".urlencode($teacher_name)."' class='littlebutton'>Visualizza orario</a></li>";
-     	echo "</ul>";
-      }
-    }
-    ?>
-  </div>
-
-<!-- Sezione Aule -->
-<h2>Laboratori</h2>
-<div class="grid">
-<?php
-$res = $conn->query("SELECT DISTINCT room FROM subjects WHERE room IS NOT NULL AND room != '' ORDER BY room");
-while($row = $res->fetch_assoc()){
-    $room_name = htmlspecialchars($row['room']);
-    echo "<ul><li><b>$room_name</b></li>";
-    echo "<li><a href='laboratori.php?room=".urlencode($room_name)."' class='littlebutton'>Visualizza orario</a></li>";
-    echo "</ul>";
-}
-?>
-</div>
-
-<p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 20px;">
-        Copyright &copy; 2025-2026 EmmeV. - Rilasciato sotto <a href="https://git.vichingo455.qzz.io/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Licenza GNU AGPL 3.0</a>.<br>
-        Codice sorgente disponibile su <a href="https://git.vichingo455.qzz.io/emmev-code/orario" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Gitea</a>.
-        La favicon in uso è stata scaricata da <a href="https://www.vecteezy.com/free-png/clcok" target="_blank" style="color: #1f618d; text-decoration: none; font-weight: bold;">Vecteezy</a>.
-</p>
-<script>
-document.getElementById('searchBox').addEventListener('input', function(e) {
-  const query = e.target.value.toLowerCase().trim();
-  const classGrids = document.querySelectorAll('.grid');
-  
-  // 1. Filter Classi (First grid - filters individual class items inside columns)
-  const classiGrid = classGrids[0];
-  if (classiGrid) {
-    const uls = classiGrid.querySelectorAll('ul');
-    uls.forEach(ul => {
-      let visibleButtons = 0;
-      const lis = ul.querySelectorAll('li');
-      // Skip the header (e.g., "Prime", "Seconde")
-      for (let i = 1; i < lis.length; i++) {
-        const btn = lis[i].querySelector('a');
-        if (btn) {
-          const text = btn.textContent.toLowerCase();
-          if (text.includes(query)) {
-            lis[i].style.display = '';
-            visibleButtons++;
-          } else {
-            lis[i].style.display = 'none';
-          }
-        }
-      }
-      // Hide the column entirely if no classes within it match
-      ul.style.display = visibleButtons > 0 || query === '' ? '' : 'none';
-    });
-  }
-
-  // Helper function to filter card-based grids (Docenti & Laboratori)
-  function filterCardGrid(gridIndex) {
-    const grid = classGrids[gridIndex];
-    if (!grid) return 0;
-    const uls = grid.querySelectorAll('ul');
-    let visibleCards = 0;
-    uls.forEach(ul => {
-      const header = ul.querySelector('li b');
-      if (header) {
-        const text = header.textContent.toLowerCase();
-        if (text.includes(query)) {
-          ul.style.display = '';
-          visibleCards++;
+    if ($legacySchemaDetected && MANDATORY_SCHEMA_UPDATE) {
+        if (!isset($_SESSION['admin'])) {
+        ?>
+            <div class="alert alert-danger text-center" role="alert">
+                <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. Accedi all'area amministrativa per aggiornarlo e ripristinare il normale funzionamento oppure contatta l'amministratore della piattaforma.
+            </div>
+        <?php
         } else {
-          ul.style.display = 'none';
+        ?>
+            <div class="alert alert-danger text-center" role="alert">
+                <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. <a href="admin/migrate.php" class="alert-link">Aggiornalo ora</a> per ripristinare il normale funzionamento della piattaforma.
+            </div>
+        <?php
         }
-      }
-    });
-    return visibleCards;
-  }
-
-  // 2. Filter Docenti (Second grid)
-  const visibleDocenti = filterCardGrid(1);
-  
-  // 3. Filter Laboratori (Third grid)
-  const visibleLaboratori = filterCardGrid(2);
-
-  // Toggle visibility of section headers (h2) if all matching items are hidden
-  const headings = document.querySelectorAll('h2');
-  if (headings.length >= 3) {
-    const visibleClassi = classiGrid ? Array.from(classiGrid.querySelectorAll('ul')).some(ul => ul.style.display !== 'none') : false;
-    
-    // Classi section
-    headings[0].style.display = visibleClassi || query === '' ? '' : 'none';
-    if (classiGrid) classiGrid.style.display = visibleClassi || query === '' ? '' : 'none';
-
-    // Docenti section
-    headings[1].style.display = visibleDocenti > 0 || query === '' ? '' : 'none';
-    if (classGrids[1]) classGrids[1].style.display = visibleDocenti > 0 || query === '' ? '' : 'none';
-
-    // Laboratori section
-    headings[2].style.display = visibleLaboratori > 0 || query === '' ? '' : 'none';
-    if (classGrids[2]) classGrids[2].style.display = visibleLaboratori > 0 || query === '' ? '' : 'none';
-  }
-});
-</script>
+    } else {
+    ?>
+    <div class="container">
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="searchBox"
+                        class="form-control"
+                        placeholder="Cerca classe, docente o laboratorio..."
+                        autocomplete="off">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                </div>
+            </div>
+        </div>
+        <h2 class="mb-3"><i class="bi bi-calendar"></i> Classi</h2>
+        <div class="row g-3" id="classes-container"></div>
+        
+        <h2 class="mt-5 mb-3"><i class="bi bi-people-fill"></i> Docenti</h2>
+        <div class="row g-3" id="teachers-container"></div>
+        
+        <h2 class="mb-3 mt-4"><i class="bi bi-flask"></i> Laboratori</h2>
+        <div class="row g-3" id="labs-container"></div>
+    </div>
+    <?php
+    }
+    ?>
+    <footer class="text-center text-body-secondary small mt-5 mb-3">
+        Copyright &copy; 2025-<?php echo date("Y"); ?>
+        EmmeV. Rilasciato sotto
+        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
+            target="_blank"
+            class="fw-bold text-decoration-none">
+            Licenza GNU AGPL 3.0
+        </a>.
+        <br>
+        Codice sorgente disponibile su
+        <a href="https://git.vichingo455.com/emmev-code/orario"
+            target="_blank"
+            class="fw-bold text-decoration-none">
+            Gitea
+        </a>.
+    </footer>
+    <?php
+    if (!$legacySchemaDetected) {
+    ?>
+        <script src="js/index.js"></script>
+    <?php
+    }
+    ?>
+    <script src="js/theme.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
