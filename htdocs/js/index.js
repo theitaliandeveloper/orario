@@ -43,10 +43,12 @@ document.addEventListener("DOMContentLoaded", async function() {
             const docenti = await res.json();
             let html = "";
             docenti.forEach(d => {
-                html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3"><div class="card h-100 shadow-sm"><div class="card-body text-center">
+                if (!d.includes("Sconosciuto")) {
+                    html += `<div class="col-12 col-sm-6 col-md-4 col-lg-3"><div class="card h-100 shadow-sm"><div class="card-body text-center">
                          <h5 class="card-title">${d}</h5>
                          <a href="orario.php?view=docente&id=${encodeURIComponent(d)}" class="btn btn-outline-info btn-sm">Visualizza orario</a>
                          </div></div></div>`;
+                }
             });
             document.getElementById("teachers-container").innerHTML = html;
         } catch (e) { console.error("Error loading teachers", e); }
