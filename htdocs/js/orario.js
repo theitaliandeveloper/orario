@@ -29,6 +29,13 @@ document.addEventListener("DOMContentLoaded", async function() {
     ];
 
     try {
+        if (VIEW_ID.contains("Sconosciuto")) {
+            document.getElementById("page-title").innerText = "Errore nel caricamento";
+            document.getElementById("desktop-table").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+            document.getElementById("mobile-view").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+            document.getElementById("pdf-export").innerHTML = "";
+            return;
+        }
         const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(3000) }); // Prova a caricare i dati con timeout di 2 secondi
         if (!res.ok) {
             if (res.status == 404) {
@@ -36,8 +43,8 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
             else {
                 document.getElementById("page-title").innerText = "Errore nel caricamento";
-                document.getElementById("desktop-table").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
-                document.getElementById("mobile-view").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+                document.getElementById("desktop-table").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+                document.getElementById("mobile-view").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
                 document.getElementById("pdf-export").innerHTML = "";
             }
             return;
@@ -164,8 +171,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     } catch (e) {
         console.error(e);
         document.getElementById("page-title").innerText = "Errore nel caricamento";
-        document.getElementById("desktop-table").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
-        document.getElementById("mobile-view").innerHTML = "<a href=\"/index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+        document.getElementById("desktop-table").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
+        document.getElementById("mobile-view").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
         document.getElementById("pdf-export").innerHTML = "";
     }
 });

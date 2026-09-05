@@ -3,9 +3,9 @@
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -71,8 +71,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                   </li>
               </ul>
           </div>
-      </div>
-  </nav>
+      </nav>
 
 <div class="container my-4">
     <div class="d-flex align-items-center justify-content-between mb-4">
@@ -111,6 +110,14 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                     <div class="form-text text-muted">Codice della classe nel sistema esterno</div>
                 </div>
 
+                <div class="col-12">
+                    <label for="vouch_cookie" class="form-label fw-semibold">Cookie Vouch *</label>
+                    <textarea name="vouch_cookie" id="vouch_cookie" 
+                              class="form-control font-monospace" rows="4" 
+                              placeholder="Incolla qui il valore del cookie..." required></textarea>
+                    <div class="form-text text-muted">Inserisci solo il valore del cookie, senza <code>VouchCookie=</code></div>
+                </div>
+
                 <div class="col-12 mt-4 text-end">
                     <button type="submit" id="btn-submit" class="btn btn-warning text-dark fw-bold px-4 py-2">
                         <i class="bi bi-cloud-arrow-down-fill me-1"></i> Importa Orario
@@ -130,6 +137,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                 <li>Assicurati che il server Node.js sia avviato (<code>node server.js</code>)</li>
                 <li>Seleziona la classe di destinazione nel tuo database</li>
                 <li>Inserisci il codice della classe nel sistema esterno (es: 3BIN, 1A, 5ACM)</li>
+                <li>Inserisci il valore del cookie Vouch ottenuto dal browser</li>
                 <li>Clicca su "Importa Orario"</li>
                 <li>Il sistema cancellerà l'orario esistente e importerà i nuovi dati</li>
             </ol>
@@ -167,6 +175,17 @@ const classSelect = document.getElementById("classe_id");
 const importForm = document.getElementById("import-form");
 const btnSubmit = document.getElementById("btn-submit");
 const alertContainer = document.getElementById("alert-container");
+const vouchCookie = document.getElementById("vouch_cookie");
+
+const savedVouchCookie = localStorage.getItem("vouch_cookie");
+if (savedVouchCookie) {
+    vouchCookie.value = savedVouchCookie;
+}
+
+vouchCookie.addEventListener("input", function() {
+    localStorage.setItem("vouch_cookie", vouchCookie.value);
+});
+
 
 function closeAlert() {
     alertContainer.innerHTML = "";
@@ -202,8 +221,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         
         const classe_id = parseInt(classSelect.value);
         const classe_codice = document.getElementById("classe_codice").value.trim();
+        const vouch_cookie = document.getElementById("vouch_cookie").value.trim();
 
-        if (!classe_id || !classe_codice) return;
+        if (!classe_id || !classe_codice || !vouch_cookie) return;
 
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Importazione in corso...`;
@@ -216,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": CSRF_TOKEN
                 },
-                body: JSON.stringify({ classe_id, classe_codice }),
+                body: JSON.stringify({ classe_id, classe_codice, vouch_cookie }),
                 signal: AbortSignal.timeout(10000)
             });
 
@@ -230,7 +250,10 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
             msg += `- Importati ${data.docenti_importati?.length || 0} docenti e ${data.laboratori_importati?.length || 0} laboratori.`;
             showAlert(msg, "success");
+            const savedCookie = vouchCookie.value;
             importForm.reset();
+            vouchCookie.value = savedCookie;
+
 
         } catch (e) {
             showAlert(e.message, "danger");

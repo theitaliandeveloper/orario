@@ -3,9 +3,9 @@
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,8 +35,9 @@ $input = json_decode(file_get_contents('php://input'), true);
 $input = is_array($input) ? $input : $_POST;
 $classe_codice = trim($input['classe_codice'] ?? $_POST['classe_codice'] ?? '');
 $classe_id = intval($input['classe_id'] ?? $_POST['classe_id'] ?? 0);
+$vouch_cookie = trim($input['vouch_cookie'] ?? $_POST['vouch_cookie'] ?? '');
 
-if (empty($classe_codice) || $classe_id === 0) {
+if (empty($classe_codice) || $classe_id === 0 || empty($vouch_cookie)) {
     http_response_code(400);
     echo json_encode(["error" => "Compila tutti i campi obbligatori."]);
     exit;
@@ -56,7 +57,7 @@ if (!$classExists) {
 try {
     $baseUrl = rtrim(API_URL, '/');
     $suffix = str_ends_with($baseUrl, "/orario") ? "" : "/orario";
-    $url = $baseUrl . $suffix . "?classe=" . urlencode($classe_codice);
+    $url = $baseUrl . $suffix . "?classe=" . urlencode($classe_codice) . "&vouch_cookie=" . urlencode($vouch_cookie);
     
     $ch = curl_init();
     if ($ch === false) {
@@ -65,6 +66,7 @@ try {
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_COOKIE, "VouchCookie=" . $vouch_cookie);
     $response = curl_exec($ch);
     $curlError = curl_error($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
