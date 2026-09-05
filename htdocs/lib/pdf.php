@@ -432,7 +432,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
 
             if ($cell['subject'] !== null) {
                 // Cella piena - Sfondo tenue Bootstrap #e7f1ff
-                $pdf->SetFillColor(231, 241, 255);
+                $pdf->SetFillColor(255, 255, 255);
                 $pdf->SetDrawColor(222, 226, 230);
                 $pdf->Rect($x, $y, $dayColW, $rowH, 'FD');
 
