@@ -417,6 +417,30 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
         $xStart = $pdf->GetX();
         $yStart = $pdf->GetY();
 
+        $rowH = 22;
+        foreach ($days as $d) {
+            $cell = $data[$d][$hnum];
+            if ($cell['subject'] === null) {
+                continue;
+            }
+
+            $contentHeight = 2;
+            $pdf->SetFont('Arial', 'B', 8.5);
+            $contentHeight += pdf_wrapped_line_count($pdf, (string)$cell['subject'], $dayColW - 2) * 4;
+
+            if (!empty($cell['lines'])) {
+                $pdf->SetFont('Arial', '', 7);
+                $contentHeight += 0.5 + pdf_wrapped_line_count($pdf, joinList($cell['lines']), $dayColW - 2) * 3.2;
+            }
+
+            if (!empty($cell['rooms'])) {
+                $pdf->SetFont('Arial', 'I', 6.5);
+                $contentHeight += 0.5 + pdf_wrapped_line_count($pdf, joinList($cell['rooms']), $dayColW - 2) * 3.5;
+            }
+
+            $rowH = max($rowH, $contentHeight + 3);
+        }
+
         // Colonna ORA
         $pdf->SetFillColor(248, 249, 250); // #f8f9fa
         $pdf->SetDrawColor(222, 226, 230);
@@ -456,8 +480,8 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                     $roomStr = joinList($cell['rooms']);
                     $pdf->SetFont('Arial', 'I', 6.5);
                     $pdf->SetTextColor(108, 117, 125);
-                    $pdf->SetXY($x + 1, $y + $rowH - 5);
-                    $pdf->Cell($dayColW - 2, 4, mb_convert_encoding($roomStr, 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
+                    $pdf->SetXY($x + 1, $pdf->GetY() + 0.5);
+                    $pdf->MultiCell($dayColW - 2, 3.5, mb_convert_encoding($roomStr, 'ISO-8859-1', 'UTF-8'), 0, 'C');
                 }
 
             } else {
@@ -486,4 +510,36 @@ function joinList(array $arr): string
     if (count($arr) === 1) return $arr[0];
     $last = array_pop($arr);
     return implode(', ', $arr) . ' e ' . $last;
+}
+
+function pdf_wrapped_line_count(Fpdf\Fpdf $pdf, string $text, float $width): int
+{
+    $text = trim($text);
+    if ($text === '') {
+        return 0;
+    }
+
+    $currentWidth = 0;
+    $wrappedLines = 1;
+    foreach (preg_split('/\s+/', $text) as $word) {
+        $wordWidth = $pdf->GetStringWidth(mb_convert_encoding($word, 'ISO-8859-1', 'UTF-8'));
+        if ($wordWidth > $width) {
+            if ($currentWidth > 0) {
+                $wrappedLines++;
+                $currentWidth = 0;
+            }
+            $wrappedLines += (int)ceil($wordWidth / $width) - 1;
+            continue;
+        }
+
+        $spaceWidth = $currentWidth > 0 ? $pdf->GetStringWidth(' ') : 0;
+        if ($currentWidth + $spaceWidth + $wordWidth > $width) {
+            $wrappedLines++;
+            $currentWidth = $wordWidth;
+        } else {
+            $currentWidth += $spaceWidth + $wordWidth;
+        }
+    }
+
+    return max(1, $wrappedLines);
 }
