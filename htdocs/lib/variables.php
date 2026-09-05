@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 // Queste variabili sono per sviluppatori
 if (!defined('VERSION')) {
-    define('VERSION', '3.0'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
+    define('VERSION', '3.0.1'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
 }
 
 if (!defined('DEV_MODE')) {
