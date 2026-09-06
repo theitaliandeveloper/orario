@@ -386,7 +386,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     $pdf = new _OrarioPDF('L', 'mm', 'A4');
     $pdf->pageTitle = $title;
     $pdf->SetMargins(10, 10, 10);
-    $pdf->SetAutoPageBreak(true, 14);
+    $pdf->SetAutoPageBreak(false);
     $pdf->AddPage();
 
     $pageW    = 297 - 20; // 277 mm
@@ -411,13 +411,9 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     }
     $pdf->Ln();
 
-    // ---- Righe ore ----
+    $rowHeights = [];
     foreach ($hours as $hnum => $hlabel) {
-        $pdf->SetTextColor(33, 37, 41);
-        $xStart = $pdf->GetX();
-        $yStart = $pdf->GetY();
-
-        $rowH = 22;
+        $desiredHeight = 22;
         foreach ($days as $d) {
             $cell = $data[$d][$hnum];
             if ($cell['subject'] === null) {
@@ -438,13 +434,28 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 $contentHeight += 0.5 + pdf_wrapped_line_count($pdf, joinList($cell['rooms']), $dayColW - 2) * 3.5;
             }
 
-            $rowH = max($rowH, $contentHeight + 3);
+            $desiredHeight = max($desiredHeight, $contentHeight + 3);
         }
+        $rowHeights[$hnum] = $desiredHeight;
+    }
+
+    $availableHeight = 210 - $pdf->GetY() - 14;
+    $totalHeight = array_sum($rowHeights);
+    $scale = $totalHeight > $availableHeight
+        ? max(0.55, $availableHeight / $totalHeight)
+        : 1;
+
+    // ---- Righe ore ----
+    foreach ($hours as $hnum => $hlabel) {
+        $pdf->SetTextColor(33, 37, 41);
+        $xStart = $pdf->GetX();
+        $yStart = $pdf->GetY();
+        $rowH = $rowHeights[$hnum] * $scale;
 
         // Colonna ORA
         $pdf->SetFillColor(248, 249, 250); // #f8f9fa
         $pdf->SetDrawColor(222, 226, 230);
-        $pdf->SetFont('Arial', 'B', 7.5);
+        $pdf->SetFont('Arial', 'B', 7.5 * $scale);
         $pdf->MultiCell($hourColW, $rowH / 2, mb_convert_encoding($hlabel, 'ISO-8859-1', 'UTF-8'), 1, 'C', true);
         $pdf->SetXY($xStart + $hourColW, $yStart);
 
@@ -461,27 +472,27 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 $pdf->Rect($x, $y, $dayColW, $rowH, 'FD');
 
                 // Materia - Primary emphasis #0a58ca
-                $pdf->SetFont('Arial', 'B', 8.5);
+                $pdf->SetFont('Arial', 'B', 8.5 * $scale);
                 $pdf->SetTextColor(10, 88, 202);
-                $pdf->SetXY($x + 1, $y + 2);
-                $pdf->MultiCell($dayColW - 2, 4, mb_convert_encoding($cell['subject'], 'ISO-8859-1', 'UTF-8'), 0, 'C');
+                $pdf->SetXY($x + 1, $y + (2 * $scale));
+                $pdf->MultiCell($dayColW - 2, 4 * $scale, mb_convert_encoding($cell['subject'], 'ISO-8859-1', 'UTF-8'), 0, 'C');
 
                 // Righe secondarie (docenti / classi) - Dark body text #212529
                 if (!empty($cell['lines'])) {
                     $linesStr = joinList($cell['lines']);
-                    $pdf->SetFont('Arial', '', 7);
+                    $pdf->SetFont('Arial', '', 7 * $scale);
                     $pdf->SetTextColor(33, 37, 41);
-                    $pdf->SetXY($x + 1, $pdf->GetY() + 0.5);
-                    $pdf->MultiCell($dayColW - 2, 3.2, mb_convert_encoding($linesStr, 'ISO-8859-1', 'UTF-8'), 0, 'C');
+                    $pdf->SetXY($x + 1, $pdf->GetY() + (0.5 * $scale));
+                    $pdf->MultiCell($dayColW - 2, 3.2 * $scale, mb_convert_encoding($linesStr, 'ISO-8859-1', 'UTF-8'), 0, 'C');
                 }
 
                 // Aula/e - Secondary muted text #6c757d
                 if (!empty($cell['rooms'])) {
                     $roomStr = joinList($cell['rooms']);
-                    $pdf->SetFont('Arial', 'I', 6.5);
+                    $pdf->SetFont('Arial', 'I', 6.5 * $scale);
                     $pdf->SetTextColor(108, 117, 125);
-                    $pdf->SetXY($x + 1, $pdf->GetY() + 0.5);
-                    $pdf->MultiCell($dayColW - 2, 3.5, mb_convert_encoding($roomStr, 'ISO-8859-1', 'UTF-8'), 0, 'C');
+                    $pdf->SetXY($x + 1, $pdf->GetY() + (0.5 * $scale));
+                    $pdf->MultiCell($dayColW - 2, 3.5 * $scale, mb_convert_encoding($roomStr, 'ISO-8859-1', 'UTF-8'), 0, 'C');
                 }
 
             } else {
