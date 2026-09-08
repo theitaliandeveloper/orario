@@ -50,6 +50,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         if (VIEW_TYPE === "docente") titleName = data.teacher;
         if (VIEW_TYPE === "laboratorio") titleName = data.room;
         document.getElementById("page-title").innerText = `Orario ${VIEW_TYPE} ${titleName}`;
+        if (VIEW_TYPE === "docente") {
+            document.getElementById("page-hours").textContent = `Ore cattedra docente: ${data.hours}`;
+        }
         document.title = `Orario ${VIEW_TYPE} ${titleName}`;
 
         const timetable = data.timetable;

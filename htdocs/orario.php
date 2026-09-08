@@ -100,7 +100,8 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     </div>
 </nav>
 
-<h1 class="fw-bold text-center mt-5 mb-5" id="page-title"></h1>
+<h1 class="fw-bold text-center mt-5 mb-2" id="page-title"></h1>
+<h4 class="text-center text-secondary-emphasis mt-2 mb-5" id="page-hours"></h4>
 
 <!-- Desktop View -->
 <table class="table table-bordered table-striped-columns table-hover text-center d-none d-md-table" id="desktop-table">
