@@ -53,8 +53,30 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 <style>
+    /* Desktop: colonne di larghezza uniforme */
+    #desktop-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
     #desktop-table th,
-    #desktop-table td,
+    #desktop-table td {
+        width: auto;
+        max-width: 1px;
+        padding: 0.5rem;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    /* Evita che contenuti molto lunghi allarghino la tabella */
+    #desktop-table th > *,
+    #desktop-table td > * {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
     #mobile-view .list-group-item,
     #mobile-view .subject,
     #mobile-view .teacher,
@@ -100,7 +122,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     </div>
 </nav>
 
-<h1 class="fw-bold text-center mt-5 mb-2" id="page-title"></h1>
+<h1 class="fw-bold text-center mt-3 mb-2" id="page-title"></h1>
 <h4 class="text-center text-secondary-emphasis mt-2 mb-5" id="page-hours"></h4>
 
 <!-- Desktop View -->
@@ -114,22 +136,11 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <!-- Mobile View -->
 <div class="d-block d-md-none" id="mobile-view"></div>
 
-<footer class="text-center text-body-secondary small mt-5 mb-3">
-        Copyright &copy; 2025-<?php echo date("Y"); ?>
-        EmmeV. Rilasciato sotto
-        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
-            target="_blank"
-            class="fw-bold text-decoration-none">
-            Licenza GNU AGPL 3.0
-        </a>.
-        <br>
-        Codice sorgente disponibile su
-        <a href="https://git.vichingo455.com/emmev-code/orario"
-            target="_blank"
-            class="fw-bold text-decoration-none">
-            Gitea
-        </a>.
-    </footer>
+<footer class="text-center text-body-secondary small mt-3 mb-3">
+    Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+</footer>
 
 <script src="js/orario.js"></script>
 <script src="js/theme.js"></script>

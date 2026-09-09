@@ -119,22 +119,11 @@ $legacySchemaDetected = schema_update_required($conn);
     <?php
     }
     ?>
-    <footer class="text-center text-body-secondary small mt-5 mb-3">
-        Copyright &copy; 2025-<?php echo date("Y"); ?>
-        EmmeV. Rilasciato sotto
-        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
-            target="_blank"
-            class="fw-bold text-decoration-none">
-            Licenza GNU AGPL 3.0
-        </a>.
-        <br>
-        Codice sorgente disponibile su
-        <a href="https://git.vichingo455.com/emmev-code/orario"
-            target="_blank"
-            class="fw-bold text-decoration-none">
-            Gitea
-        </a>.
-    </footer>
+    <footer class="text-center text-body-secondary small mt-3 mb-3">
+    Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+</footer>
     <?php
     if (!$legacySchemaDetected) {
     ?>

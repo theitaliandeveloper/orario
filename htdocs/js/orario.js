@@ -28,8 +28,12 @@ document.addEventListener("DOMContentLoaded", async function() {
         "Sesta ora<br> 12:50 - 13:50"
     ];
 
+    // Impostazione ricreazioni.
+    // In futuro questo valore potrà essere fornito dal backend.
+    const SHOW_BREAKS = true;
     try {
         const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(3000) }); // Prova a caricare i dati con timeout di 2 secondi
+
         if (!res.ok) {
             if (res.status == 404) {
                 location.replace("404.php");
@@ -42,9 +46,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
             return;
         }
-        
+    
         const data = await res.json();
-        
+
         let titleName = "";
         if (VIEW_TYPE === "classe") titleName = data.class_name;
         if (VIEW_TYPE === "docente") titleName = data.teacher;
@@ -77,7 +81,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             return `${items.slice(0, -1).join(", ")} e ${items[items.length - 1]}`;
         };
 
-
         function slotDetails(slot) {
             if (VIEW_TYPE === 'classe') {
                 return {
@@ -105,7 +108,10 @@ document.addEventListener("DOMContentLoaded", async function() {
             };
         }
 
+        // ============================================================
         // Render Desktop
+        // ============================================================
+
         let dHead = `<th>Ora/Giorno</th>`;
         days.forEach(d => dHead += `<th>${d}</th>`);
         document.getElementById("desktop-head").innerHTML = dHead;
@@ -120,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     const details = slotDetails(slot);
                     const secondary = details.secondary;
                     const rooms = details.rooms;
-                    
+
                     dBody += `<td data-label="${d}">
                         <div class="subject fw-bold text-primary-emphasis">${escapeHtml(slot.subject)}</div>
                         ${secondary ? `<div class="teacher small">${escapeHtml(secondary)}</div>` : ''}
@@ -131,17 +137,40 @@ document.addEventListener("DOMContentLoaded", async function() {
                 }
             });
             dBody += `</tr>`;
+
+            // Prima ricreazione: 9:45 - 9:55
+            if (SHOW_BREAKS && i === 2) {
+                dBody += `
+                    <tr>
+                        <td colspan="7" class="text-center fw-semibold py-2">Prima ricreazione <span class="text-body-secondary fw-normal">9:45 - 9:55</span></td>
+                    </tr>
+                `;
+            }
+
+            // Seconda ricreazione: 11:45 - 11:55
+            if (SHOW_BREAKS && i === 4) {
+                dBody += `
+                    <tr>
+                        <td colspan="7" class="text-center fw-semibold py-2">Seconda ricreazione <span class="text-body-secondary fw-normal">11:45 - 11:55</span></td>
+                    </tr>
+                `;
+            }
         }
+
         document.getElementById("desktop-body").innerHTML = dBody;
 
+        // ============================================================
         // Render Mobile
+        // ============================================================
+
         let mBody = "";
+
         days.forEach(d => {
             const dayClean = dayKey(d);
             mBody += `<div class="card mb-3 shadow-sm"><div class="card-header fw-semibold">${escapeHtml(d)}</div><div class="list-group list-group-flush">`;
             for (let i = 1; i <= 6; i++) {
                 const slot = (timetable[dayClean] && timetable[dayClean][i]) ? timetable[dayClean][i] : null;
-                const hlabel = hours[i-1].replace("<br>", " ");
+                const hlabel = hours[i - 1].replace("<br>", " ");
                 if (slot && slot.subject) {
                     const details = slotDetails(slot);
                     const secondary = details.secondary;
@@ -159,11 +188,33 @@ document.addEventListener("DOMContentLoaded", async function() {
                         <div>—</div>
                     </div>`;
                 }
+
+                // Prima ricreazione: dopo la seconda ora
+                if (SHOW_BREAKS && i === 2) {
+                    mBody += `
+                        <div class="list-group-item bg-warning-subtle">
+                            <div class="fw-semibold">Prima ricreazione</div>
+                            <div class="small text-body-secondary">9:45 - 9:55</div>
+                        </div>
+                    `;
+                }
+
+                // Seconda ricreazione: dopo la quarta ora
+                if (SHOW_BREAKS && i === 4) {
+                    mBody += `
+                        <div class="list-group-item bg-warning-subtle">
+                            <div class="fw-semibold">Seconda ricreazione</div>
+                            <div class="small text-body-secondary">11:45 - 11:55</div>
+                        </div>
+                    `;
+                }
             }
+
             mBody += `</div></div>`;
         });
+
         document.getElementById("mobile-view").innerHTML = mBody;
-        
+
     } catch (e) {
         console.error(e);
         document.getElementById("page-title").innerText = "Errore nel caricamento";
