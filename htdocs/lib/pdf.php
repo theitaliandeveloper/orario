@@ -605,7 +605,8 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 $pdf->SetFont('Arial', 'B', 8.5 * $scale);
                 $pdf->SetTextColor(10, 88, 202);
                 $pdf->SetXY($x + 1, $y + (2 * $scale));
-                $pdf->MultiCell($dayColW - 2, 4 * $scale, mb_convert_encoding($cell['subject'], 'ISO-8859-1', 'UTF-8'), 0, 'C');
+                $subjectText = mb_convert_case($cell['subject'], MB_CASE_TITLE, "UTF-8");
+                $pdf->MultiCell($dayColW - 2, 4 * $scale, mb_convert_encoding($subjectText, 'ISO-8859-1', 'UTF-8'), 0, 'C');
 
 
                 // -------------------------------------------------
@@ -613,7 +614,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 // -------------------------------------------------
 
                 if (!empty($cell['lines'])) {
-                    $linesStr = joinList($cell['lines']);
+                    $linesStr = mb_convert_case(joinList($cell['lines']), MB_CASE_TITLE, "UTF-8");
                     $pdf->SetFont('Arial', '', 7 * $scale);
                     $pdf->SetTextColor(33, 37, 41);
                     $pdf->SetXY($x + 1, $pdf->GetY() + (0.5 * $scale));
@@ -626,7 +627,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 // -------------------------------------------------
 
                 if (!empty($cell['rooms'])) {
-                    $roomStr = joinList($cell['rooms']);
+                    $roomStr = mb_convert_case(joinList($cell['rooms']), MB_CASE_TITLE, "UTF-8");
                     $pdf->SetFont('Arial', 'I', 6.5 * $scale);
                     $pdf->SetTextColor(108, 117, 125);
                     $pdf->SetXY($x + 1, $pdf->GetY() + (0.5 * $scale));

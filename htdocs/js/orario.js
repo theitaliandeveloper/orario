@@ -50,14 +50,16 @@ document.addEventListener("DOMContentLoaded", async function() {
         const data = await res.json();
 
         let titleName = "";
+        let pageTitle = "";
         if (VIEW_TYPE === "classe") titleName = data.class_name;
         if (VIEW_TYPE === "docente") titleName = data.teacher;
         if (VIEW_TYPE === "laboratorio") titleName = data.room;
-        document.getElementById("page-title").innerText = `Orario ${VIEW_TYPE} ${titleName}`;
+        pageTitle = `Orario ${(VIEW_TYPE != "laboratorio") ? VIEW_TYPE : ""} ${titleName}`;
+        document.getElementById("page-title").innerText = pageTitle;
         if (VIEW_TYPE === "docente") {
             document.getElementById("page-hours").textContent = `Ore cattedra docente: ${data.hours}`;
         }
-        document.title = `Orario ${VIEW_TYPE} ${titleName}`;
+        document.title = APP_NAME + " - " + pageTitle;
 
         const timetable = data.timetable;
 

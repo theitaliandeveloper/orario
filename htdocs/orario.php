@@ -46,7 +46,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <!DOCTYPE html>
 <html>
 <head>
-<title><?= APP_NAME ?> <?= YEAR ?></title>
+<title><?= APP_NAME ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./css/fonts.css">
@@ -95,6 +95,8 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <script>
     const VIEW_TYPE = "<?php echo $view; ?>";
     const VIEW_ID = "<?php echo htmlspecialchars($id); ?>";
+    const APP_NAME = "<?php echo APP_NAME; ?>";
+    const YEAR = "<?php echo YEAR; ?>";
 </script>
 </head>
 <body>
@@ -123,7 +125,6 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 </nav>
 
 <h1 class="fw-bold text-center mt-3 mb-2" id="page-title"></h1>
-<h4 class="text-center text-secondary-emphasis mt-2 mb-5" id="page-hours"></h4>
 
 <!-- Desktop View -->
 <table class="table table-bordered table-striped-columns table-hover text-center d-none d-md-table" id="desktop-table">
@@ -135,6 +136,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 
 <!-- Mobile View -->
 <div class="d-block d-md-none" id="mobile-view"></div>
+<h6 class="text-center text-secondary-emphasis mt-2 mb-5" id="page-hours"></h6>
 
 <footer class="text-center text-body-secondary small mt-3 mb-3">
     Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
