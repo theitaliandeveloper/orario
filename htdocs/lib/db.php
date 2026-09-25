@@ -30,4 +30,17 @@ if ($conn->connect_error) {
     else
         die("Connessione al database fallita!");
 }
+
+require_once __DIR__ . "/schema.php";
+load_application_settings($conn);
+
+ini_set('memory_limit', app_setting('PHP_MAX_RAM'));
+ini_set('session.gc_maxlifetime', app_setting('SESSION_LIFETIME'));
+session_set_cookie_params([
+    'lifetime' => app_setting('SESSION_LIFETIME'),
+    'path' => '/',
+    'domain' => '',
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 ?>

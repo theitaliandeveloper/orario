@@ -24,9 +24,9 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 
-if (!isset($_SESSION['admin']) && MAINTENANCE) {
+if (!isset($_SESSION['admin']) && app_setting('MAINTENANCE')) {
     header("Location: manutenzione.php");
     exit;
 }
@@ -46,7 +46,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <!DOCTYPE html>
 <html>
 <head>
-<title><?= APP_NAME ?></title>
+<title><?= app_setting('APP_NAME') ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./css/fonts.css">
@@ -95,8 +95,8 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <script>
     const VIEW_TYPE = "<?php echo $view; ?>";
     const VIEW_ID = "<?php echo htmlspecialchars($id); ?>";
-    const APP_NAME = "<?php echo APP_NAME; ?>";
-    const YEAR = "<?php echo YEAR; ?>";
+    const APP_NAME = "<?php echo app_setting('APP_NAME'); ?>";
+    const YEAR = "<?php echo app_setting('YEAR'); ?>";
 </script>
 </head>
 <body>
@@ -104,7 +104,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     <div class="container-fluid">
         <a class="navbar-brand fw-bold text-reset" href="index.php">
             <i class="bi bi-clock"></i>&nbsp;
-            <?= APP_NAME ?> <?= YEAR ?>
+            <?= app_setting('APP_NAME') ?> <?= app_setting('YEAR') ?>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -115,7 +115,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
                     <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-house"></i> Home</a>
                 </li>
                 <li class="nav-item" id="pdf-export">
-                    <?php if (PDF_EXPORT):?>
+                    <?php if (app_setting('PDF_EXPORT')):?>
                         <a class="nav-link fw-bold text-reset" href="api/getOrario.php?type=<?= urlencode($view) ?>&id=<?= urlencode($id) ?>&dl=1" target="_blank" download><i class="bi bi-file-earmark-pdf"></i> Esporta PDF</a>
                     <?php endif;?>
                 </li>

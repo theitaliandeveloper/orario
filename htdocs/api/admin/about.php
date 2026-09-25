@@ -69,9 +69,9 @@ echo json_encode([
     'phpVersion' => PHP_VERSION,
     'phpDebug' => defined('PHP_DEBUG') && PHP_DEBUG,
     'os' => php_uname(),
-    'sessionLifetime' => SESSION_LIFETIME,
+    'sessionLifetime' => app_setting('SESSION_LIFETIME'),
     'version' => VERSION,
-    'maintenance' => MAINTENANCE,
+    'maintenance' => app_setting('MAINTENANCE'),
     'extensions' => array_values($extensions)
 ]);
 exit;

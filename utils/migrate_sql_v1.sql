@@ -1,16 +1,6 @@
 -- Orario Scuola
--- Migrazione opzionale: schema legacy -> new_schema.sql (normalizzato)
---
--- Assunzioni:
--- 1) Hai gia importato new_schema.sql in un database vuoto.
--- 2) Hai le vecchie tabelle caricate con suffisso _legacy:
---    classes_legacy(id, name, section)
---    subjects_legacy(id, name, teacher, room)
---    timetable_legacy(id, class_id, day, hour, subject_id)
---
--- Se parti da un database legacy esistente con nomi originali:
--- RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
--- Poi importa new_schema.sql e quindi esegui questo file.
+-- Copyright (C) 2025-2026 EmmeV. All rights reserved.
+-- Migrazione allo schema v1
 
 USE school_timetable;
 

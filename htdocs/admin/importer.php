@@ -29,9 +29,9 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
-else if (!defined('API_URL') || API_URL == "") { header("Location: index.php"); exit; }
+else if (app_setting('API_URL') == "") { header("Location: index.php"); exit; }
 if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     header("Location: migrate.php?backto=importer.php");
     exit;
@@ -40,7 +40,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo APP_NAME; ?> - Importa Orario</title>
+    <title><?php echo app_setting('APP_NAME'); ?> - Importa Orario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="../css/fonts.css">
@@ -56,7 +56,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
       <div class="container-fluid">
           <a class="navbar-brand fw-bold text-reset" href="index.php">
               <i class="bi bi-clock"></i>&nbsp;
-              <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
+            <?php echo app_setting('APP_NAME'); ?> <?php echo app_setting('YEAR'); ?> - Admin
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
               <span class="navbar-toggler-icon"></span>

@@ -38,7 +38,7 @@ if (!isset($_SESSION['admin'])) {
     exit;
 }
 
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     // For non-GET requests (POST, PUT, DELETE), verify CSRF

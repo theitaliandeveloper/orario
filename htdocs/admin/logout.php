@@ -37,20 +37,20 @@ $authType = $_SESSION['auth_type'] ?? null;
 session_unset();
 session_destroy();
 
-if (strtolower($authType) !== 'oidc' || OIDC_NO_LOGOUT === true) {
+if (strtolower($authType) !== 'oidc' || app_setting('OIDC_NO_LOGOUT') === true) {
     header("Location: ../index.php");
     exit;
 }
 
 $oidc = new OpenIDConnectClient(
-    OIDC_ISSUER,
-    OIDC_CLIENT_ID,
-    OIDC_CLIENT_SECRET
+    app_setting('OIDC_ISSUER'),
+    app_setting('OIDC_CLIENT_ID'),
+    app_setting('OIDC_CLIENT_SECRET')
 );
 
 try {
     $scheme = is_https() ? 'https://' : 'http://';
-    $postLogoutRedirectUri = $scheme . APP_DOMAIN . '/index.php';
+    $postLogoutRedirectUri = $scheme . app_setting('APP_DOMAIN') . '/index.php';
 
     if (!empty($idToken)) {
         $oidc->signOut($idToken, $postLogoutRedirectUri);

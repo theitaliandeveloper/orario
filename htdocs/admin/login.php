@@ -31,9 +31,9 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) { //
     }
     session_regenerate_id(true);
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME; // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME'); // https://stackoverflow.com/questions/8311320/how-to-change-the-session-timeout-in-php
 if (isset($_SESSION['admin'])) { header("Location: index.php"); exit; }
-if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(AUTH_TYPE) == 'local') {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(app_setting('AUTH_TYPE')) == 'local') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = "Token CSRF non valido.";
     } else {
@@ -65,10 +65,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && strtolower(AUTH_TYPE) == 'local') {
         }
     }
 }
-$name = APP_NAME;
-$year = YEAR;
+$name = app_setting('APP_NAME');
+$year = app_setting('YEAR');
 
-if (strtolower(AUTH_TYPE) == 'local') {
+if (strtolower(app_setting('AUTH_TYPE')) == 'local') {
 $csrf_field = csrf_field();
 $error_alert = isset($error) ? "<div class='alert alert-danger mt-3 mb-0' role='alert'><i class='bi bi-exclamation-triangle-fill me-2'></i>{$error}</div>" : "";
 echo <<<HTML
@@ -139,20 +139,20 @@ echo <<<HTML
 </html>
 HTML;
 }
-else if (strtolower(AUTH_TYPE) === 'oidc') {
+else if (strtolower(app_setting('AUTH_TYPE')) === 'oidc') {
   try {
     // Configura il client OIDC
     $oidc = new OpenIDConnectClient(
-        OIDC_ISSUER,
-        OIDC_CLIENT_ID,
-        OIDC_CLIENT_SECRET
+        app_setting('OIDC_ISSUER'),
+        app_setting('OIDC_CLIENT_ID'),
+        app_setting('OIDC_CLIENT_SECRET')
     );
 
     // Richiedi anche le informazioni del profilo
     $oidc->addScope(['openid', 'profile', 'email']);
 
     // Redirect post-login
-    $oidc->setRedirectURL('https://' . APP_DOMAIN . '/admin/login.php');
+    $oidc->setRedirectURL('https://' . app_setting('APP_DOMAIN') . '/admin/login.php');
 
     if (!$oidc->authenticate()) {
         throw new Exception("OIDC Authentication failed");
@@ -174,7 +174,7 @@ else if (strtolower(AUTH_TYPE) === 'oidc') {
         throw new Exception("Il provider OIDC non ha restituito preferred_username, username o email.");
     }
 
-    if (OIDC_ALLOWED_USERS === [] || in_array($username, OIDC_ALLOWED_USERS, true)) {
+    if (app_setting('OIDC_ALLOWED_USERS') === [] || in_array($username, app_setting('OIDC_ALLOWED_USERS'), true)) {
         $_SESSION['admin'] = $username;
         $_SESSION['auth_type'] = 'oidc';
 

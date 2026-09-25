@@ -53,14 +53,15 @@ if (!defined('DB_HOST') || !defined('DB_USER') || !defined('DB_PASS') || !define
     exit(1);
 }
 
-if (!MAINTENANCE) {
-    fwrite(STDERR, "Errore: La modalità di manutenzione deve essere abilitata per eseguire la migrazione.\n");
-    exit(1);
-}
-
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
+load_application_settings($conn);
+
+if (!app_setting('MAINTENANCE')) {
+    fwrite(STDERR, "Errore: La modalità di manutenzione deve essere abilitata per eseguire la migrazione.\n");
+    exit(1);
+}
 
 try {
     echo "Connessione DB riuscita.\n";
@@ -72,13 +73,21 @@ try {
     echo "Versione schema rilevata: " . ($installedVersion === null ? 'non disponibile' : $installedVersion) . "\n";
     echo "Versione schema richiesta: " . CURRENT_SCHEMA_VERSION . "\n";
 
-    $result = migrate_v1(
-        $conn,
-        dirname(__DIR__),
-        static function (string $message): void {
-            echo $message . PHP_EOL;
-        }
-    );
+    $result = $installedVersion === null
+        ? migrate_v1(
+            $conn,
+            dirname(__DIR__),
+            static function (string $message): void {
+                echo $message . PHP_EOL;
+            }
+        )
+        : migrate_v2(
+            $conn,
+            dirname(__DIR__),
+            static function (string $message): void {
+                echo $message . PHP_EOL;
+            }
+        );
 
     echo "Migrazione completata con successo.\n";
     echo "Versione schema: {$result['version']}\n";

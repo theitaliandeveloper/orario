@@ -439,7 +439,7 @@ class _OrarioPDF extends Fpdf\Fpdf
         $this->Cell(0, 9, mb_convert_encoding($this->pageTitle, 'ISO-8859-1', 'UTF-8',), 0, 1, 'C');
         $this->SetFont('Arial', '', 8);
         $this->SetTextColor(108, 117, 125);
-        $this->Cell(0, 4, mb_convert_encoding('Anno Scolastico ' . YEAR, 'ISO-8859-1', 'UTF-8'), 0, 1, 'C');
+        $this->Cell(0, 4, mb_convert_encoding('Anno Scolastico ' . app_setting('YEAR'), 'ISO-8859-1', 'UTF-8'), 0, 1, 'C');
         $this->Ln(3);
     }
 
@@ -448,7 +448,7 @@ class _OrarioPDF extends Fpdf\Fpdf
         $this->SetY(-11);
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(108, 117, 125);
-        $this->Cell(0, 5, mb_convert_encoding(APP_NAME . ' - Copyright (C) 2025-' . date('Y') . ' EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
+        $this->Cell(0, 5, mb_convert_encoding(app_setting('APP_NAME') . ' - Copyright (C) 2025-' . date('Y') . ' EmmeV. - Ultimo aggiornamento: ' . date('d/m/Y'), 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
     }
 }
 

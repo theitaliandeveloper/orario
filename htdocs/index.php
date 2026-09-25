@@ -23,8 +23,8 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME; 
-if (!isset($_SESSION['admin']) && MAINTENANCE) {
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
+if (!isset($_SESSION['admin']) && app_setting('MAINTENANCE')) {
     header("Location: manutenzione.php");
     exit;
 }
@@ -34,7 +34,7 @@ $legacySchemaDetected = schema_update_required($conn);
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?></title>
+    <title><?php echo app_setting('APP_NAME'); ?> - A.S. <?php echo app_setting('YEAR'); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="./css/fonts.css">
@@ -47,7 +47,7 @@ $legacySchemaDetected = schema_update_required($conn);
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-reset" href="index.php">
                 <i class="bi bi-clock"></i>&nbsp;
-                <?php echo APP_NAME; ?> <?php echo YEAR; ?>
+                <?php echo app_setting('APP_NAME'); ?> <?php echo app_setting('YEAR'); ?>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
@@ -65,17 +65,13 @@ $legacySchemaDetected = schema_update_required($conn);
         </div>
     </nav>
     <h1 class="fw-bold text-center mb-4">
-        <?php echo APP_NAME; ?> - A.S. <?php echo YEAR; ?>
+        <?php echo app_setting('APP_NAME'); ?> - A.S. <?php echo app_setting('YEAR'); ?>
     </h1>
-    <?php
-    if (MAINTENANCE) {
-    ?>
+    <?php if (app_setting('MAINTENANCE')): ?>
         <div class="alert alert-warning text-center" role="alert">
-            <strong>Attenzione!</strong> Modalità di manutenzione attiva.
+            <strong>Attenzione!</strong> La modalità di manutenzione è attiva. Gli utenti non amministratori non possono accedere al sito.
         </div>
-    <?php
-    }
-    ?>
+    <?php endif; ?>
     <?php
     if ($legacySchemaDetected && MANDATORY_SCHEMA_UPDATE) {
         if (!isset($_SESSION['admin'])) {
@@ -83,9 +79,7 @@ $legacySchemaDetected = schema_update_required($conn);
             <div class="alert alert-danger text-center" role="alert">
                 <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. Accedi all'area amministrativa per aggiornarlo e ripristinare il normale funzionamento oppure contatta l'amministratore della piattaforma.
             </div>
-        <?php
-        } else {
-        ?>
+        <?php } else { ?>
             <div class="alert alert-danger text-center" role="alert">
                 <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. <a href="admin/migrate.php" class="alert-link">Aggiornalo ora</a> per ripristinare il normale funzionamento della piattaforma.
             </div>
@@ -116,9 +110,7 @@ $legacySchemaDetected = schema_update_required($conn);
         <h2 class="mb-3 mt-4"><i class="bi bi-flask"></i> Laboratori</h2>
         <div class="row g-3" id="labs-container"></div>
     </div>
-    <?php
-    }
-    ?>
+    <?php } ?>
     <footer class="text-center text-body-secondary small mt-3 mb-3">
     Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
     <br>

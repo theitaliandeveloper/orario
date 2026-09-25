@@ -40,10 +40,10 @@ $backto = $_GET['backto'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         http_response_code(403);
-        $message = 'Token CSRF non valido.';
+        $message .= 'Token CSRF non valido.';
         $messageType = 'danger';
     } else if (!$versionNeedsUpdate) {
-        $message = 'Nessuna migrazione disponibile per lo stato/versione attuale del database.';
+        $message .= 'Nessuna migrazione disponibile per lo stato/versione attuale del database.';
         $messageType = 'warning';
     } else {
         try {
@@ -61,11 +61,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $versionSupported = true;
                 $message .= 'Migrazione alla v' . $schemaVersion . ' completata. Le tabelle legacy sono state conservate come backup.';
                 $messageType = 'success';
+            } elseif ($schemaVersion < 2) {
+                $result = migrate_v2(
+                    $conn,
+                    dirname(__DIR__, 2),
+                    static function (string $step): void {
+                    }
+                );
+                $schemaVersion = (int)$result['version'];
+                $versionNeedsUpdate = false;
+                $versionSupported = true;
+                $message .= 'Migrazione alla v' . $schemaVersion . ' completata.';
+                $messageType = 'success';
             } else {
-                throw new RuntimeException('Nessuna migrazione disponibile per lo stato/versione attuale del database.');
+                $message .= 'Nessuna migrazione disponibile per lo stato/versione attuale del database.';
+                $messageType = 'warning';
             }
         } catch (Throwable $error) {
-            $message = 'Migrazione alla v' . CURRENT_SCHEMA_VERSION . ' non completata: ' . $error->getMessage();
+            $message .= 'Migrazione alla v' . CURRENT_SCHEMA_VERSION . ' non completata: ' . $error->getMessage();
             $messageType = 'danger';
         }
     }
@@ -76,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo htmlspecialchars(APP_NAME); ?> - Aggiornamento database</title>
+    <title><?php echo htmlspecialchars(app_setting('APP_NAME')); ?> - Aggiornamento database</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/fonts.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -85,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <nav class="navbar navbar-expand-md bg-primary mb-4 px-3 text-light">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold text-reset"><i class="bi bi-clock"></i>&nbsp;<?php echo htmlspecialchars(APP_NAME); ?> - Admin</span>
+        <span class="navbar-brand fw-bold text-reset"><i class="bi bi-clock"></i>&nbsp;<?php echo htmlspecialchars(app_setting('APP_NAME')); ?> - Admin</span>
         <ul class="navbar-nav ms-auto">
             <?php if (!$versionNeedsUpdate): ?>
                 <li class="nav-item">
@@ -118,10 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p>Nel database verranno applicati i seguenti aggiornamenti:</p>
                 <ul>
                 <?php
-                for ($v = $schemaVersion === null ? 0 : $schemaVersion; $v < CURRENT_SCHEMA_VERSION; $v++) {
-                    if ($schemaVersion === null || $v > $schemaVersion) {
-                        echo '<li>' . htmlspecialchars(update_ops($v+1)) . '</li>';
-                    }
+                $firstPendingVersion = ($schemaVersion ?? 0) + 1;
+                for ($v = $firstPendingVersion; $v <= CURRENT_SCHEMA_VERSION; $v++) {
+                    echo '<li>' . htmlspecialchars(update_ops($v)) . '</li>';
                 }
                 ?>
                 </ul>

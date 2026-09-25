@@ -28,51 +28,5 @@ if (!defined('DB_PASS')) {
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'school_timetable'); // Nome del database, non modificare se non sai cosa stai facendo.
 }
-// Impostazioni sito generali
-if (!defined('APP_NAME')) {
-    define('APP_NAME', 'Orario Scuola'); // Nome del sito
-}
-if (!defined('YEAR')) {
-    define('YEAR', '2025/26'); // Anno Scolastico Corrente
-}
-if (!defined('PDF_EXPORT')) {
-    define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
-}
-if (!defined('MAINTENANCE')) {
-    define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
-}
-// Impostazioni autenticazione dashboard amministrativa
-if (!defined('AUTH_TYPE')) {
-    define('AUTH_TYPE','local'); // Può essere local (integrata), oidc (OpenID Connect)
-}
-if (!defined('APP_DOMAIN')) {
-    define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
-}
-// Impostazioni autenticazione via OpenID Connect (richiesto solo se AUTH_TYPE sta impostato su oidc)
-if (!defined('OIDC_ISSUER')) {
-    define('OIDC_ISSUER',''); // Issuer URL per OIDC (ad esempio https://tuokeycloak.com/realms/master)
-}
-if (!defined('OIDC_CLIENT_ID')) {
-    define('OIDC_CLIENT_ID',''); // Client ID per OIDC (ad esempio orario)
-}
-if (!defined('OIDC_CLIENT_SECRET')) {
-    define('OIDC_CLIENT_SECRET',''); // Client Secret per OIDC (ad esempio abcdefghijklm)
-}
-if (!defined('OIDC_ALLOWED_USERS')) {
-    define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
-}
-if (!defined('OIDC_NO_LOGOUT')) {
-    define('OIDC_NO_LOGOUT',false); // Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
-}
-// Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
-if (!defined('PHP_MAX_RAM')) {
-    define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
-}
-if (!defined('SESSION_LIFETIME')) {
-    define('SESSION_LIFETIME',3600); // Durata del cookie di login
-}
-// Labs (funzioni interne)
-if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/orario
-}
+
 ?>
