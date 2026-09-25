@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 use Jumbojett\OpenIDConnectClient;
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../lib/variables.php';
+require __DIR__ . '/../lib/db.php';
 require __DIR__ . '/../lib/csrf.php';
 require __DIR__ . '/../lib/misc.php';
 

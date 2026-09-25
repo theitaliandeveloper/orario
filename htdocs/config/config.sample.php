@@ -28,5 +28,7 @@ if (!defined('DB_PASS')) {
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'school_timetable'); // Nome del database, non modificare se non sai cosa stai facendo.
 }
-
+if (!defined('FACTORY_RESET')) {
+    define('FACTORY_RESET', false); // Reset delle preferenze alle impostazioni di fabbrica, usare solo in caso di problemi con le impostazioni attuali
+}
 ?>

@@ -74,8 +74,7 @@ $legacySchemaDetected = schema_update_required($conn);
     <?php endif; ?>
     <?php
     if ($legacySchemaDetected && MANDATORY_SCHEMA_UPDATE) {
-        if (!isset($_SESSION['admin'])) {
-        ?>
+        if (!isset($_SESSION['admin'])) { ?>
             <div class="alert alert-danger text-center" role="alert">
                 <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. Accedi all'area amministrativa per aggiornarlo e ripristinare il normale funzionamento oppure contatta l'amministratore della piattaforma.
             </div>
@@ -83,10 +82,13 @@ $legacySchemaDetected = schema_update_required($conn);
             <div class="alert alert-danger text-center" role="alert">
                 <strong>Attenzione!</strong> Lo schema SQL installato è obsoleto. <a href="admin/migrate.php" class="alert-link">Aggiornalo ora</a> per ripristinare il normale funzionamento della piattaforma.
             </div>
-        <?php
-        }
-    } else {
-    ?>
+        <?php }
+     } else { ?>
+        <?php if (app_setting('ANNOUNCEMENT_TEXT') !== '' && app_setting('ANNOUNCEMENT_TEXT') !== null): ?>
+            <div class="alert alert-info text-center" role="alert">
+                <?php echo app_setting('ANNOUNCEMENT_TEXT'); ?>
+            </div>
+        <?php endif; ?>
     <div class="container">
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-6 col-lg-5">

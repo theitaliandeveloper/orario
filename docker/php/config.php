@@ -48,6 +48,10 @@ if (!defined('DB_NAME')) {
         define('DB_NAME', 'school_timetable');
     }
 }
+if (!defined('FACTORY_RESET')) {
+    $val = getenv('FACTORY_RESET');
+    define('FACTORY_RESET', $val !== false && filter_var($val, FILTER_VALIDATE_BOOLEAN));
+}
 // Impostazioni sito generali
 if (!defined('APP_NAME')) {
     $val = getenv('APP_NAME');

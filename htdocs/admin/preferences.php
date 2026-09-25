@@ -43,7 +43,7 @@ $preferenceDefinitions = [
     'OIDC_CLIENT_ID' => ['label' => 'Client ID OIDC', 'type' => 'text', 'group' => 'Autenticazione'],
     'OIDC_CLIENT_SECRET' => ['label' => 'Client secret OIDC', 'type' => 'password', 'group' => 'Autenticazione'],
     'OIDC_ALLOWED_USERS' => ['label' => 'Utenti OIDC autorizzati', 'type' => 'users', 'group' => 'Autenticazione'],
-    'OIDC_NO_LOGOUT' => ['label' => 'Mantieni logout nel provider OIDC disattivato', 'type' => 'checkbox', 'group' => 'Autenticazione'],
+    'OIDC_NO_LOGOUT' => ['label' => 'Non disconnettere dal provider OIDC', 'type' => 'checkbox', 'group' => 'Autenticazione'],
     'PHP_MAX_RAM' => ['label' => 'Memoria massima PHP', 'type' => 'text', 'group' => 'Avanzate'],
     'SESSION_LIFETIME' => ['label' => 'Durata sessione (secondi)', 'type' => 'number', 'group' => 'Avanzate'],
     'API_URL' => ['label' => 'URL API importazione', 'type' => 'url', 'group' => 'Avanzate'],
@@ -67,7 +67,9 @@ $preferenceDefinitions = [
 <body>
 <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-reset" href="index.php"><i class="bi bi-clock"></i>&nbsp;<?php echo htmlspecialchars(app_setting('APP_NAME')); ?> <?php echo htmlspecialchars(app_setting('YEAR')); ?> - Admin</a>
+        <a class="navbar-brand fw-bold text-reset" href="index.php"><i class="bi bi-clock"></i>&nbsp;
+            <?php echo htmlspecialchars(app_setting('APP_NAME')); ?> <?php echo htmlspecialchars(app_setting('YEAR')); ?> - Admin
+        </a>
         <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
             <li class="nav-item"><a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>"><i class="bi bi-box-arrow-right"></i> Logout</a></li>

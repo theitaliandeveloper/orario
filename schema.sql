@@ -270,4 +270,5 @@ INSERT IGNORE INTO preferences (identifier, value, description) VALUES
     ('OIDC_NO_LOGOUT', '0', 'Non eseguire il logout dal provider OIDC'),
     ('PHP_MAX_RAM', '128M', 'Limite di memoria per PHP'),
     ('SESSION_LIFETIME', '3600', 'Durata del cookie di login'),
-    ('API_URL', '', 'URL API di importazione');
+    ('API_URL', '', 'URL API di importazione'),
+    ('ANNOUNCEMENT_TEXT', '', 'Testo annuncio');

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/db.php'; // Per sicurezza, includiamo il file db.php per garantire che la connessione al database sia disponibile prima di eseguire qualsiasi operazione sullo schema.
 // Versione corrente dello schema del database. Aggiorna questo valore quando viene rilasciata una nuova versione della piattaforma che richiede modifiche al database.
 const CURRENT_SCHEMA_VERSION = 2;
 const MANDATORY_SCHEMA_UPDATE = true; // Imposta a true se l'aggiornamento dello schema è obbligatorio per la versione corrente della piattaforma.
@@ -122,6 +123,7 @@ function load_application_settings(mysqli $conn): bool
         'PHP_MAX_RAM',
         'SESSION_LIFETIME',
         'API_URL',
+        'ANNOUNCEMENT_TEXT',
     ];
     $fromDatabase = schema_table_exists($conn, 'preferences') && get_schema_version($conn) >= 2;
 
@@ -130,7 +132,7 @@ function load_application_settings(mysqli $conn): bool
         $result = $conn->query('SELECT `identifier`, `value` FROM `preferences`');
         while ($row = $result->fetch_assoc()) {
             if (!in_array($row['identifier'], $settingNames, true)) {
-                continue;
+                $settings[$row['identifier']] = null;
             }
 
             if (in_array($row['identifier'], ['PDF_EXPORT', 'MAINTENANCE', 'OIDC_NO_LOGOUT'], true)) {
@@ -147,18 +149,13 @@ function load_application_settings(mysqli $conn): bool
             }
         }
         $missingSettings = array_diff($settingNames, array_keys($settings));
-        if ($missingSettings !== []) {
-            throw new RuntimeException(
-                'Impostazioni DB mancanti: ' . implode(', ', $missingSettings)
-            );
+        foreach ($missingSettings as $missingSetting) {
+            $settings[$missingSetting] = defined($missingSetting) ? constant($missingSetting) : null;
         }
     } else {
         $settings = [];
         foreach ($settingNames as $name) {
-            if (!defined($name)) {
-                throw new RuntimeException("Impostazione {$name} non presente nel config.php.");
-            }
-            $settings[$name] = constant($name);
+            $settings[$name] = defined($name) ? constant($name) : null;
         }
     }
 
@@ -176,6 +173,48 @@ function app_setting(string $name)
     return constant($name);
 }
 
+function factory_reset_app_settings(mysqli $conn): int
+{
+    $preferences = [
+        'APP_NAME' => ['Orario Scuola', 'Nome del sito'],
+        'YEAR' => ['2025/26', 'Anno scolastico corrente'],
+        'PDF_EXPORT' => ['1', 'Consenti esportazione degli orari in PDF'],
+        'MAINTENANCE' => ['0', 'Abilita la modalità di manutenzione'],
+        'ANNOUNCEMENT_TEXT' => ['', 'Testo annuncio'],
+        'AUTH_TYPE' => ['local', 'Tipo di autenticazione amministrativa'],
+        'APP_DOMAIN' => ['', 'Dominio del sito'],
+        'OIDC_ISSUER' => ['', 'Issuer URL per OIDC'],
+        'OIDC_CLIENT_ID' => ['', 'Client ID per OIDC'],
+        'OIDC_CLIENT_SECRET' => ['', 'Client Secret per OIDC'],
+        'OIDC_ALLOWED_USERS' => ['[]', 'Utenti OIDC autorizzati'],
+        'OIDC_NO_LOGOUT' => ['0', 'Non eseguire il logout dal provider OIDC'],
+        'PHP_MAX_RAM' => ['128M', 'Limite di memoria per PHP'],
+        'SESSION_LIFETIME' => ['3600', 'Durata del cookie di login'],
+        'API_URL' => ['', 'URL API di importazione'],
+    ];
+
+    $stmt = $conn->prepare(
+        'INSERT INTO `preferences` (`identifier`, `value`, `description`) VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `description` = VALUES(`description`)'
+    );
+
+    foreach ($preferences as $identifier => [$value, $description]) {
+        if (is_array($value)) {
+            $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        } elseif (is_bool($value)) {
+            $value = $value ? '1' : '0';
+        } else {
+            $value = (string)$value;
+        }
+
+        $stmt->bind_param('sss', $identifier, $value, $description);
+        $stmt->execute();
+    }
+
+    $stmt->close();
+    return count($preferences);
+}
+
 function migrate_preferences_from_config(mysqli $conn): int
 {
     $preferences = [
@@ -183,6 +222,7 @@ function migrate_preferences_from_config(mysqli $conn): int
         'YEAR' => [app_setting('YEAR'), 'Anno scolastico corrente'],
         'PDF_EXPORT' => [app_setting('PDF_EXPORT'), 'Consenti esportazione degli orari in PDF'],
         'MAINTENANCE' => [app_setting('MAINTENANCE'), 'Abilita la modalità di manutenzione'],
+        'ANNOUNCEMENT_TEXT' => [app_setting('ANNOUNCEMENT_TEXT'), 'Testo annuncio'],
         'AUTH_TYPE' => [app_setting('AUTH_TYPE'), 'Tipo di autenticazione amministrativa'],
         'APP_DOMAIN' => [app_setting('APP_DOMAIN'), 'Dominio del sito'],
         'OIDC_ISSUER' => [app_setting('OIDC_ISSUER'), 'Issuer URL per OIDC'],
