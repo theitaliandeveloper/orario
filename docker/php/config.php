@@ -50,7 +50,11 @@ if (!defined('DB_NAME')) {
 }
 if (!defined('FACTORY_RESET')) {
     $val = getenv('FACTORY_RESET');
-    define('FACTORY_RESET', $val !== false && filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    if ($val !== false && $val !== '') {
+        define('FACTORY_RESET', filter_var($val, FILTER_VALIDATE_BOOLEAN));
+    } else {
+        define('FACTORY_RESET', false);
+    }
 }
 // Impostazioni sito generali
 if (!defined('APP_NAME')) {

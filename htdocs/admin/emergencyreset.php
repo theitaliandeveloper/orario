@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navbar -->
     <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-reset" href="index.php">
+            <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="index.php">
                 <i class="bi bi-clock"></i>&nbsp;
                 <?php echo htmlspecialchars(app_setting('APP_NAME')); ?> <?php echo htmlspecialchars(app_setting('YEAR')); ?> - Admin
             </a>

@@ -78,53 +78,6 @@ if (!defined('DB_PASS')) {
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'school_timetable'); // Nome del database, non modificare se non sai cosa stai facendo.
 }
-// Impostazioni sito generali
-if (!defined('APP_NAME')) {
-    define('APP_NAME', 'Orario Scuola'); // Nome del sito
-}
-if (!defined('YEAR')) {
-    define('YEAR', '2025/26'); // Anno Scolastico Corrente
-}
-if (!defined('PDF_EXPORT')) {
-    define('PDF_EXPORT', true); // Consenti l'esportazione degli orari in PDF. Imposta su false per impedire.
-}
-if (!defined('MAINTENANCE')) {
-    define('MAINTENANCE', false); // Abilita la modalità di manutenzione della piattaforma.
-}
-// Impostazioni autenticazione dashboard amministrativa
-if (!defined('AUTH_TYPE')) {
-    define('AUTH_TYPE','local'); // Può essere local (integrata), oidc (OpenID Connect)
-}
-if (!defined('APP_DOMAIN')) {
-    define('APP_DOMAIN',''); // Dominio del sito (ad esempio orario.yourdomain.com), richiesto per autenticazioni non local
-}
-// Impostazioni autenticazione via OpenID Connect (richiesto solo se AUTH_TYPE sta impostato su oidc)
-if (!defined('OIDC_ISSUER')) {
-    define('OIDC_ISSUER',''); // Issuer URL per OIDC (ad esempio https://tuokeycloak.com/realms/master)
-}
-if (!defined('OIDC_CLIENT_ID')) {
-    define('OIDC_CLIENT_ID',''); // Client ID per OIDC (ad esempio orario)
-}
-if (!defined('OIDC_CLIENT_SECRET')) {
-    define('OIDC_CLIENT_SECRET',''); // Client Secret per OIDC (ad esempio abcdefghijklm)
-}
-if (!defined('OIDC_ALLOWED_USERS')) {
-    define('OIDC_ALLOWED_USERS',[]); // Contiene i nomi utente degli utenti OIDC autorizzati ad accedere all'amministrazione
-}
-if (!defined('OIDC_NO_LOGOUT')) {
-    define('OIDC_NO_LOGOUT',false); // Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
-}
-// Impostazioni avanzate. NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
-if (!defined('PHP_MAX_RAM')) {
-    define('PHP_MAX_RAM','128M'); // Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
-}
-if (!defined('SESSION_LIFETIME')) {
-    define('SESSION_LIFETIME',3600); // Durata del cookie di login
-}
-// Labs (funzioni interne)
-if (!defined('API_URL')) {
-    define('API_URL', ''); // URL API di importazione, lascia vuoto per disabilitare. Esempio: http://localhost:3006/classe
-}
 ?>
 ```
 7. **Apri ``http://localhost`` e goditi il sito**
@@ -151,37 +104,10 @@ docker compose up -d
 Per cambiare le impostazioni dell'istanza basta aprire ``docker-compose.yml`` con un editor di testo e modificare le variabili d'ambiente:
 ```yaml
     environment:
-      # --- Configuratione Database ---
       DB_HOST: db # Host database
       DB_USER: orario # Utente database
       DB_PASS: orario # Password dell'utente del database
       DB_NAME: school_timetable # Nome del database
-
-      # --- Impostazioni sito ---
-      APP_NAME: "Orario Scuola" # Nome del sito
-      YEAR: "2025/26" # Anno scolastico corrente
-      PDF_EXPORT: true # Abilita l'esportazione degli orari in PDF
-      MAINTENANCE: false # Abilita la modalità di manutenzione
-
-      # --- Impostazioni Autenticazione ---
-      AUTH_TYPE: "local" # Tipo di autenticazione: può essere local o oidc
-      APP_DOMAIN: "" # Dominio dell'app, ad esempio orario.tuosito.com
-
-      # --- Impostazioni di OAuth2 (solo se il tipo di autenticazione è oidc) ---
-      OIDC_ISSUER: "" # OIDC Issuer, ad esempio https://sso.tuosito.com/realms/master
-      OIDC_CLIENT_ID: "" # Client ID per OIDC, ad esempio orario
-      OIDC_CLIENT_SECRET: "" # Client Secret per OIDC, ad esempio abcde12345
-      OIDC_ALLOWED_USERS: '[]' # Nomi utente che possono accedere al pannello di controllo, lascia vuoto per consentire tutti gli utenti. Esempio: '["admin","prof","segreteria"]'
-      OIDC_NO_LOGOUT: false # Se attivato, non esegue il logout dal provider OIDC (solo dalla piattaforma)
-
-      # --- Impostazioni Avanzate ---
-      # NON MODIFICARE SE NON SAI QUELLO CHE STAI FACENDO!!
-      PHP_MAX_RAM: "128M" # Limite di memoria per PHP, si consiglia di aumentarlo in caso di bisogno e di non andare sotto i 128 MB. Imposta a -1 per disattivare. - https://www.php.net/manual/en/ini.core.php#ini.memory-limit
-      SESSION_LIMIT: 3600 # Durata del cookie di login
-
-      # --- Labs ---
-      # Queste sono funzioni interne che non sono documentate
-      API_URL: "" # URL della API per l'importazione, lascia vuoto per disabilitare
 ```
 
 ## Migrazione dello schema
@@ -213,7 +139,7 @@ php utils/migrate.php
 Lo strumento chiederà il permesso a procedere e vi informerà del risultato della migrazione.
 
 ### Migrazione manuale (Docker e installazione manuale)
-Se vuoi fare la migrazione manuale, puoi usare ``migrate_sql.sql``.
+Se vuoi fare la migrazione manuale, puoi usare ``migrate_sql_v1.sql``.
 
 Passi consigliati:
 1. Esegui backup completo del database.
@@ -223,7 +149,7 @@ USE school_timetable;
 RENAME TABLE classes TO classes_legacy, subjects TO subjects_legacy, timetable TO timetable_legacy;
 ```
 3. Importa ``schema.sql``.
-4. Esegui ``migrate_sql.sql`` per popolare il nuovo modello.
+4. Esegui ``migrate_sql_v1.sql`` per popolare il nuovo modello.
 
 ## Licenza
 **Orario Scuola, Copyright (C) 2025-2026 EmmeV.**

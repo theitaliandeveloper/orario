@@ -6,6 +6,14 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/db.php";
 require_once __DIR__ . "/../lib/csrf.php";
@@ -65,17 +73,28 @@ $preferenceDefinitions = [
     </script>
 </head>
 <body>
-<nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-reset" href="index.php"><i class="bi bi-clock"></i>&nbsp;
-            <?php echo htmlspecialchars(app_setting('APP_NAME')); ?> <?php echo htmlspecialchars(app_setting('YEAR')); ?> - Admin
-        </a>
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-        </ul>
-    </div>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
+      <div class="container-fluid">
+          <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="index.php">
+              <i class="bi bi-clock"></i>&nbsp;
+            <?php echo app_setting('APP_NAME'); ?> <?php echo app_setting('YEAR'); ?> - Admin
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+              <ul class="navbar-nav">
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-reset" href="logout.php?csrf_token=<?php echo generate_csrf_token(); ?>"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                  </li>
+              </ul>
+          </div>
+      </div>
+  </nav>
 
 <main class="container my-4" style="max-width: 900px;">
     <div class="d-flex align-items-center justify-content-between mb-4">

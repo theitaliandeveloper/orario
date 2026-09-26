@@ -86,7 +86,7 @@ echo <<<HTML
 
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-reset" href="../index.php">
+      <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="../index.php">
         <i class="bi bi-clock"></i>&nbsp; {$name} {$year} - Admin
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
@@ -197,7 +197,7 @@ else if (strtolower(app_setting('AUTH_TYPE')) === 'oidc') {
 
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-reset" href="../index.php">
+      <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="../index.php">
         <i class="bi bi-clock"></i>&nbsp; {$name} {$year} - Admin
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
@@ -255,7 +255,7 @@ HTML;
 
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-reset" href="../index.php">
+      <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="../index.php">
         <i class="bi bi-clock"></i>&nbsp; {$name} {$year} - Admin
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">

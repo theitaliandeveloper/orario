@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <nav class="navbar navbar-expand-md bg-primary mb-4 px-3 text-light">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold text-reset"><i class="bi bi-clock"></i>&nbsp;<?php echo htmlspecialchars(app_setting('APP_NAME')); ?> - Admin</span>
+        <span class="navbar-brand fw-bold text-reset text-wrap text-break d-block"><i class="bi bi-clock"></i>&nbsp;<?php echo htmlspecialchars(app_setting('APP_NAME')); ?> - Admin</span>
         <ul class="navbar-nav ms-auto">
             <?php if (!$versionNeedsUpdate): ?>
                 <li class="nav-item">

@@ -15,6 +15,10 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+
+echo "Orario Scuola\n";
+echo "Copyright (C) 2025-" . date("Y") . " EmmeV Code. Rilasciato sotto licenza GNU AGPL 3.0.\n\n\n";
+
 if ($argc > 1) {
     $primoArgomento = $argv[1];
     $password = password_hash($primoArgomento, PASSWORD_DEFAULT);
