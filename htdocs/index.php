@@ -118,13 +118,7 @@ $legacySchemaDetected = schema_update_required($conn);
     <br>
     Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
 </footer>
-    <?php
-    if (!$legacySchemaDetected) {
-    ?>
-        <script src="js/index.js"></script>
-    <?php
-    }
-    ?>
+    <script src="js/index.js"></script>
     <script src="js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>

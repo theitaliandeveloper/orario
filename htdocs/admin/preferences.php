@@ -41,7 +41,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
 }
 
 $preferenceDefinitions = [
-    'APP_NAME' => ['label' => 'Nome piattaforma', 'type' => 'text', 'group' => 'Generali'],
+    'APP_NAME' => ['label' => 'Nome sito', 'type' => 'text', 'group' => 'Generali'],
     'YEAR' => ['label' => 'Anno scolastico', 'type' => 'text', 'group' => 'Generali'],
     'PDF_EXPORT' => ['label' => 'Esportazione PDF', 'type' => 'checkbox', 'group' => 'Generali'],
     'MAINTENANCE' => ['label' => 'Modalita manutenzione', 'type' => 'checkbox', 'group' => 'Generali'],
@@ -56,6 +56,8 @@ $preferenceDefinitions = [
     'SESSION_LIFETIME' => ['label' => 'Durata sessione (secondi)', 'type' => 'number', 'group' => 'Avanzate'],
     'API_URL' => ['label' => 'URL API importazione', 'type' => 'url', 'group' => 'Avanzate'],
     'ANNOUNCEMENT_TEXT' => ['label' => 'Testo annuncio', 'type' => 'textarea', 'group' => 'Generali'],
+    'TIMETABLE_HOURS' => ['label' => 'Fasce orarie', 'type' => 'json', 'group' => 'Tabella Oraria'],
+    'TIMETABLE_BREAKS' => ['label' => 'Intervalli', 'type' => 'json', 'group' => 'Tabella Oraria'],
 ];
 ?>
 <!DOCTYPE html>
@@ -105,7 +107,7 @@ $preferenceDefinitions = [
     <div id="alert-container"></div>
 
     <form id="preferences-form">
-        <?php foreach (['Generali', 'Autenticazione', 'Avanzate'] as $group): ?>
+        <?php foreach (['Generali', 'Tabella Oraria', 'Autenticazione', 'Avanzate'] as $group): ?>
             <section class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-body-tertiary fw-bold"><?php echo htmlspecialchars($group); ?></div>
                 <div class="card-body">
@@ -131,6 +133,10 @@ $preferenceDefinitions = [
                                 <?php elseif ($definition['type'] === 'textarea'): ?>
                                     <label class="form-label" for="<?php echo $identifier; ?>"><?php echo htmlspecialchars($definition['label']); ?></label>
                                     <textarea class="form-control" id="<?php echo $identifier; ?>" rows="4"></textarea>
+                                <?php elseif ($definition['type'] === 'json'): ?>
+                                    <label class="form-label" for="<?php echo $identifier; ?>"><?php echo htmlspecialchars($definition['label']); ?></label>
+                                    <textarea class="form-control" id="<?php echo $identifier; ?>" rows="6"></textarea>
+                                    <div class="form-text">Una riga per elemento, separando i campi con <code>|</code>.</div>
                                 <?php else: ?>
                                     <label class="form-label" for="<?php echo $identifier; ?>"><?php echo htmlspecialchars($definition['label']); ?></label>
                                     <input class="form-control" type="<?php echo $definition['type']; ?>" id="<?php echo $identifier; ?>" <?php echo $definition['type'] === 'number' ? 'min="60"' : ''; ?>>
@@ -193,9 +199,27 @@ $preferenceDefinitions = [
             input.checked = value === true;
         } else if (type === 'users') {
             input.value = Array.isArray(value) ? value.join('\n') : '';
+        } else if (type === 'json') {
+            input.value = Array.isArray(value)
+                ? value.map(item => identifier === 'TIMETABLE_HOURS'
+                    ? [item.label, item.start, item.end].join('|')
+                    : [item.after, item.label, item.start, item.end].join('|')
+                ).join('\n')
+                : '';
         } else {
             input.value = value ?? '';
         }
+    }
+
+    function parseJsonPreference(identifier, value) {
+        const lines = value.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        return lines.map(line => {
+            const parts = line.split('|').map(part => part.trim());
+            if (identifier === 'TIMETABLE_HOURS') {
+                return { label: parts[0] || '', start: parts[1] || '', end: parts[2] || '' };
+            }
+            return { after: Number(parts[0]), label: parts[1] || '', start: parts[2] || '', end: parts[3] || '' };
+        });
     }
 
     function updateOidcFields() {
@@ -238,6 +262,8 @@ $preferenceDefinitions = [
                 values[identifier] = input.checked;
             } else if (definition.type === 'users') {
                 values[identifier] = input.value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+            } else if (definition.type === 'json') {
+                values[identifier] = parseJsonPreference(identifier, input.value);
             } else {
                 values[identifier] = input.value;
             }

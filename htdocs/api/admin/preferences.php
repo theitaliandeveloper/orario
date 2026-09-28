@@ -24,6 +24,8 @@ if (($_SESSION['admin'] ?? '') !== 'admin') {
     exit;
 }
 
+ensure_timetable_preferences($conn);
+
 $preferenceTypes = [
     'APP_NAME' => 'text',
     'YEAR' => 'text',
@@ -40,6 +42,8 @@ $preferenceTypes = [
     'SESSION_LIFETIME' => 'integer',
     'API_URL' => 'text',
     'ANNOUNCEMENT_TEXT' => 'textarea',
+    'TIMETABLE_HOURS' => 'json',
+    'TIMETABLE_BREAKS' => 'json',
 ];
 
 $preferenceDescriptions = [
@@ -58,6 +62,8 @@ $preferenceDescriptions = [
     'SESSION_LIFETIME' => 'Durata sessione',
     'API_URL' => 'URL API importazione',
     'ANNOUNCEMENT_TEXT' => 'Testo annuncio',
+    'TIMETABLE_HOURS' => 'Fasce orarie della giornata',
+    'TIMETABLE_BREAKS' => 'Intervalli tra le lezioni',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -77,6 +83,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } elseif ($preferenceTypes[$identifier] === 'integer') {
             $settings[$identifier] = (int)$row['value'];
         } elseif ($preferenceTypes[$identifier] === 'users') {
+            $decoded = json_decode($row['value'], true);
+            $settings[$identifier] = is_array($decoded) ? $decoded : [];
+        } elseif ($preferenceTypes[$identifier] === 'json') {
             $decoded = json_decode($row['value'], true);
             $settings[$identifier] = is_array($decoded) ? $decoded : [];
         } else {
@@ -117,6 +126,13 @@ foreach ($preferenceTypes as $identifier => $type) {
         }
         $users = array_values(array_filter(array_map('trim', $users), static fn(string $user): bool => $user !== ''));
         $values[$identifier] = json_encode($users, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    } elseif ($type === 'json') {
+        if (!is_array($input[$identifier] ?? null)) {
+            http_response_code(400);
+            echo json_encode(['error' => "Il valore {$identifier} deve essere un array."]);
+            exit;
+        }
+        $values[$identifier] = json_encode($input[$identifier], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     } elseif ($type === 'secret' && trim((string)($input[$identifier] ?? '')) === '') {
         $secretResult = $conn->query("SELECT `value` FROM `preferences` WHERE `identifier` = 'OIDC_CLIENT_SECRET'");
         $secretRow = $secretResult->fetch_assoc();

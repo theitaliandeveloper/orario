@@ -271,4 +271,6 @@ INSERT IGNORE INTO preferences (identifier, value, description) VALUES
     ('PHP_MAX_RAM', '128M', 'Limite di memoria per PHP'),
     ('SESSION_LIFETIME', '3600', 'Durata del cookie di login'),
     ('API_URL', '', 'URL API di importazione'),
-    ('ANNOUNCEMENT_TEXT', '', 'Testo annuncio');
+    ('ANNOUNCEMENT_TEXT', '', 'Testo annuncio'),
+    ('TIMETABLE_HOURS', '[{"label":"Prima ora","start":"7:50","end":"8:50"},{"label":"Seconda ora","start":"8:50","end":"9:45"},{"label":"Terza ora","start":"9:55","end":"10:50"},{"label":"Quarta ora","start":"10:50","end":"11:45"},{"label":"Quinta ora","start":"11:55","end":"12:50"},{"label":"Sesta ora","start":"12:50","end":"13:50"}]', 'Fasce orarie della giornata'),
+    ('TIMETABLE_BREAKS', '[{"after":2,"label":"Prima ricreazione","start":"9:45","end":"9:55"},{"after":4,"label":"Seconda ricreazione","start":"11:45","end":"11:55"}]', 'Intervalli tra le lezioni');

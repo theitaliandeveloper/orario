@@ -177,7 +177,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
             </div>
             <?php endif; ?>
 
-            <?php if ($_SESSION['admin'] === 'admin'): ?>
+            <?php if ($_SESSION['admin'] === 'admin' || $_SESSION['auth_type'] === 'oidc'): ?>
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body text-center p-4">

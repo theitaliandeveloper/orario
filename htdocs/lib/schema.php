@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/db.php'; // Per sicurezza, includiamo il file db.php per garantire che la connessione al database sia disponibile prima di eseguire qualsiasi operazione sullo schema.
 // Versione corrente dello schema del database. Aggiorna questo valore quando viene rilasciata una nuova versione della piattaforma che richiede modifiche al database.
 const CURRENT_SCHEMA_VERSION = 2;
 const MANDATORY_SCHEMA_UPDATE = true; // Imposta a true se l'aggiornamento dello schema è obbligatorio per la versione corrente della piattaforma.
@@ -108,31 +107,32 @@ function ensure_schema_version_table(mysqli $conn, int $version, string $descrip
 
 function load_application_settings(mysqli $conn): bool
 {
-    $settingNames = [
-        'APP_NAME',
-        'YEAR',
-        'PDF_EXPORT',
-        'MAINTENANCE',
-        'AUTH_TYPE',
-        'APP_DOMAIN',
-        'OIDC_ISSUER',
-        'OIDC_CLIENT_ID',
-        'OIDC_CLIENT_SECRET',
-        'OIDC_ALLOWED_USERS',
-        'OIDC_NO_LOGOUT',
-        'PHP_MAX_RAM',
-        'SESSION_LIFETIME',
-        'API_URL',
-        'ANNOUNCEMENT_TEXT',
+    $defaultSettings = [
+        'APP_NAME' => 'Orario Scuola',
+        'YEAR' => '2025/26',
+        'PDF_EXPORT' => true,
+        'MAINTENANCE' => false,
+        'AUTH_TYPE' => 'local',
+        'APP_DOMAIN' => '',
+        'OIDC_ISSUER' => '',
+        'OIDC_CLIENT_ID' => '',
+        'OIDC_CLIENT_SECRET' => '',
+        'OIDC_ALLOWED_USERS' => [],
+        'OIDC_NO_LOGOUT' => false,
+        'PHP_MAX_RAM' => '128M',
+        'SESSION_LIFETIME' => 3600,
+        'API_URL' => '',
+        'ANNOUNCEMENT_TEXT' => '',
     ];
+    $settingNames = array_keys($defaultSettings);
     $fromDatabase = schema_table_exists($conn, 'preferences') && get_schema_version($conn) >= 2;
 
     if ($fromDatabase) {
-        $settings = [];
+        $settings = $defaultSettings;
         $result = $conn->query('SELECT `identifier`, `value` FROM `preferences`');
         while ($row = $result->fetch_assoc()) {
             if (!in_array($row['identifier'], $settingNames, true)) {
-                $settings[$row['identifier']] = null;
+                continue;
             }
 
             if (in_array($row['identifier'], ['PDF_EXPORT', 'MAINTENANCE', 'OIDC_NO_LOGOUT'], true)) {
@@ -148,14 +148,14 @@ function load_application_settings(mysqli $conn): bool
                 $settings[$row['identifier']] = $row['value'];
             }
         }
-        $missingSettings = array_diff($settingNames, array_keys($settings));
-        foreach ($missingSettings as $missingSetting) {
-            $settings[$missingSetting] = defined($missingSetting) ? constant($missingSetting) : null;
-        }
     } else {
         $settings = [];
         foreach ($settingNames as $name) {
-            $settings[$name] = defined($name) ? constant($name) : null;
+            if (!defined($name)) {
+                $settings[$name] = $defaultSettings[$name];
+                continue;
+            }
+            $settings[$name] = constant($name);
         }
     }
 
@@ -173,48 +173,6 @@ function app_setting(string $name)
     return constant($name);
 }
 
-function factory_reset_app_settings(mysqli $conn): int
-{
-    $preferences = [
-        'APP_NAME' => ['Orario Scuola', 'Nome del sito'],
-        'YEAR' => ['2025/26', 'Anno scolastico corrente'],
-        'PDF_EXPORT' => ['1', 'Consenti esportazione degli orari in PDF'],
-        'MAINTENANCE' => ['0', 'Abilita la modalità di manutenzione'],
-        'ANNOUNCEMENT_TEXT' => ['', 'Testo annuncio'],
-        'AUTH_TYPE' => ['local', 'Tipo di autenticazione amministrativa'],
-        'APP_DOMAIN' => ['', 'Dominio del sito'],
-        'OIDC_ISSUER' => ['', 'Issuer URL per OIDC'],
-        'OIDC_CLIENT_ID' => ['', 'Client ID per OIDC'],
-        'OIDC_CLIENT_SECRET' => ['', 'Client Secret per OIDC'],
-        'OIDC_ALLOWED_USERS' => ['[]', 'Utenti OIDC autorizzati'],
-        'OIDC_NO_LOGOUT' => ['0', 'Non eseguire il logout dal provider OIDC'],
-        'PHP_MAX_RAM' => ['128M', 'Limite di memoria per PHP'],
-        'SESSION_LIFETIME' => ['3600', 'Durata del cookie di login'],
-        'API_URL' => ['', 'URL API di importazione'],
-    ];
-
-    $stmt = $conn->prepare(
-        'INSERT INTO `preferences` (`identifier`, `value`, `description`) VALUES (?, ?, ?)
-         ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `description` = VALUES(`description`)'
-    );
-
-    foreach ($preferences as $identifier => [$value, $description]) {
-        if (is_array($value)) {
-            $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-        } elseif (is_bool($value)) {
-            $value = $value ? '1' : '0';
-        } else {
-            $value = (string)$value;
-        }
-
-        $stmt->bind_param('sss', $identifier, $value, $description);
-        $stmt->execute();
-    }
-
-    $stmt->close();
-    return count($preferences);
-}
-
 function migrate_preferences_from_config(mysqli $conn): int
 {
     $preferences = [
@@ -222,7 +180,6 @@ function migrate_preferences_from_config(mysqli $conn): int
         'YEAR' => [app_setting('YEAR'), 'Anno scolastico corrente'],
         'PDF_EXPORT' => [app_setting('PDF_EXPORT'), 'Consenti esportazione degli orari in PDF'],
         'MAINTENANCE' => [app_setting('MAINTENANCE'), 'Abilita la modalità di manutenzione'],
-        'ANNOUNCEMENT_TEXT' => [app_setting('ANNOUNCEMENT_TEXT'), 'Testo annuncio'],
         'AUTH_TYPE' => [app_setting('AUTH_TYPE'), 'Tipo di autenticazione amministrativa'],
         'APP_DOMAIN' => [app_setting('APP_DOMAIN'), 'Dominio del sito'],
         'OIDC_ISSUER' => [app_setting('OIDC_ISSUER'), 'Issuer URL per OIDC'],
@@ -255,6 +212,100 @@ function migrate_preferences_from_config(mysqli $conn): int
 
     $stmt->close();
     return count($preferences);
+}
+
+function timetable_preference_defaults(): array
+{
+    return [
+        'TIMETABLE_HOURS' => [
+            [
+                'label' => 'Prima ora',
+                'start' => '7:50',
+                'end' => '8:50',
+            ],
+            [
+                'label' => 'Seconda ora',
+                'start' => '8:50',
+                'end' => '9:45',
+            ],
+            [
+                'label' => 'Terza ora',
+                'start' => '9:55',
+                'end' => '10:50',
+            ],
+            [
+                'label' => 'Quarta ora',
+                'start' => '10:50',
+                'end' => '11:45',
+            ],
+            [
+                'label' => 'Quinta ora',
+                'start' => '11:55',
+                'end' => '12:50',
+            ],
+            [
+                'label' => 'Sesta ora',
+                'start' => '12:50',
+                'end' => '13:50',
+            ],
+        ],
+        'TIMETABLE_BREAKS' => [
+            [
+                'after' => 2,
+                'label' => 'Prima ricreazione',
+                'start' => '9:45',
+                'end' => '9:55',
+            ],
+            [
+                'after' => 4,
+                'label' => 'Seconda ricreazione',
+                'start' => '11:45',
+                'end' => '11:55',
+            ],
+        ],
+    ];
+}
+
+function ensure_timetable_preferences(mysqli $conn): int
+{
+    $descriptions = [
+        'TIMETABLE_HOURS' => 'Fasce orarie della giornata',
+        'TIMETABLE_BREAKS' => 'Intervalli tra le lezioni',
+    ];
+    $stmt = $conn->prepare(
+        'INSERT IGNORE INTO `preferences` (`identifier`, `value`, `description`) VALUES (?, ?, ?)'
+    );
+    $count = 0;
+    foreach (timetable_preference_defaults() as $identifier => $value) {
+        $encodedValue = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $description = $descriptions[$identifier];
+        $stmt->bind_param('sss', $identifier, $encodedValue, $description);
+        $stmt->execute();
+        $count++;
+    }
+    $stmt->close();
+    return $count;
+}
+
+function get_timetable_preferences(mysqli $conn): array
+{
+    $preferences = timetable_preference_defaults();
+    if (!schema_table_exists($conn, 'preferences')) {
+        return $preferences;
+    }
+
+    $result = $conn->query(
+        "SELECT `identifier`, `value` FROM `preferences`
+         WHERE `identifier` IN ('TIMETABLE_HOURS', 'TIMETABLE_BREAKS')"
+    );
+    while ($row = $result->fetch_assoc()) {
+        $value = json_decode($row['value'], true);
+        if (is_array($value)) {
+            $preferences[$row['identifier']] = $value;
+        }
+    }
+
+    return $preferences;
 }
 
 // Migrazione alla versione 1 dello schema, con tabelle separate per classi, materie, docenti, laboratori e lezioni.
@@ -396,6 +447,7 @@ function migrate_v2(mysqli $conn, string $projectRoot, ?callable $logger = null)
         );
 
         $preferenceCount = migrate_preferences_from_config($conn);
+        $preferenceCount += ensure_timetable_preferences($conn);
         ensure_schema_version_table($conn, 2, 'Preferenze applicative nel database');
         $conn->commit();
     } catch (Throwable $error) {

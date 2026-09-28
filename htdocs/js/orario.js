@@ -19,18 +19,6 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 document.addEventListener("DOMContentLoaded", async function() {
     const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-    const hours = [
-        "Prima ora<br> 7:50 - 8:50",
-        "Seconda ora<br> 8:50 - 9:45",
-        "Terza ora<br> 9:55 - 10:50",
-        "Quarta ora<br> 10:50 - 11:45",
-        "Quinta ora<br> 11:55 - 12:50",
-        "Sesta ora<br> 12:50 - 13:50"
-    ];
-
-    // Impostazione ricreazioni.
-    // In futuro questo valore potrà essere fornito dal backend.
-    const SHOW_BREAKS = true;
     try {
         const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(3000) }); // Prova a caricare i dati con timeout di 2 secondi
 
@@ -62,6 +50,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         document.title = APP_NAME + " - " + pageTitle;
 
         const timetable = data.timetable;
+        const hours = (data.timetable_hours || []).map(hour => `${hour.label}<br> ${hour.start} - ${hour.end}`);
+        const breaks = data.timetable_breaks || [];
 
         function dayKey(day) {
             return day.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -119,7 +109,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         document.getElementById("desktop-head").innerHTML = dHead;
 
         let dBody = "";
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 1; i <= hours.length; i++) {
             dBody += `<tr><td class="fw-bold">${hours[i-1]}</td>`;
             days.forEach(d => {
                 const dayClean = dayKey(d);
@@ -140,23 +130,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             });
             dBody += `</tr>`;
 
-            // Prima ricreazione: 9:45 - 9:55
-            if (SHOW_BREAKS && i === 2) {
-                dBody += `
-                    <tr>
-                        <td colspan="7" class="text-center fw-semibold py-2">Prima ricreazione <span class="text-body-secondary fw-normal">9:45 - 9:55</span></td>
-                    </tr>
-                `;
-            }
-
-            // Seconda ricreazione: 11:45 - 11:55
-            if (SHOW_BREAKS && i === 4) {
-                dBody += `
-                    <tr>
-                        <td colspan="7" class="text-center fw-semibold py-2">Seconda ricreazione <span class="text-body-secondary fw-normal">11:45 - 11:55</span></td>
-                    </tr>
-                `;
-            }
+            breaks.filter(item => Number(item.after) === i).forEach(item => {
+                dBody += `<tr><td colspan="7" class="text-center fw-semibold py-2">${escapeHtml(item.label)} <span class="text-body-secondary fw-normal">${escapeHtml(item.start)} - ${escapeHtml(item.end)}</span></td></tr>`;
+            });
         }
 
         document.getElementById("desktop-body").innerHTML = dBody;
@@ -170,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         days.forEach(d => {
             const dayClean = dayKey(d);
             mBody += `<div class="card mb-3 shadow-sm"><div class="card-header fw-semibold">${escapeHtml(d)}</div><div class="list-group list-group-flush">`;
-            for (let i = 1; i <= 6; i++) {
+            for (let i = 1; i <= hours.length; i++) {
                 const slot = (timetable[dayClean] && timetable[dayClean][i]) ? timetable[dayClean][i] : null;
                 const hlabel = hours[i - 1].replace("<br>", " ");
                 if (slot && slot.subject) {
@@ -191,25 +167,9 @@ document.addEventListener("DOMContentLoaded", async function() {
                     </div>`;
                 }
 
-                // Prima ricreazione: dopo la seconda ora
-                if (SHOW_BREAKS && i === 2) {
-                    mBody += `
-                        <div class="list-group-item bg-warning-subtle">
-                            <div class="fw-semibold">Prima ricreazione</div>
-                            <div class="small text-body-secondary">9:45 - 9:55</div>
-                        </div>
-                    `;
-                }
-
-                // Seconda ricreazione: dopo la quarta ora
-                if (SHOW_BREAKS && i === 4) {
-                    mBody += `
-                        <div class="list-group-item bg-warning-subtle">
-                            <div class="fw-semibold">Seconda ricreazione</div>
-                            <div class="small text-body-secondary">11:45 - 11:55</div>
-                        </div>
-                    `;
-                }
+                breaks.filter(item => Number(item.after) === i).forEach(item => {
+                    mBody += `<div class="list-group-item bg-warning-subtle"><div class="fw-semibold">${escapeHtml(item.label)}</div><div class="small text-body-secondary">${escapeHtml(item.start)} - ${escapeHtml(item.end)}</div></div>`;
+                });
             }
 
             mBody += `</div></div>`;

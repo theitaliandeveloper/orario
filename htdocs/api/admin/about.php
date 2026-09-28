@@ -35,6 +35,16 @@ if ($res = $conn->query("SELECT COUNT(*) as cnt FROM subjects")) {
     $subjectsCount = (int)$res->fetch_assoc()['cnt'];
 }
 
+$teachersCount = 0;
+if ($res = $conn->query("SELECT COUNT(*) as cnt FROM teachers")) {
+    $teachersCount = (int)$res->fetch_assoc()['cnt'];
+}
+
+$labsCount = 0;
+if ($res = $conn->query("SELECT COUNT(*) as cnt FROM rooms")) {
+    $labsCount = (int)$res->fetch_assoc()['cnt'];
+}
+
 $timetableCount = 0;
 if ($res = $conn->query("SELECT COUNT(*) as cnt FROM timetable_lessons")) {
     $timetableCount = (int)$res->fetch_assoc()['cnt'];
@@ -58,6 +68,8 @@ natcasesort($extensions);
 echo json_encode([
     'classesCount' => $classesCount,
     'subjectsCount' => $subjectsCount,
+    'teachersCount' => $teachersCount,
+    'labsCount' => $labsCount,
     'timetableCount' => $timetableCount,
     'adminsCount' => $adminsCount,
     'authType' => $_SESSION['auth_type'],

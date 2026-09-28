@@ -90,7 +90,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
         <!-- Card Statistiche DB -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-body-tertiary fw-bold fs-5">
-                <i class="bi bi-database me-1 text-primary"></i> Statistiche del Database
+                <i class="bi bi-database me-1 text-primary"></i> Statistiche
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -181,9 +181,19 @@ document.addEventListener("DOMContentLoaded", async function() {
                 <td>Classi scolastiche registrate per le quali è possibile definire l'orario.</td>
             </tr>
             <tr>
-                <td class="fw-bold"><i class="bi bi-book me-2 text-primary"></i>Docenti / Materie</td>
+                <td class="fw-bold"><i class="bi bi-book me-2 text-primary"></i>Materie</td>
                 <td class="text-center"><span class="badge bg-primary fs-6">${d.subjectsCount}</span></td>
-                <td>Accoppiamenti di docenti, materie e relativi laboratori inseriti.</td>
+                <td>Numero di materie registrate.</td>
+            </tr>
+            <tr>
+                <td class="fw-bold"><i class="bi bi-person-badge me-2 text-primary"></i>Docenti</td>
+                <td class="text-center"><span class="badge bg-primary fs-6">${d.teachersCount}</span></td>
+                <td>Docenti registrati per i quali è possibile definire le ore di lezione.</td>
+            </tr>
+            <tr>
+                <td class="fw-bold"><i class="bi bi-flask me-2 text-primary"></i>Laboratori</td>
+                <td class="text-center"><span class="badge bg-primary fs-6">${d.labsCount}</span></td>
+                <td>Numero di laboratori inseriti.</td>
             </tr>
             <tr>
                 <td class="fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Ore Programmate</td>
@@ -193,7 +203,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         if (d.authType === 'local') {
             statsHtml += `
             <tr>
-                <td class="fw-bold"><i class="bi bi-people me-2 text-primary"></i>Utenti Admin</td>
+                <td class="fw-bold"><i class="bi bi-people me-2 text-primary"></i>Amministratori</td>
                 <td class="text-center"><span class="badge bg-primary fs-6">${d.adminsCount}</span></td>
                 <td>Utenti abilitati ad accedere alla dashboard di gestione di questa istanza.</td>
             </tr>`;
