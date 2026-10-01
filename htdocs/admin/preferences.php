@@ -31,7 +31,7 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
 }
 $_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 
-if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== 'admin') {
+if (!isset($_SESSION['admin']) || ($_SESSION['admin'] !== 'admin' && $_SESSION['auth_type'] !== 'oidc')) {
     header("Location: index.php");
     exit;
 }
