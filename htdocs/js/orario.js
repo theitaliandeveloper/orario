@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                 }
 
                 breaks.filter(item => Number(item.after) === i).forEach(item => {
-                    mBody += `<div class="list-group-item bg-warning-subtle"><div class="fw-semibold">${escapeHtml(item.label)}</div><div class="small text-body-secondary">${escapeHtml(item.start)} - ${escapeHtml(item.end)}</div></div>`;
+                    mBody += `<div class="list-group-item timetable-break bg-warning-subtle"><span class="fw-semibold">${escapeHtml(item.label)}</span> <span class="small text-body-secondary">${escapeHtml(item.start)} - ${escapeHtml(item.end)}</span></div>`;
                 });
             }
 

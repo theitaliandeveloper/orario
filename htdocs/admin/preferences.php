@@ -43,9 +43,9 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
 $preferenceDefinitions = [
     'APP_NAME' => ['label' => 'Nome sito', 'type' => 'text', 'group' => 'Generali'],
     'YEAR' => ['label' => 'Anno scolastico', 'type' => 'text', 'group' => 'Generali'],
-    'PDF_EXPORT' => ['label' => 'Esportazione PDF', 'type' => 'checkbox', 'group' => 'Generali'],
+    'PDF_EXPORT' => ['label' => 'Esportazione PDF', 'type' => 'checkbox', 'group' => 'Tabella Oraria'],
     'MAINTENANCE' => ['label' => 'Modalita manutenzione', 'type' => 'checkbox', 'group' => 'Generali'],
-    'SHOW_ORE_CATTEDRA' => ['label' => 'Mostra ore cattedra docente', 'type' => 'checkbox', 'group' => 'Generali'],
+    'SHOW_ORE_CATTEDRA' => ['label' => 'Mostra ore cattedra docente', 'type' => 'checkbox', 'group' => 'Tabella Oraria'],
     'AUTH_TYPE' => ['label' => 'Tipo autenticazione', 'type' => 'select', 'group' => 'Autenticazione'],
     'APP_DOMAIN' => ['label' => 'Dominio applicazione', 'type' => 'text', 'group' => 'Autenticazione'],
     'OIDC_ISSUER' => ['label' => 'Issuer OIDC', 'type' => 'url', 'group' => 'Autenticazione'],

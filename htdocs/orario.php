@@ -91,6 +91,14 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
         overflow-wrap: anywhere;
         word-break: break-word;
     }
+
+    @media (max-width: 767.98px) {
+        #mobile-view .timetable-break {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.2;
+        }
+    }
 </style>
 <script>
     const VIEW_TYPE = "<?php echo $view; ?>";
@@ -125,7 +133,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     </div>
 </nav>
 
-<h1 class="fw-bold text-center mt-3 mb-2" id="page-title"></h1>
+<h1 class="fw-bold text-center mt-3 mb-4" id="page-title"></h1>
 
 <!-- Desktop View -->
 <table class="table table-bordered table-striped-columns table-hover text-center d-none d-md-table" id="desktop-table">

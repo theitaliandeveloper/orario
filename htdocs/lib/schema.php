@@ -174,6 +174,51 @@ function app_setting(string $name)
     return constant($name);
 }
 
+function factory_reset_app_settings(mysqli $conn): int
+{
+    $preferences = [
+        'APP_NAME' => ['Orario Scuola', 'Nome del sito'],
+        'YEAR' => ['2025/26', 'Anno scolastico corrente'],
+        'PDF_EXPORT' => ['1', 'Consenti esportazione degli orari in PDF'],
+        'MAINTENANCE' => ['0', 'Abilita la modalità di manutenzione'],
+        'ANNOUNCEMENT_TEXT' => ['', 'Testo annuncio'],
+        'AUTH_TYPE' => ['local', 'Tipo di autenticazione amministrativa'],
+        'APP_DOMAIN' => ['', 'Dominio del sito'],
+        'OIDC_ISSUER' => ['', 'Issuer URL per OIDC'],
+        'OIDC_CLIENT_ID' => ['', 'Client ID per OIDC'],
+        'OIDC_CLIENT_SECRET' => ['', 'Client Secret per OIDC'],
+        'OIDC_ALLOWED_USERS' => ['[]', 'Utenti OIDC autorizzati'],
+        'OIDC_NO_LOGOUT' => ['0', 'Non eseguire il logout dal provider OIDC'],
+        'PHP_MAX_RAM' => ['128M', 'Limite di memoria per PHP'],
+        'SESSION_LIFETIME' => ['3600', 'Durata del cookie di login'],
+        'API_URL' => ['', 'URL API di importazione'],
+        'ANNOUNCEMENT_TEXT' => ['', 'Testo annuncio'],
+        'SHOW_ORE_CATTEDRA' => [false, 'Mostra le ore cattedra nella pagina docente'],
+    ];
+
+    $stmt = $conn->prepare(
+        'INSERT INTO `preferences` (`identifier`, `value`, `description`) VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `description` = VALUES(`description`)'
+    );
+
+    foreach ($preferences as $identifier => [$value, $description]) {
+        if (is_array($value)) {
+            $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        } elseif (is_bool($value)) {
+            $value = $value ? '1' : '0';
+        } else {
+            $value = (string)$value;
+        }
+
+        $stmt->bind_param('sss', $identifier, $value, $description);
+        $stmt->execute();
+    }
+
+    $stmt->close();
+    return count($preferences) + ensure_timetable_preferences($conn);
+}
+
+
 function migrate_preferences_from_config(mysqli $conn): int
 {
     $preferences = [
@@ -192,6 +237,7 @@ function migrate_preferences_from_config(mysqli $conn): int
         'PHP_MAX_RAM' => [app_setting('PHP_MAX_RAM'), 'Limite di memoria per PHP'],
         'SESSION_LIFETIME' => [app_setting('SESSION_LIFETIME'), 'Durata del cookie di login'],
         'API_URL' => [app_setting('API_URL'), 'URL API di importazione'],
+        'ANNOUNCEMENT_TEXT' => [app_setting('ANNOUNCEMENT_TEXT'), 'Testo annuncio'],
     ];
 
     $stmt = $conn->prepare(

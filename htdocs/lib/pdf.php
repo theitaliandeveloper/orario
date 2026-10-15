@@ -18,20 +18,19 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . "/variables.php";
+require_once __DIR__ . "/misc.php";
 require_once __DIR__ . "/timetable_model.php";
 
 
 function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
 {
     $days = array_values(timetable_day_map());
-    $hours = [
-        1 => "Prima ora\n7:50 - 8:50",
-        2 => "Seconda ora\n8:50 - 9:45",
-        3 => "Terza ora\n9:55 - 10:50",
-        4 => "Quarta ora\n10:50 - 11:45",
-        5 => "Quinta ora\n11:55 - 12:50",
-        6 => "Sesta ora\n12:50 - 13:50",
-    ];
+    $timetablePreferences = get_timetable_preferences($conn);
+    $hours = [];
+    foreach (array_values($timetablePreferences['TIMETABLE_HOURS']) as $index => $hour) {
+        $hours[$index + 1] = $hour['label'] . "\n" . $hour['start'] . ' - ' . $hour['end'];
+    }
+    $breaks = array_values($timetablePreferences['TIMETABLE_BREAKS']);
 
     // CONTROLLO TIPO VALIDO
     if (!in_array($type, ['classe', 'docente', 'laboratorio'], true)) {
@@ -154,7 +153,7 @@ function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
     }
 
     $data = _loadTimetableData($conn, $type, $identifier, $days, array_keys($hours));
-    _renderPDF($title, $filename . '.pdf', $days, $hours, $data);
+    _renderPDF($title, $filename . '.pdf', $days, $hours, $breaks, $data);
 }
 
 
@@ -206,7 +205,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                     while ($row = $q->fetch_assoc()) {
                         if ($subject === null && !empty($row['subject_name'])) {
-                            $subject = $row['subject_name'];
+                            $subject = normalise_string($row['subject_name']);
                         }
 
                         $lessonId = (int)$row['lesson_id'];
@@ -227,7 +226,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         while ($trow = $tres->fetch_assoc()) {
                             if (!in_array($trow['name'], $teachers, true)
                             ) {
-                                $teachers[] = $trow['name'];
+                                $teachers[] = normalise_string($trow['name']);
                             }
                         }
                         $tstmt->close();
@@ -305,7 +304,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                     while ($row = $q->fetch_assoc()) {
                         if ($subject === null && !empty($row['subject_name'])) {
-                            $subject = $row['subject_name'];
+                            $subject = normalise_string($row['subject_name']);
                         }
                         if (!empty($row['class_name']) && !in_array($row['class_name'], $classes, true)) {
                             $classes[] = $row['class_name'];
@@ -380,7 +379,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
 
                     while ($row = $q->fetch_assoc()) {
                         if ($subject === null && !empty($row['subject_name'])) {
-                            $subject = $row['subject_name'];
+                            $subject = normalise_string($row['subject_name']);
                         }
 
                         $lessonId = (int)$row['lesson_id'];
@@ -400,7 +399,7 @@ function _loadTimetableData(mysqli $conn, string $type, $identifier, array $days
                         $hasTeacher = false;
                         while ($trow = $tres->fetch_assoc()) {
                             $hasTeacher = true;
-                            $pair = $row['class_name'] . ' (' . $trow['name'] . ')';
+                            $pair = $row['class_name'] . ' (' . normalise_string($trow['name']) . ')';
                             $pairs[$pair] = true;
                         }
                         $tstmt->close();
@@ -483,7 +482,7 @@ function _renderBreakBar(Fpdf\Fpdf $pdf, float $hourColW, float $dayColW, int $d
 /**
  * Renderizza il PDF dell'orario.
  */
-function _renderPDF(string $title, string $filename, array $days, array $hours, array $data): void 
+function _renderPDF(string $title, string $filename, array $days, array $hours, array $breaks, array $data): void
 {
     $pdf = new _OrarioPDF('L', 'mm', 'A4');
     $pdf->pageTitle = $title;
@@ -555,10 +554,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     // SCALING
     // =============================================================
     $availableHeight = 210 - $pdf->GetY() - 14;
-    /*
-     * Le due ricreazioni occupano 8 mm ciascuna.
-     */
-    $breakBarsHeight = 8 * 2;
+    $breakBarsHeight = 8 * count($breaks);
     $totalHeight = array_sum($rowHeights) + $breakBarsHeight;
     $scale = $totalHeight > $availableHeight ? max(0.55, $availableHeight / $totalHeight) : 1;
     // =============================================================
@@ -605,8 +601,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 $pdf->SetFont('Arial', 'B', 8.5 * $scale);
                 $pdf->SetTextColor(10, 88, 202);
                 $pdf->SetXY($x + 1, $y + (2 * $scale));
-                $subjectText = mb_convert_case($cell['subject'], MB_CASE_TITLE, "UTF-8");
-                $pdf->MultiCell($dayColW - 2, 4 * $scale, mb_convert_encoding($subjectText, 'ISO-8859-1', 'UTF-8'), 0, 'C');
+                $pdf->MultiCell($dayColW - 2, 4 * $scale, mb_convert_encoding($cell['subject'], 'ISO-8859-1', 'UTF-8'), 0, 'C');
 
 
                 // -------------------------------------------------
@@ -614,7 +609,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 // -------------------------------------------------
 
                 if (!empty($cell['lines'])) {
-                    $linesStr = mb_convert_case(joinList($cell['lines']), MB_CASE_TITLE, "UTF-8");
+                    $linesStr = joinList($cell['lines']);
                     $pdf->SetFont('Arial', '', 7 * $scale);
                     $pdf->SetTextColor(33, 37, 41);
                     $pdf->SetXY($x + 1, $pdf->GetY() + (0.5 * $scale));
@@ -627,7 +622,7 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
                 // -------------------------------------------------
 
                 if (!empty($cell['rooms'])) {
-                    $roomStr = mb_convert_case(joinList($cell['rooms']), MB_CASE_TITLE, "UTF-8");
+                    $roomStr = joinList($cell['rooms']);
                     $pdf->SetFont('Arial', 'I', 6.5 * $scale);
                     $pdf->SetTextColor(108, 117, 125);
                     $pdf->SetXY($x + 1, $pdf->GetY() + (0.5 * $scale));
@@ -656,22 +651,19 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
         // Vai alla riga successiva
         $pdf->Ln($rowH);
 
-        // =========================================================
-        // PRIMA RICREAZIONE
-        // 9:45 - 9:55
-        // =========================================================
+        foreach ($breaks as $break) {
+            if ((int)($break['after'] ?? 0) !== (int)$hnum) {
+                continue;
+            }
 
-        if ($hnum === 2) {
-            _renderBreakBar($pdf, $hourColW, $dayColW, count($days), 'Prima ricreazione', '9:45 - 9:55');
-        }
-
-        // =========================================================
-        // SECONDA RICREAZIONE
-        // 11:45 - 11:55
-        // =========================================================
-
-        if ($hnum === 4) {
-            _renderBreakBar($pdf, $hourColW, $dayColW, count($days), 'Seconda ricreazione', '11:45 - 11:55');
+            _renderBreakBar(
+                $pdf,
+                $hourColW,
+                $dayColW,
+                count($days),
+                (string)($break['label'] ?? ''),
+                (string)($break['start'] ?? '') . ' - ' . (string)($break['end'] ?? '')
+            );
         }
     }
 

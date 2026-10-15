@@ -36,6 +36,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     exit;
 }
 $initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
+$timetablePreferences = get_timetable_preferences($conn);
 ?>
 <!DOCTYPE html>
 <html>
@@ -80,6 +81,7 @@ $initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
     <script>
         const CSRF_TOKEN = "<?php echo generate_csrf_token(); ?>";
         const INITIAL_CLASS_ID = <?php echo $initial_class_id; ?>;
+        const TIMETABLE_HOURS = <?php echo json_encode($timetablePreferences['TIMETABLE_HOURS'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
 </head>
 <body>
@@ -252,9 +254,13 @@ document.addEventListener("DOMContentLoaded", async function() {
 
             // Build grid
             let html = "";
-            for (let hour = 1; hour <= 6; hour++) {
+            TIMETABLE_HOURS.forEach((hourDefinition, hourIndex) => {
+                const hour = hourIndex + 1;
                 html += `<tr>`;
-                html += `<td class="fw-bold bg-body-tertiary">${hour}ª ora</td>`;
+                html += `<td class="fw-bold bg-body-tertiary">
+                    <div>${escapeHtml(hourDefinition.label)}</div>
+                    <small class="text-body-secondary">${escapeHtml(hourDefinition.start)} - ${escapeHtml(hourDefinition.end)}</small>
+                </td>`;
                 days.forEach(day => {
                     const cellSubjects = preselected.filter(item => item.day === day && item.hour === hour);
                     
@@ -273,7 +279,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     </td>`;
                 });
                 html += `</tr>`;
-            }
+            });
 
             timetableGrid.innerHTML = html;
             timetableForm.classList.remove("d-none");
