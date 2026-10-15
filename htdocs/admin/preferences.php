@@ -45,6 +45,7 @@ $preferenceDefinitions = [
     'YEAR' => ['label' => 'Anno scolastico', 'type' => 'text', 'group' => 'Generali'],
     'PDF_EXPORT' => ['label' => 'Esportazione PDF', 'type' => 'checkbox', 'group' => 'Generali'],
     'MAINTENANCE' => ['label' => 'Modalita manutenzione', 'type' => 'checkbox', 'group' => 'Generali'],
+    'SHOW_ORE_CATTEDRA' => ['label' => 'Mostra ore cattedra docente', 'type' => 'checkbox', 'group' => 'Generali'],
     'AUTH_TYPE' => ['label' => 'Tipo autenticazione', 'type' => 'select', 'group' => 'Autenticazione'],
     'APP_DOMAIN' => ['label' => 'Dominio applicazione', 'type' => 'text', 'group' => 'Autenticazione'],
     'OIDC_ISSUER' => ['label' => 'Issuer OIDC', 'type' => 'url', 'group' => 'Autenticazione'],

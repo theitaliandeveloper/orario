@@ -123,6 +123,7 @@ function load_application_settings(mysqli $conn): bool
         'SESSION_LIFETIME' => 3600,
         'API_URL' => '',
         'ANNOUNCEMENT_TEXT' => '',
+        'SHOW_ORE_CATTEDRA' => false,
     ];
     $settingNames = array_keys($defaultSettings);
     $fromDatabase = schema_table_exists($conn, 'preferences') && get_schema_version($conn) >= 2;
@@ -135,7 +136,7 @@ function load_application_settings(mysqli $conn): bool
                 continue;
             }
 
-            if (in_array($row['identifier'], ['PDF_EXPORT', 'MAINTENANCE', 'OIDC_NO_LOGOUT'], true)) {
+            if (in_array($row['identifier'], ['PDF_EXPORT', 'MAINTENANCE', 'OIDC_NO_LOGOUT', 'SHOW_ORE_CATTEDRA'], true)) {
                 $settings[$row['identifier']] = $row['value'] === '1';
             } elseif ($row['identifier'] === 'SESSION_LIFETIME') {
                 $settings[$row['identifier']] = (int)$row['value'];
@@ -180,6 +181,7 @@ function migrate_preferences_from_config(mysqli $conn): int
         'YEAR' => [app_setting('YEAR'), 'Anno scolastico corrente'],
         'PDF_EXPORT' => [app_setting('PDF_EXPORT'), 'Consenti esportazione degli orari in PDF'],
         'MAINTENANCE' => [app_setting('MAINTENANCE'), 'Abilita la modalità di manutenzione'],
+        'SHOW_ORE_CATTEDRA' => [app_setting('SHOW_ORE_CATTEDRA'), 'Mostra le ore cattedra nella pagina docente'],
         'AUTH_TYPE' => [app_setting('AUTH_TYPE'), 'Tipo di autenticazione amministrativa'],
         'APP_DOMAIN' => [app_setting('APP_DOMAIN'), 'Dominio del sito'],
         'OIDC_ISSUER' => [app_setting('OIDC_ISSUER'), 'Issuer URL per OIDC'],

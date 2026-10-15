@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         if (VIEW_TYPE === "laboratorio") titleName = data.room;
         pageTitle = `Orario ${(VIEW_TYPE != "laboratorio") ? VIEW_TYPE : ""} ${titleName}`;
         document.getElementById("page-title").innerText = pageTitle;
-        if (VIEW_TYPE === "docente") {
+        if (VIEW_TYPE === "docente" && SHOW_ORE_CATTEDRA === "1") {
             document.getElementById("page-hours").textContent = `Ore cattedra docente: ${data.hours}`;
         }
         document.title = APP_NAME + " - " + pageTitle;

@@ -97,6 +97,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     const VIEW_ID = "<?php echo htmlspecialchars($id); ?>";
     const APP_NAME = "<?php echo app_setting('APP_NAME'); ?>";
     const YEAR = "<?php echo app_setting('YEAR'); ?>";
+    const SHOW_ORE_CATTEDRA = "<?php echo app_setting('SHOW_ORE_CATTEDRA'); ?>";
 </script>
 </head>
 <body>

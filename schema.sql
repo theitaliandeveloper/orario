@@ -261,6 +261,7 @@ INSERT IGNORE INTO preferences (identifier, value, description) VALUES
     ('YEAR', '2025/26', 'Anno scolastico corrente'),
     ('PDF_EXPORT', '1', 'Consenti esportazione degli orari in PDF'),
     ('MAINTENANCE', '0', 'Abilita la modalità di manutenzione'),
+    ('SHOW_ORE_CATTEDRA', '0', 'Mostra le ore cattedra nella pagina docente'),
     ('AUTH_TYPE', 'local', 'Tipo di autenticazione amministrativa'),
     ('APP_DOMAIN', '', 'Dominio del sito'),
     ('OIDC_ISSUER', '', 'Issuer URL per OIDC'),
