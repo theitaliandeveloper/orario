@@ -20,7 +20,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 document.addEventListener("DOMContentLoaded", async function() {
     const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
     try {
-        const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(3000) }); // Prova a caricare i dati con timeout di 2 secondi
+        const res = await fetch(`api/getOrario.php?type=${VIEW_TYPE}&id=${encodeURIComponent(VIEW_ID)}`,{ signal: AbortSignal.timeout(10000) }); // Prova a caricare i dati con timeout di 2 secondi
 
         if (!res.ok) {
             if (res.status == 404) {

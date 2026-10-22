@@ -249,7 +249,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
 
       async function loadSubjects() {
           try {
-              const res = await fetch("../api/admin/subjects.php",{ signal: AbortSignal.timeout(3000) });
+              const res = await fetch("../api/admin/subjects.php",{ signal: AbortSignal.timeout(10000) });
               if (!res.ok) throw new Error("Errore nel caricamento delle materie.");
               allSubjects = await res.json();
 
@@ -286,7 +286,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
       async function loadResource(type) {
           const container = type === "teachers" ? teachersContainer : roomsContainer;
           try {
-              const res = await fetch(`../api/admin/${type}.php`, { signal: AbortSignal.timeout(3000) });
+              const res = await fetch(`../api/admin/${type}.php`, { signal: AbortSignal.timeout(10000) });
               if (!res.ok) throw new Error("Errore nel caricamento.");
               const resources = await res.json();
               if (resources.length === 0) {
@@ -321,7 +321,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
               method: "POST",
               headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
               body: JSON.stringify({ name }),
-              signal: AbortSignal.timeout(3000)
+              signal: AbortSignal.timeout(10000)
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Errore durante l'aggiunta.");
@@ -377,7 +377,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                   const res = await fetch(`../api/admin/${type}.php?id=${deleteButton.dataset.id}`, {
                       method: "DELETE",
                       headers: { "X-CSRF-Token": CSRF_TOKEN },
-                      signal: AbortSignal.timeout(3000)
+                      signal: AbortSignal.timeout(10000)
                   });
                   const data = await res.json();
                   if (!res.ok) throw new Error(data.error || "Errore durante l'eliminazione.");
@@ -392,7 +392,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
                 body: JSON.stringify({ id, name }),
-                signal: AbortSignal.timeout(3000)
+                signal: AbortSignal.timeout(10000)
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Errore durante l'aggiornamento.");
@@ -446,7 +446,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                       "X-CSRF-Token": CSRF_TOKEN
                   },
                   body: JSON.stringify({ name }),
-                  signal: AbortSignal.timeout(3000)
+                  signal: AbortSignal.timeout(10000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante il salvataggio.");
@@ -496,7 +496,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                       "X-CSRF-Token": CSRF_TOKEN
                   },
                   body: JSON.stringify({ id, name }),
-                  signal: AbortSignal.timeout(3000)
+                  signal: AbortSignal.timeout(10000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'aggiornamento.");
@@ -526,7 +526,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
                   headers: {
                       "X-CSRF-Token": CSRF_TOKEN
                   },
-                  signal: AbortSignal.timeout(3000)
+                  signal: AbortSignal.timeout(10000)
               });
               const data = await res.json();
               if (!res.ok) throw new Error(data.error || "Errore durante l'eliminazione.");

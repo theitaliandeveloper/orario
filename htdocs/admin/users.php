@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     async function loadUsers() {
         try {
-            const res = await fetch("../api/admin/users.php", { signal: AbortSignal.timeout(3000) });
+            const res = await fetch("../api/admin/users.php", { signal: AbortSignal.timeout(10000) });
             if (!res.ok) throw new Error("Errore nel caricamento degli utenti.");
             const users = await res.json();
             
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     "X-CSRF-Token": CSRF_TOKEN
                 },
                 body: JSON.stringify({ username, password }),
-                signal: AbortSignal.timeout(3000)
+                signal: AbortSignal.timeout(10000)
             });
 
             const data = await res.json();
@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 headers: {
                     "X-CSRF-Token": CSRF_TOKEN
                 },
-                signal: AbortSignal.timeout(3000)
+                signal: AbortSignal.timeout(10000)
             });
 
             const data = await res.json();

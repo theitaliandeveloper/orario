@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Load classes dropdown
     try {
-        const res = await fetch("../api/admin/classes.php",{ signal: AbortSignal.timeout(3000) });
+        const res = await fetch("../api/admin/classes.php",{ signal: AbortSignal.timeout(10000) });
         if (!res.ok) throw new Error("Errore nel caricamento delle classi.");
         const classes = await res.json();
         
