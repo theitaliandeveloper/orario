@@ -17,6 +17,13 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 // JavaScript per la tabella oraria
 
+function showLoadError() {
+    const homeButton = '<a href="index.php" class="btn btn-primary">Torna alla home</a>';
+    document.getElementById("desktop-table").innerHTML = `<tbody><tr><td class="text-center">${homeButton}</td></tr></tbody>`;
+    document.getElementById("mobile-view").innerHTML = `<div class="d-flex justify-content-center">${homeButton}</div>`;
+    document.getElementById("pdf-export").innerHTML = "";
+}
+
 document.addEventListener("DOMContentLoaded", async function() {
     const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
     try {
@@ -28,14 +35,25 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
             else {
                 document.getElementById("page-title").innerText = "Errore nel caricamento";
-                document.getElementById("desktop-table").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
-                document.getElementById("mobile-view").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
-                document.getElementById("pdf-export").innerHTML = "";
+                showLoadError();
             }
             return;
         }
     
         const data = await res.json();
+
+        const classIds = new Map();
+        if (VIEW_TYPE !== "classe") {
+            try {
+                const classesRes = await fetch("api/getClassi.php", { signal: AbortSignal.timeout(10000) });
+                if (classesRes.ok) {
+                    const classes = await classesRes.json();
+                    classes.forEach(item => classIds.set(item.name, item.id));
+                }
+            } catch (e) {
+                console.warn("Impossibile caricare gli ID delle classi", e);
+            }
+        }
 
         let titleName = "";
         let pageTitle = "";
@@ -66,6 +84,14 @@ document.addEventListener("DOMContentLoaded", async function() {
                 .replace(/'/g, "&#039;");
         }
 
+        function entityLink(type, name) {
+            if (!name) return "";
+            const id = type === "classe" ? classIds.get(name) : name;
+            if (id === undefined) return escapeHtml(name);
+            const colorClass = "text-reset";
+            return `<a class="${colorClass} text-decoration-none" href="orario.php?view=${type}&id=${encodeURIComponent(id)}">${escapeHtml(name)}</a>`;
+        }
+
         const joinWithAnd = items => {
             if (items.length === 0) return "";
             if (items.length === 1) return items[0];
@@ -73,18 +99,20 @@ document.addEventListener("DOMContentLoaded", async function() {
             return `${items.slice(0, -1).join(", ")} e ${items[items.length - 1]}`;
         };
 
+        const joinEntities = (type, items) => joinWithAnd((items || []).map(item => entityLink(type, item)));
+
         function slotDetails(slot) {
             if (VIEW_TYPE === 'classe') {
                 return {
-                    secondary: joinWithAnd(slot.teachers || []),
-                    rooms: joinWithAnd(slot.rooms || [])
+                    secondary: joinEntities("docente", slot.teachers),
+                    rooms: joinEntities("laboratorio", slot.rooms)
                 };
             }
 
             if (VIEW_TYPE === 'docente') {
                 return {
-                    secondary: joinWithAnd(slot.classes || []),
-                    rooms: joinWithAnd(slot.rooms || [])
+                    secondary: joinEntities("classe", slot.classes),
+                    rooms: joinEntities("laboratorio", slot.rooms)
                 };
             }
 
@@ -92,8 +120,8 @@ document.addEventListener("DOMContentLoaded", async function() {
                 secondary: joinWithAnd(
                     (slot.classes || [])
                         .map(item => item.teacher
-                            ? `${item.class} (${item.teacher})`
-                            : item.class
+                            ? `${entityLink("classe", item.class)} (${entityLink("docente", item.teacher)})`
+                            : entityLink("classe", item.class)
                         )
                 ),
                 rooms: ""
@@ -121,8 +149,8 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                     dBody += `<td data-label="${d}">
                         <div class="subject fw-bold text-primary-emphasis">${escapeHtml(slot.subject)}</div>
-                        ${secondary ? `<div class="teacher small">${escapeHtml(secondary)}</div>` : ''}
-                        ${rooms ? `<div class="room text-secondary-emphasis small">${escapeHtml(rooms)}</div>` : ''}
+                        ${secondary ? `<div class="teacher small">${secondary}</div>` : ''}
+                        ${rooms ? `<div class="room text-secondary-emphasis small">${rooms}</div>` : ''}
                     </td>`;
                 } else {
                     dBody += `<td data-label="${d}"></td>`;
@@ -142,10 +170,18 @@ document.addEventListener("DOMContentLoaded", async function() {
         // ============================================================
 
         let mBody = "";
+        const currentDayNumber = new Date().getDay();
+        const currentDay = currentDayNumber >= 1 && currentDayNumber <= 6
+            ? days[currentDayNumber - 1]
+            : null;
 
-        days.forEach(d => {
+        days.forEach((d, dayIndex) => {
             const dayClean = dayKey(d);
-            mBody += `<div class="card mb-3 shadow-sm"><div class="card-header fw-semibold">${escapeHtml(d)}</div><div class="list-group list-group-flush">`;
+            const isCurrentDay = d === currentDay;
+            const collapseId = `mobile-day-${dayIndex}`;
+            mBody += `<div class="card mb-3 shadow-sm">
+                <button class="card-header fw-semibold text-start w-100 border-0 border-bottom rounded-0 bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isCurrentDay}" aria-controls="${collapseId}">${escapeHtml(d)} <i class="bi bi-chevron-${isCurrentDay ? "up" : "down"} float-end" aria-hidden="true"></i></button>
+                <div id="${collapseId}" class="collapse${isCurrentDay ? " show" : ""}"><div class="list-group list-group-flush">`;
             for (let i = 1; i <= hours.length; i++) {
                 const slot = (timetable[dayClean] && timetable[dayClean][i]) ? timetable[dayClean][i] : null;
                 const hlabel = hours[i - 1].replace("<br>", " ");
@@ -157,8 +193,8 @@ document.addEventListener("DOMContentLoaded", async function() {
                     mBody += `<div class="list-group-item">
                         <div class="small text-body-secondary">${escapeHtml(hlabel)}</div>
                         <div class="fw-semibold text-primary-emphasis">${escapeHtml(slot.subject)}</div>
-                        ${secondary ? `<div class="text-secondary-emphasis">${escapeHtml(secondary)}</div>` : ''}
-                        ${rooms ? `<span class="badge border border-info text-info mt-1">${escapeHtml(rooms)}</span>` : ''}
+                        ${secondary ? `<div class="text-secondary-emphasis">${secondary}</div>` : ''}
+                        ${rooms ? `<span class="badge border border-info text-info mt-1">${rooms}</span>` : ''}
                     </div>`;
                 } else {
                     mBody += `<div class="list-group-item text-body-tertiary">
@@ -172,16 +208,29 @@ document.addEventListener("DOMContentLoaded", async function() {
                 });
             }
 
-            mBody += `</div></div>`;
+            mBody += `</div></div></div>`;
         });
 
         document.getElementById("mobile-view").innerHTML = mBody;
+        document.querySelectorAll("#mobile-view [data-bs-toggle=\"collapse\"]").forEach(button => {
+            const target = document.querySelector(button.dataset.bsTarget);
+            const icon = button.querySelector("i");
+            if (!target || !icon) return;
+
+            const updateChevron = () => {
+                const isExpanded = target.classList.contains("show");
+                icon.classList.toggle("bi-chevron-up", isExpanded);
+                icon.classList.toggle("bi-chevron-down", !isExpanded);
+            };
+
+            target.addEventListener("shown.bs.collapse", updateChevron);
+            target.addEventListener("hidden.bs.collapse", updateChevron);
+            updateChevron();
+        });
 
     } catch (e) {
         console.error(e);
         document.getElementById("page-title").innerText = "Errore nel caricamento";
-        document.getElementById("desktop-table").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
-        document.getElementById("mobile-view").innerHTML = "<a href=\"index.php\" class=\"btn btn-primary\">Torna alla home</a>";
-        document.getElementById("pdf-export").innerHTML = "";
+        showLoadError();
     }
 });

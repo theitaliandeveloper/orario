@@ -30,6 +30,7 @@ if (!isset($_SESSION['admin']) && app_setting('MAINTENANCE')) {
 }
 
 $legacySchemaDetected = schema_update_required($conn);
+$timetablePreferences = get_timetable_preferences($conn);
 ?>
 <!DOCTYPE html>
 <html>
@@ -67,6 +68,7 @@ $legacySchemaDetected = schema_update_required($conn);
     <h1 class="fw-bold text-center mb-4">
         <?php echo app_setting('APP_NAME'); ?> - A.S. <?php echo app_setting('YEAR'); ?>
     </h1>
+    <div id="current-time" class="text-center text-body-secondary fs-5 mb-4" aria-live="polite"></div>
     <?php if (app_setting('MAINTENANCE')): ?>
         <div class="alert alert-warning text-center" role="alert">
             <strong>Attenzione!</strong> La modalità di manutenzione è attiva. Gli utenti non amministratori non possono accedere al sito.
@@ -118,6 +120,10 @@ $legacySchemaDetected = schema_update_required($conn);
     <br>
     Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
 </footer>
+    <script>
+        window.TIMETABLE_HOURS = <?php echo json_encode($timetablePreferences['TIMETABLE_HOURS'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+        window.TIMETABLE_BREAKS = <?php echo json_encode($timetablePreferences['TIMETABLE_BREAKS'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    </script>
     <script src="js/index.js"></script>
     <script src="js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
