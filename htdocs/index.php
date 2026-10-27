@@ -6,6 +6,14 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/lib/variables.php";
 require_once __DIR__ . "/lib/csrf.php";
@@ -68,7 +76,6 @@ $timetablePreferences = get_timetable_preferences($conn);
     <h1 class="fw-bold text-center mb-4">
         <?php echo app_setting('APP_NAME'); ?> - A.S. <?php echo app_setting('YEAR'); ?>
     </h1>
-    <div id="current-time" class="text-center text-body-secondary fs-5 mb-4" aria-live="polite"></div>
     <?php if (app_setting('MAINTENANCE')): ?>
         <div class="alert alert-warning text-center" role="alert">
             <strong>Attenzione!</strong> La modalità di manutenzione è attiva. Gli utenti non amministratori non possono accedere al sito.
@@ -91,6 +98,7 @@ $timetablePreferences = get_timetable_preferences($conn);
                 <?php echo app_setting('ANNOUNCEMENT_TEXT'); ?>
             </div>
         <?php endif; ?>
+    <div id="current-time" class="text-center text-body-secondary fs-5 mb-4" aria-live="polite"></div>
     <div class="container">
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-6 col-lg-5">
