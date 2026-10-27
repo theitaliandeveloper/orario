@@ -1,6 +1,6 @@
 services:
   web:
-    image: git.vichingo455.com/emmev-code/orario:latest
+    image: vichingo455/orario:latest
     container_name: orario-web
     ports:
       - "8080:80"
