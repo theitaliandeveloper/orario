@@ -17,6 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . "/auth_check.php";
+require_once __DIR__ . "/../../lib/redis.php";
 require_once __DIR__ . "/../../lib/timetable_model.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {

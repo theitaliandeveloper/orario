@@ -18,7 +18,6 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 require_once __DIR__ . "/../../lib/db.php";
 require_once __DIR__ . "/../../lib/csrf.php";
-require_once __DIR__ . "/../../lib/redis.php";
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
