@@ -1,3 +1,18 @@
+# Orario Scuola, Copyright (C) 2025-2026 EmmeV.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see https://www.gnu.org/licenses/.
+
 services:
   web:
     image: git.vichingo455.com/emmev-code/orario:latest
@@ -14,11 +29,11 @@ services:
       DB_USER: orario # Utente database
       DB_PASS: orario # Password dell'utente del database
       DB_NAME: school_timetable # Nome del database
-      REDIS_ENABLED: true
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
-      REDIS_TIMEOUT: 0.5
+      REDIS_ENABLED: true # Abilita l'uso di Redis
+      REDIS_HOST: redis # Host Redis
+      REDIS_PORT: 6379 # Porta Redis
+      REDIS_PASSWORD: "" # Password Redis (lasciare vuoto se non impostata)
+      REDIS_TIMEOUT: 0.5 # Timeout di connessione a Redis in secondi
   redis:
     image: redis:8-trixie
     container_name: orario-redis
