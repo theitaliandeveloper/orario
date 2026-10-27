@@ -23,6 +23,8 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - php_sessions:/var/lib/php/sessions
     restart: unless-stopped
     environment:
       DB_HOST: db # Host database
@@ -56,3 +58,4 @@ services:
 volumes:
   db_data:
   orario-redis_data:
+  php_sessions:

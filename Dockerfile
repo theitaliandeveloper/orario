@@ -16,6 +16,10 @@
 FROM php:8.5-apache
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 RUN pecl install redis && docker-php-ext-enable redis
+RUN mkdir -p /var/lib/php/sessions \
+	&& chown -R www-data:www-data /var/lib/php/sessions \
+	&& chmod 700 /var/lib/php/sessions \
+	&& printf "session.save_path = /var/lib/php/sessions\n" > /usr/local/etc/php/conf.d/zz-sessions.ini
 COPY htdocs/ /var/www/html/
 RUN mkdir /var/www/utils
 COPY utils/ /var/www/utils/
