@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 require_once __DIR__ . "/variables.php";
 
-function redis_connection(): ?Redis
+function redis_connection()
 {
     static $redis = null;
     static $attempted = false;
