@@ -43,17 +43,4 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
-
-if (session_status() === PHP_SESSION_NONE) {
-    $sessionPaths = ['/var/lib/php/sessions', '/tmp/orario-sessions'];
-    foreach ($sessionPaths as $sessionPath) {
-        if (!is_dir($sessionPath)) {
-            @mkdir($sessionPath, 0700, true);
-        }
-        if (is_writable($sessionPath)) {
-            session_save_path($sessionPath);
-            break;
-        }
-    }
-}
 ?>
