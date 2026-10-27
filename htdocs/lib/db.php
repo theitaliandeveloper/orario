@@ -36,19 +36,6 @@ load_application_settings($conn);
 
 ini_set('memory_limit', app_setting('PHP_MAX_RAM'));
 ini_set('session.gc_maxlifetime', app_setting('SESSION_LIFETIME'));
-
-require_once __DIR__ . "/redis.php";
-$sessionRedis = redis_connection();
-if ($sessionRedis) {
-    $sessionSavePath = 'tcp://' . REDIS_HOST . ':' . REDIS_PORT;
-    $sessionOptions = ['database=0'];
-    if (REDIS_PASSWORD !== '') {
-        $sessionOptions[] = 'auth=' . rawurlencode(REDIS_PASSWORD);
-    }
-    ini_set('session.save_handler', 'redis');
-    ini_set('session.save_path', $sessionSavePath . '?' . implode('&', $sessionOptions));
-}
-
 session_set_cookie_params([
     'lifetime' => app_setting('SESSION_LIFETIME'),
     'path' => '/',
