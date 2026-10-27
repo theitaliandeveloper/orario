@@ -16,6 +16,20 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/../lib/misc.php";
+require_once __DIR__ . "/../lib/redis.php";
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: X-API-Key, X-Requested-With");
+
+$cacheKey = 'homepage:teachers:v' . redis_occupancy_version();
+$cached = redis_get_cached($cacheKey);
+if ($cached !== null) {
+    echo $cached;
+    exit();
+}
+
 require_once __DIR__ . "/../lib/db.php";
 $res = $conn->query(
     "SELECT DISTINCT t.name AS teacher
@@ -29,9 +43,7 @@ while ($row = $res->fetch_assoc()) {
         $docenti[] = normalise_string($row['teacher']);
     }
 }
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header("Access-Control-Allow-Headers: X-API-Key, X-Requested-With");
-echo json_encode($docenti, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$json = json_encode($docenti, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+redis_set_cached($cacheKey, $json, 3600);
+echo $json;
 exit();

@@ -18,6 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 require_once __DIR__ . "/auth_check.php";
 require_once __DIR__ . "/../../lib/schema.php";
+require_once __DIR__ . "/../../lib/redis.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -65,6 +66,20 @@ $memoryLimit = ini_get('memory_limit');
 $extensions = get_loaded_extensions();
 natcasesort($extensions);
 
+$redisStatus = 'disabled';
+if (REDIS_ENABLED) {
+    if (!class_exists('Redis')) {
+        $redisStatus = 'extension_missing';
+    } else {
+        try {
+            $redis = redis_connection();
+            $redisStatus = $redis && $redis->ping() ? 'connected' : 'unavailable';
+        } catch (Throwable $exception) {
+            $redisStatus = 'unavailable';
+        }
+    }
+}
+
 echo json_encode([
     'classesCount' => $classesCount,
     'subjectsCount' => $subjectsCount,
@@ -84,6 +99,12 @@ echo json_encode([
     'sessionLifetime' => app_setting('SESSION_LIFETIME'),
     'version' => VERSION,
     'maintenance' => app_setting('MAINTENANCE'),
+    'redis' => [
+        'enabled' => REDIS_ENABLED,
+        'status' => $redisStatus,
+        'host' => REDIS_HOST,
+        'port' => REDIS_PORT
+    ],
     'extensions' => array_values($extensions)
 ]);
 exit;

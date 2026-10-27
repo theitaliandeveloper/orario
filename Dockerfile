@@ -1,5 +1,6 @@
 FROM php:8.5-apache
 RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN pecl install redis && docker-php-ext-enable redis
 COPY htdocs/ /var/www/html/
 RUN mkdir /var/www/utils
 COPY utils/ /var/www/utils/

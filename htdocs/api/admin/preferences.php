@@ -173,6 +173,7 @@ try {
     }
     $stmt->close();
     $conn->commit();
+    redis_invalidate_occupancy_cache();
     load_application_settings($conn);
     echo json_encode(['success' => true]);
 } catch (Throwable $error) {

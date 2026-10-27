@@ -15,15 +15,27 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+require_once __DIR__ . "/../lib/redis.php";
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: X-API-Key, X-Requested-With");
+
+$cacheKey = 'homepage:classes:v' . redis_occupancy_version();
+$cached = redis_get_cached($cacheKey);
+if ($cached !== null) {
+    echo $cached;
+    exit();
+}
+
 require_once __DIR__ . "/../lib/db.php";
 $res = $conn->query("SELECT id, name FROM classes ORDER BY name");
 $classi = [];
 while ($row = $res->fetch_assoc()) {
     $classi[] = ['id' => (int)$row['id'], 'name' => $row['name']];
 }
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header("Access-Control-Allow-Headers: X-API-Key, X-Requested-With");
-echo json_encode($classi, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$json = json_encode($classi, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+redis_set_cached($cacheKey, $json, 3600);
+echo $json;
 exit();

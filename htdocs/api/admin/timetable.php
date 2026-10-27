@@ -137,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         $conn->commit();
+        redis_invalidate_occupancy_cache();
         echo json_encode(["success" => true]);
     } catch (Throwable $e) {
         $conn->rollback();

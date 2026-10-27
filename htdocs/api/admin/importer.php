@@ -186,6 +186,7 @@ try {
         }
 
         $conn->commit();
+        redis_invalidate_occupancy_cache();
         $materie_create = array_keys($materie_create);
         $docenti_create = array_keys($docenti_create);
         $laboratori_create = array_keys($laboratori_create);

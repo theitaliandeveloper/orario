@@ -19,6 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 require_once __DIR__ . "/misc.php";
 require_once __DIR__ . "/variables.php";
 require_once __DIR__ . "/timetable_model.php";
+require_once __DIR__ . "/redis.php";
 
 function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
 {
@@ -342,10 +343,12 @@ function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
         ];
     }
 
-    echo json_encode(
+    $json = json_encode(
         $response,
         JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
     );
+    redis_set_cached(redis_timetable_cache_key($type, $identifier), $json, 3600);
+    echo $json;
 
     exit;
 }

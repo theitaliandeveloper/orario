@@ -48,6 +48,27 @@ if (!defined('DB_NAME')) {
         define('DB_NAME', 'school_timetable');
     }
 }
+// Impostazioni Redis
+if (!defined('REDIS_ENABLED')) {
+    $val = getenv('REDIS_ENABLED');
+    define('REDIS_ENABLED', $val === false || $val === '' ? true : filter_var($val, FILTER_VALIDATE_BOOLEAN));
+}
+if (!defined('REDIS_HOST')) {
+    $val = getenv('REDIS_HOST');
+    define('REDIS_HOST', $val !== false && $val !== '' ? $val : 'redis');
+}
+if (!defined('REDIS_PORT')) {
+    $val = getenv('REDIS_PORT');
+    define('REDIS_PORT', $val !== false && $val !== '' && is_numeric($val) ? (int)$val : 6379);
+}
+if (!defined('REDIS_PASSWORD')) {
+    $val = getenv('REDIS_PASSWORD');
+    define('REDIS_PASSWORD', $val !== false ? $val : '');
+}
+if (!defined('REDIS_TIMEOUT')) {
+    $val = getenv('REDIS_TIMEOUT');
+    define('REDIS_TIMEOUT', $val !== false && $val !== '' && is_numeric($val) ? (float)$val : 0.5);
+}
 if (!defined('FACTORY_RESET')) {
     $val = getenv('FACTORY_RESET');
     if ($val !== false && $val !== '') {
