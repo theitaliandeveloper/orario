@@ -35,6 +35,7 @@ function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
     ];
 
     $timetable = [];
+    $teacherHours = 0;
 
     $normalized_type = strtolower($type);
     if ($normalized_type === 'classe') $normalized_type = 'class';
@@ -201,8 +202,10 @@ function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
                 $subject = null;
                 $classes = [];
                 $rooms = [];
+                $hasLesson = false;
 
                 while ($row = $q->fetch_assoc()) {
+                    $hasLesson = true;
                     if ($subject === null && !empty($row['subject_name'])) {
                         $subject = normalise_string($row['subject_name']);
                     }
@@ -227,6 +230,10 @@ function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
                         }
                     }
                     $rstmt->close();
+                }
+
+                if ($hasLesson) {
+                    $teacherHours++;
                 }
 
                 $stmt->close();
@@ -309,21 +316,29 @@ function exportTimetableJSON(mysqli $conn, string $type, $identifier): void
     /*
      * Risposta.
      */
+    $timetablePreferences = get_timetable_preferences($conn);
     if ($normalized_type === 'class') {
         $response = [
             'class_id'   => intval($identifier),
             'class_name' => $class_name,
-            'timetable'  => $timetable
+            'timetable'  => $timetable,
+            'timetable_hours' => $timetablePreferences['TIMETABLE_HOURS'],
+            'timetable_breaks' => $timetablePreferences['TIMETABLE_BREAKS']
         ];
     } elseif ($normalized_type === 'teacher') {
         $response = [
             'teacher'   => normalise_string($identifier),
-            'timetable' => $timetable
+            'hours'     => $teacherHours,
+            'timetable' => $timetable,
+            'timetable_hours' => $timetablePreferences['TIMETABLE_HOURS'],
+            'timetable_breaks' => $timetablePreferences['TIMETABLE_BREAKS']
         ];
     } else {
         $response = [
             'room'      => trim((string)$identifier),
-            'timetable' => $timetable
+            'timetable' => $timetable,
+            'timetable_hours' => $timetablePreferences['TIMETABLE_HOURS'],
+            'timetable_breaks' => $timetablePreferences['TIMETABLE_BREAKS']
         ];
     }
 

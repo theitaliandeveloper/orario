@@ -15,15 +15,15 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-require_once __DIR__ . "/lib/variables.php";
-if (!MAINTENANCE) {
+require_once __DIR__ . "/lib/db.php";
+if (!app_setting('MAINTENANCE')) {
   header('Location: index.php');
 }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo APP_NAME; ?> - Manutenzione</title>
+    <title><?php echo app_setting('APP_NAME'); ?> - Manutenzione</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="./css/fonts.css">
@@ -33,9 +33,9 @@ if (!MAINTENANCE) {
 <body>
     <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-reset" href="index.php">
+            <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="index.php">
                 <i class="bi bi-clock"></i>&nbsp;
-                <?php echo APP_NAME; ?> <?php echo YEAR; ?>
+                <?php echo app_setting('APP_NAME'); ?> <?php echo app_setting('YEAR'); ?>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
@@ -61,7 +61,7 @@ if (!MAINTENANCE) {
                         <div class="mb-4">
                             <img src="assets/wip.jpg" alt="Manutenzione in corso..." class="img-fluid rounded shadow-sm" style="max-width: 320px;">
                         </div>
-                        <h1 class="fw-bold mb-3"><?php echo APP_NAME; ?></h1>
+                        <h1 class="fw-bold mb-3"><?php echo app_setting('APP_NAME'); ?></h1>
                         <div class="alert alert-warning shadow-sm border-0 p-3" role="alert">
                             <h5 class="alert-heading fw-bold mb-2"><i class="bi bi-tools me-2"></i> Manutenzione in corso</h5>
                             <p class="mb-0 fs-5">Il sito è momentaneamente in manutenzione, ci scusiamo per il disagio.</p>

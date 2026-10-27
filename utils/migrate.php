@@ -16,6 +16,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
+echo "Orario Scuola\n";
+echo "Copyright (C) 2025-" . date("Y") . " EmmeV Code. Rilasciato sotto licenza GNU AGPL 3.0.\n\n\n";
+
 if (PHP_SAPI !== 'cli') {
     fwrite(STDERR, "Questo script deve essere eseguito da CLI.\n");
     exit(1);
@@ -25,7 +28,7 @@ $yes = in_array('--yes', $argv, true);
 $help = in_array('--help', $argv, true) || in_array('-h', $argv, true);
 
 if ($help) {
-    echo "Migrazione in-place schema legacy -> schema nuovo (stesso database).\n\n";
+    echo "Migrazione del database all'ultima versione disponibile.\n\n";
     echo "Uso:\n";
     echo "  php utils/migrate.php --yes\n\n";
     echo "Opzioni:\n";
@@ -53,14 +56,15 @@ if (!defined('DB_HOST') || !defined('DB_USER') || !defined('DB_PASS') || !define
     exit(1);
 }
 
-if (!MAINTENANCE) {
-    fwrite(STDERR, "Errore: La modalità di manutenzione deve essere abilitata per eseguire la migrazione.\n");
-    exit(1);
-}
-
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
+load_application_settings($conn);
+
+if (!app_setting('MAINTENANCE')) {
+    fwrite(STDERR, "Errore: La modalità di manutenzione deve essere abilitata per eseguire la migrazione.\n");
+    exit(1);
+}
 
 try {
     echo "Connessione DB riuscita.\n";
@@ -69,27 +73,39 @@ try {
         throw new RuntimeException("La versione dello schema installata ({$installedVersion}) è già aggiornata.");
     }
 
-    echo "Versione schema rilevata: " . ($installedVersion === null ? 'non disponibile' : $installedVersion) . "\n";
+    if ($installedVersion === null) {
+        $installedVersion = 0;
+    }
+
+    echo "Versione schema rilevata: " . $installedVersion . "\n";
     echo "Versione schema richiesta: " . CURRENT_SCHEMA_VERSION . "\n";
 
-    $result = migrate_v1(
-        $conn,
-        dirname(__DIR__),
-        static function (string $message): void {
-            echo $message . PHP_EOL;
-        }
-    );
+    $result = null;
+    if ($installedVersion < 1) {
+        $result = migrate_v1(
+            $conn,
+            dirname(__DIR__),
+            static function (string $message): void {
+                echo $message . PHP_EOL;
+            }
+        );
+        $installedVersion = (int)$result['version'];
+        echo "Migrazione alla versione 1 completata con successo.";
+    }
+    if ($installedVersion < 2) {
+        $result = migrate_v2(
+            $conn,
+            dirname(__DIR__),
+            static function (string $message): void {
+                echo $message . PHP_EOL;
+            }
+        );
+        $installedVersion = (int)$result['version'];
+        echo "Migrazione alla versione 2 completata con successo.";
+    }
 
-    echo "Migrazione completata con successo.\n";
     echo "Versione schema: {$result['version']}\n";
-    echo "Tabelle legacy mantenute per rollback manuale:\n";
-    foreach ($result['backup_tables'] as $table) {
-        echo " - {$table}\n";
-    }
-    echo "Riepilogo record:\n";
-    foreach ($result['counts'] as $table => $count) {
-        echo " - {$table}: {$count}\n";
-    }
+    echo "Migrazione completata con successo.\n";
     exit(0);
 } catch (Throwable $error) {
     fwrite(STDERR, "Errore migrazione: {$error->getMessage()}\n");

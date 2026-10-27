@@ -29,18 +29,19 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     header("Location: migrate.php?backto=timetable.php");
     exit;
 }
 $initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
+$timetablePreferences = get_timetable_preferences($conn);
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo APP_NAME; ?> - Gestisci Orario</title>
+    <title><?php echo app_setting('APP_NAME'); ?> - Gestisci Orario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="../css/fonts.css">
@@ -80,15 +81,16 @@ $initial_class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
     <script>
         const CSRF_TOKEN = "<?php echo generate_csrf_token(); ?>";
         const INITIAL_CLASS_ID = <?php echo $initial_class_id; ?>;
+        const TIMETABLE_HOURS = <?php echo json_encode($timetablePreferences['TIMETABLE_HOURS'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
 </head>
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
       <div class="container-fluid">
-          <a class="navbar-brand fw-bold text-reset" href="index.php">
+          <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="index.php">
               <i class="bi bi-clock"></i>&nbsp;
-              <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
+            <?php echo app_setting('APP_NAME'); ?> <?php echo app_setting('YEAR'); ?> - Admin
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
               <span class="navbar-toggler-icon"></span>
@@ -200,10 +202,10 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Load initial data (classes and subjects)
     try {
         const [classesRes, subjectsRes, teachersRes, roomsRes] = await Promise.all([
-            fetch("../api/admin/classes.php", { signal: AbortSignal.timeout(3000) }),
-            fetch("../api/admin/subjects.php", { signal: AbortSignal.timeout(3000) }),
-            fetch("../api/admin/teachers.php", { signal: AbortSignal.timeout(3000) }),
-            fetch("../api/admin/rooms.php", { signal: AbortSignal.timeout(3000) })
+            fetch("../api/admin/classes.php", { signal: AbortSignal.timeout(10000) }),
+            fetch("../api/admin/subjects.php", { signal: AbortSignal.timeout(10000) }),
+            fetch("../api/admin/teachers.php", { signal: AbortSignal.timeout(10000) }),
+            fetch("../api/admin/rooms.php", { signal: AbortSignal.timeout(10000) })
         ]);
 
         if (!classesRes.ok || !subjectsRes.ok || !teachersRes.ok || !roomsRes.ok) {
@@ -246,15 +248,19 @@ document.addEventListener("DOMContentLoaded", async function() {
     async function loadClassTimetable(classId) {
         try {
             timetableForm.classList.add("d-none");
-            const res = await fetch(`../api/admin/timetable.php?class_id=${classId}`, { signal: AbortSignal.timeout(3000) });
+            const res = await fetch(`../api/admin/timetable.php?class_id=${classId}`, { signal: AbortSignal.timeout(10000) });
             if (!res.ok) throw new Error("Errore nel caricamento dell'orario.");
             const preselected = await res.json();
 
             // Build grid
             let html = "";
-            for (let hour = 1; hour <= 6; hour++) {
+            TIMETABLE_HOURS.forEach((hourDefinition, hourIndex) => {
+                const hour = hourIndex + 1;
                 html += `<tr>`;
-                html += `<td class="fw-bold bg-body-tertiary">${hour}ª ora</td>`;
+                html += `<td class="fw-bold bg-body-tertiary">
+                    <div>${escapeHtml(hourDefinition.label)}</div>
+                    <small class="text-body-secondary">${escapeHtml(hourDefinition.start)} - ${escapeHtml(hourDefinition.end)}</small>
+                </td>`;
                 days.forEach(day => {
                     const cellSubjects = preselected.filter(item => item.day === day && item.hour === hour);
                     
@@ -273,7 +279,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     </td>`;
                 });
                 html += `</tr>`;
-            }
+            });
 
             timetableGrid.innerHTML = html;
             timetableForm.classList.remove("d-none");
@@ -393,7 +399,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     "X-CSRF-Token": CSRF_TOKEN
                 },
                 body: JSON.stringify({ class_id: Number(classId), assignments }),
-                signal: AbortSignal.timeout(3000)
+                signal: AbortSignal.timeout(10000)
             });
 
             const responseText = await res.text();

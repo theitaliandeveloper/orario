@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 // Carica le variabili necessarie
-require __DIR__ . "/variables.php";
+require_once __DIR__ . "/variables.php";
 $host = DB_HOST;
 $user = DB_USER;
 $pass = DB_PASS;
@@ -30,4 +30,17 @@ if ($conn->connect_error) {
     else
         die("Connessione al database fallita!");
 }
+
+require_once __DIR__ . "/schema.php";
+load_application_settings($conn);
+
+ini_set('memory_limit', app_setting('PHP_MAX_RAM'));
+ini_set('session.gc_maxlifetime', app_setting('SESSION_LIFETIME'));
+session_set_cookie_params([
+    'lifetime' => app_setting('SESSION_LIFETIME'),
+    'path' => '/',
+    'domain' => '',
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 ?>

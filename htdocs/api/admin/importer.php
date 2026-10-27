@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 require_once __DIR__ . "/auth_check.php";
 require_once __DIR__ . "/../../lib/timetable_model.php";
 
-if (!defined('API_URL') || API_URL == "") {
+if (app_setting('API_URL') == "") {
     http_response_code(400);
     echo json_encode(["error" => "API_URL non configurato."]);
     exit;
@@ -55,7 +55,7 @@ if (!$classExists) {
 }
 
 try {
-    $baseUrl = rtrim(API_URL, '/');
+    $baseUrl = rtrim(app_setting('API_URL'), '/');
     $suffix = str_ends_with($baseUrl, "/orario") ? "" : "/orario";
     $url = $baseUrl . $suffix . "?classe=" . urlencode($classe_codice) . "&vouch_cookie=" . urlencode($vouch_cookie);
     

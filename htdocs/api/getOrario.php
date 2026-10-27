@@ -37,7 +37,7 @@ if (!in_array($type, ["classe", "docente", "laboratorio", "class", "teacher", "r
 }
 
 if ($dl == 1) {
-    if (PDF_EXPORT) {
+    if (app_setting('PDF_EXPORT')) {
         exportTimetablePDF($conn, $type, $id);
     } else {
         http_response_code(403);

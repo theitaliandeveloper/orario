@@ -29,7 +29,7 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit; }
 if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     header("Location: migrate.php?backto=about.php");
@@ -39,7 +39,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo APP_NAME; ?> - Informazioni sulla piattaforma</title>
+    <title><?php echo app_setting('APP_NAME'); ?> - Informazioni sulla piattaforma</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="../css/fonts.css">
@@ -50,9 +50,9 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
   <!-- Navbar -->
   <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
       <div class="container-fluid">
-          <a class="navbar-brand fw-bold text-reset" href="index.php">
+          <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="index.php">
               <i class="bi bi-clock"></i>&nbsp;
-              <?php echo APP_NAME; ?> <?php echo YEAR; ?> - Admin
+            <?php echo app_setting('APP_NAME'); ?> <?php echo app_setting('YEAR'); ?> - Admin
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
               <span class="navbar-toggler-icon"></span>
@@ -77,7 +77,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
     </div>
 
     <p class="lead text-secondary text-center mb-4">
-        Benvenuto nella pagina informativa di <strong><?php echo APP_NAME; ?></strong>. Qui puoi monitorare lo stato del database e i dettagli dell'ambiente di esecuzione.
+        Benvenuto nella pagina informativa di <strong><?php echo app_setting('APP_NAME'); ?></strong>. Qui puoi monitorare lo stato del database e i dettagli dell'ambiente di esecuzione.
     </p>
 
     <!-- Spinner while loading -->
@@ -90,7 +90,7 @@ if (schema_update_required($conn) && MANDATORY_SCHEMA_UPDATE) {
         <!-- Card Statistiche DB -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-body-tertiary fw-bold fs-5">
-                <i class="bi bi-database me-1 text-primary"></i> Statistiche del Database
+                <i class="bi bi-database me-1 text-primary"></i> Statistiche
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     const envBody = document.getElementById("env-body");
 
     try {
-        const res = await fetch("../api/admin/about.php",{ signal: AbortSignal.timeout(3000) });
+        const res = await fetch("../api/admin/about.php",{ signal: AbortSignal.timeout(10000) });
         if (!res.ok) throw new Error("Errore nel caricamento delle informazioni.");
         const d = await res.json();
 
@@ -181,9 +181,19 @@ document.addEventListener("DOMContentLoaded", async function() {
                 <td>Classi scolastiche registrate per le quali è possibile definire l'orario.</td>
             </tr>
             <tr>
-                <td class="fw-bold"><i class="bi bi-book me-2 text-primary"></i>Docenti / Materie</td>
+                <td class="fw-bold"><i class="bi bi-book me-2 text-primary"></i>Materie</td>
                 <td class="text-center"><span class="badge bg-primary fs-6">${d.subjectsCount}</span></td>
-                <td>Accoppiamenti di docenti, materie e relativi laboratori inseriti.</td>
+                <td>Numero di materie registrate.</td>
+            </tr>
+            <tr>
+                <td class="fw-bold"><i class="bi bi-person-badge me-2 text-primary"></i>Docenti</td>
+                <td class="text-center"><span class="badge bg-primary fs-6">${d.teachersCount}</span></td>
+                <td>Docenti registrati per i quali è possibile definire le ore di lezione.</td>
+            </tr>
+            <tr>
+                <td class="fw-bold"><i class="bi bi-flask me-2 text-primary"></i>Laboratori</td>
+                <td class="text-center"><span class="badge bg-primary fs-6">${d.labsCount}</span></td>
+                <td>Numero di laboratori inseriti.</td>
             </tr>
             <tr>
                 <td class="fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Ore Programmate</td>
@@ -193,7 +203,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         if (d.authType === 'local') {
             statsHtml += `
             <tr>
-                <td class="fw-bold"><i class="bi bi-people me-2 text-primary"></i>Utenti Admin</td>
+                <td class="fw-bold"><i class="bi bi-people me-2 text-primary"></i>Amministratori</td>
                 <td class="text-center"><span class="badge bg-primary fs-6">${d.adminsCount}</span></td>
                 <td>Utenti abilitati ad accedere alla dashboard di gestione di questa istanza.</td>
             </tr>`;

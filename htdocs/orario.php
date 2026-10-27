@@ -24,9 +24,9 @@ if (isset($_SESSION['discard_after']) && $now > $_SESSION['discard_after']) {
         session_start();
     }
 }
-$_SESSION['discard_after'] = $now + SESSION_LIFETIME;
+$_SESSION['discard_after'] = $now + app_setting('SESSION_LIFETIME');
 
-if (!isset($_SESSION['admin']) && MAINTENANCE) {
+if (!isset($_SESSION['admin']) && app_setting('MAINTENANCE')) {
     header("Location: manutenzione.php");
     exit;
 }
@@ -46,15 +46,37 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 <!DOCTYPE html>
 <html>
 <head>
-<title><?= APP_NAME ?> <?= YEAR ?></title>
+<title><?= app_setting('APP_NAME') ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./css/fonts.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 <style>
+    /* Desktop: colonne di larghezza uniforme */
+    #desktop-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
     #desktop-table th,
-    #desktop-table td,
+    #desktop-table td {
+        width: auto;
+        max-width: 1px;
+        padding: 0.5rem;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    /* Evita che contenuti molto lunghi allarghino la tabella */
+    #desktop-table th > *,
+    #desktop-table td > * {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
     #mobile-view .list-group-item,
     #mobile-view .subject,
     #mobile-view .teacher,
@@ -69,18 +91,29 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
         overflow-wrap: anywhere;
         word-break: break-word;
     }
+
+    @media (max-width: 767.98px) {
+        #mobile-view .timetable-break {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.2;
+        }
+    }
 </style>
 <script>
     const VIEW_TYPE = "<?php echo $view; ?>";
     const VIEW_ID = "<?php echo htmlspecialchars($id); ?>";
+    const APP_NAME = "<?php echo app_setting('APP_NAME'); ?>";
+    const YEAR = "<?php echo app_setting('YEAR'); ?>";
+    const SHOW_ORE_CATTEDRA = "<?php echo app_setting('SHOW_ORE_CATTEDRA'); ?>";
 </script>
 </head>
 <body>
 <nav class="navbar navbar-expand-md bg-primary shadow-sm rounded-bottom mb-4 px-3 text-light">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-reset" href="index.php">
+        <a class="navbar-brand fw-bold text-reset text-wrap text-break d-block" href="index.php">
             <i class="bi bi-clock"></i>&nbsp;
-            <?= APP_NAME ?> <?= YEAR ?>
+            <?= app_setting('APP_NAME') ?> <?= app_setting('YEAR') ?>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -91,7 +124,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
                     <a class="nav-link fw-bold text-reset" href="index.php"><i class="bi bi-house"></i> Home</a>
                 </li>
                 <li class="nav-item" id="pdf-export">
-                    <?php if (PDF_EXPORT):?>
+                    <?php if (app_setting('PDF_EXPORT')):?>
                         <a class="nav-link fw-bold text-reset" href="api/getOrario.php?type=<?= urlencode($view) ?>&id=<?= urlencode($id) ?>&dl=1" target="_blank" download><i class="bi bi-file-earmark-pdf"></i> Esporta PDF</a>
                     <?php endif;?>
                 </li>
@@ -100,7 +133,7 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
     </div>
 </nav>
 
-<h1 class="fw-bold text-center mt-5 mb-5" id="page-title"></h1>
+<h1 class="fw-bold text-center mt-3 mb-4" id="page-title"></h1>
 
 <!-- Desktop View -->
 <table class="table table-bordered table-striped-columns table-hover text-center d-none d-md-table" id="desktop-table">
@@ -112,23 +145,13 @@ if (!in_array($view, ['classe', 'docente', 'laboratorio'], true) || empty($id)) 
 
 <!-- Mobile View -->
 <div class="d-block d-md-none" id="mobile-view"></div>
+<h6 class="text-center text-secondary-emphasis mt-2 mb-5" id="page-hours"></h6>
 
-<footer class="text-center text-body-secondary small mt-5 mb-3">
-        Copyright &copy; 2025-<?php echo date("Y"); ?>
-        EmmeV. Rilasciato sotto
-        <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt"
-            target="_blank"
-            class="fw-bold text-decoration-none">
-            Licenza GNU AGPL 3.0
-        </a>.
-        <br>
-        Codice sorgente disponibile su
-        <a href="https://git.vichingo455.com/emmev-code/orario"
-            target="_blank"
-            class="fw-bold text-decoration-none">
-            Gitea
-        </a>.
-    </footer>
+<footer class="text-center text-body-secondary small mt-3 mb-3">
+    Copyright &copy; 2025-<?php echo date("Y"); ?> EmmeV. Rilasciato sotto <a href="https://git.vichingo455.com/emmev-code/orario/src/branch/stable/LICENSE.txt" target="_blank" class="fw-bold text-decoration-none">Licenza GNU AGPL 3.0</a>.
+    <br>
+    Codice sorgente disponibile su <a href="https://git.vichingo455.com/emmev-code/orario" target="_blank" class="fw-bold text-decoration-none">Gitea</a>.
+</footer>
 
 <script src="js/orario.js"></script>
 <script src="js/theme.js"></script>
