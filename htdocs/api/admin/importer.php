@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
@@ -17,6 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . "/auth_check.php";
+require_once __DIR__ . "/../../lib/redis.php";
 require_once __DIR__ . "/../../lib/timetable_model.php";
 
 if (app_setting('API_URL') == "") {
@@ -186,6 +187,7 @@ try {
         }
 
         $conn->commit();
+        redis_invalidate_occupancy_cache();
         $materie_create = array_keys($materie_create);
         $docenti_create = array_keys($docenti_create);
         $laboratori_create = array_keys($laboratori_create);

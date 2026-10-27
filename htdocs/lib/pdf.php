@@ -22,7 +22,7 @@ require_once __DIR__ . "/misc.php";
 require_once __DIR__ . "/timetable_model.php";
 
 
-function exportTimetablePDF(mysqli $conn, string $type, $identifier): void
+function exportTimetablePDF(mysqli $conn, string $type, $identifier, bool $returnContent = false, ?string &$returnedContent = null): void
 {
     $days = array_values(timetable_day_map());
     $timetablePreferences = get_timetable_preferences($conn);
@@ -670,6 +670,12 @@ function _renderPDF(string $title, string $filename, array $days, array $hours, 
     // =============================================================
     // OUTPUT
     // =============================================================
+
+    if ($returnContent) {
+        $content = call_user_func([$pdf, 'Output'], 'S');
+        $returnedContent = is_string($content) ? $content : null;
+        return;
+    }
 
     $pdf->Output('I', $filename);
     exit;

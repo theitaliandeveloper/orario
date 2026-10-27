@@ -63,85 +63,39 @@ function updateCurrentTime() {
     window.setTimeout(updateCurrentTime, 1000 - now.getMilliseconds());
 }
 
-function getCurrentTeacherSlot(schedule, now = new Date()) {
-    const dayNames = ["", "Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi", "Sabato"];
-    const dayName = dayNames[now.getDay()];
-    if (!dayName) return null;
+async function updateCurrentOccupancy() {
+    try {
+        const response = await fetch("api/getCurrentOccupancy.php", {
+            signal: AbortSignal.timeout(10000)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const hours = schedule.timetable_hours || [];
-    const currentHour = hours.findIndex(hour => {
-        const start = parseTime(hour.start);
-        const end = parseTime(hour.end);
-        return start !== null && end !== null && currentMinutes >= start && currentMinutes < end;
-    });
-
-    if (currentHour < 0) return null;
-
-    const dayTimetable = schedule.timetable?.[dayName] || {};
-    const slot = dayTimetable[currentHour + 1];
-    if (!slot || (!slot.subject && !(slot.classes || []).length)) return null;
-    return slot;
-}
-
-async function updateTeacherPositions(teacherNames) {
-    const now = new Date();
-    await Promise.all(teacherNames.map(async teacher => {
-        const positionElement = [...document.querySelectorAll("[data-teacher-position]")]
-            .find(element => element.dataset.teacherPosition === teacher);
-        if (!positionElement) return;
-
-        try {
-            const response = await fetch(`api/getOrario.php?type=docente&id=${encodeURIComponent(teacher)}`, {
-                signal: AbortSignal.timeout(10000)
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const schedule = await response.json();
-            const slot = getCurrentTeacherSlot(schedule, now);
-            if (!slot) {
-                positionElement.textContent = "Nessuna lezione in corso";
+        const occupancy = await response.json();
+        document.querySelectorAll("[data-teacher-position]").forEach(element => {
+            const teacher = occupancy.teachers?.[element.dataset.teacherPosition];
+            if (!teacher) {
+                element.textContent = "Nessuna lezione in corso";
                 return;
             }
 
-            const places = [...(slot.classes || []), ...(slot.rooms || [])];
-            positionElement.textContent = places.length
+            const places = [...(teacher.classes || []), ...(teacher.rooms || [])];
+            element.textContent = places.length
                 ? `Adesso: ${places.join(" • ")}`
                 : "Lezione in corso";
-        } catch (error) {
-            console.error(`Errore nel caricamento della posizione di ${teacher}`, error);
-            positionElement.textContent = "";
-        }
-    }));
-}
+        });
 
-async function updateLabOccupancy(labs) {
-    const now = new Date();
-    await Promise.all(labs.map(async lab => {
-        const occupancyElement = [...document.querySelectorAll("[data-lab-occupancy]")]
-            .find(element => element.dataset.labOccupancy === lab);
-        if (!occupancyElement) return;
-
-        try {
-            const response = await fetch(`api/getOrario.php?type=laboratorio&id=${encodeURIComponent(lab)}`, {
-                signal: AbortSignal.timeout(10000)
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const schedule = await response.json();
-            const slot = getCurrentTeacherSlot(schedule, now);
-            const classes = [...new Set((slot?.classes || [])
-                .map(item => item.class)
-                .filter(Boolean))];
-
-            occupancyElement.textContent = classes.length
+        document.querySelectorAll("[data-lab-occupancy]").forEach(element => {
+            const classes = occupancy.rooms?.[element.dataset.labOccupancy] || [];
+            element.textContent = classes.length
                 ? `In uso da ${joinWithAnd(classes)}`
                 : "Nessuna classe presente";
-        } catch (error) {
-            console.error(`Errore nel caricamento dell'occupazione di ${lab}`, error);
-            occupancyElement.textContent = "";
-        }
-    }));
+        });
+    } catch (error) {
+        console.error("Errore nel caricamento dell'occupazione corrente", error);
+        document.querySelectorAll("[data-teacher-position], [data-lab-occupancy]").forEach(element => {
+            element.textContent = "";
+        });
+    }
 }
 
 document.addEventListener("DOMContentLoaded", async function() {
@@ -180,8 +134,6 @@ document.addEventListener("DOMContentLoaded", async function() {
                      </div></div></div>`;
             });
             document.getElementById("teachers-container").innerHTML = html;
-            updateTeacherPositions(visibleTeachers);
-            setInterval(() => updateTeacherPositions(visibleTeachers), 60000);
         } catch (e) { console.error("Error loading teachers", e); }
 
         // Fetch Labs
@@ -197,8 +149,8 @@ document.addEventListener("DOMContentLoaded", async function() {
                          </div></div></div>`;
             });
             document.getElementById("labs-container").innerHTML = html;
-            updateLabOccupancy(labs);
-            setInterval(() => updateLabOccupancy(labs), 60000);
+            updateCurrentOccupancy();
+            setInterval(updateCurrentOccupancy, 60000);
         } catch (e) { console.error("Error loading labs", e); }
     });
 

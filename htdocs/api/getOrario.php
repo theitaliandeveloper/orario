@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
-require_once __DIR__ . "/../lib/db.php";
+require_once __DIR__ . "/../lib/redis.php";
 require_once __DIR__ . "/../lib/json.php";
 require_once __DIR__ . "/../lib/pdf.php";
 
@@ -37,12 +37,35 @@ if (!in_array($type, ["classe", "docente", "laboratorio", "class", "teacher", "r
 }
 
 if ($dl == 1) {
+    require_once __DIR__ . "/../lib/db.php";
     if (app_setting('PDF_EXPORT')) {
-        exportTimetablePDF($conn, $type, $id);
+        $pdfCacheKey = redis_timetable_cache_key($type, $id) . ':pdf';
+        $pdfContent = redis_get_cached($pdfCacheKey);
+        if ($pdfContent === null) {
+            exportTimetablePDF($conn, $type, $id, true, $pdfContent);
+            if ($pdfContent !== null) {
+                redis_set_cached($pdfCacheKey, $pdfContent, 3600);
+            }
+        }
+
+        if ($pdfContent !== null) {
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: inline; filename="orario.pdf"');
+            echo $pdfContent;
+        }
     } else {
         http_response_code(403);
         echo json_encode(["error" => "PDF exporting is disabled in this instance."]);
     }
 } else {
+    $cacheKey = redis_timetable_cache_key($type, $id);
+    $cached = redis_get_cached($cacheKey);
+    if ($cached !== null) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo $cached;
+        exit;
+    }
+
+    require_once __DIR__ . "/../lib/db.php";
     exportTimetableJSON($conn, $type, $id);
 }

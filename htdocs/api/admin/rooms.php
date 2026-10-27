@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/auth_check.php";
+require_once __DIR__ . "/../../lib/redis.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $res = $conn->query("SELECT id, name FROM rooms ORDER BY name ASC");
@@ -40,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare("INSERT INTO rooms (name) VALUES (?)");
     $stmt->bind_param('s', $name);
     if ($stmt->execute()) {
+        redis_invalidate_occupancy_cache();
         echo json_encode(['success' => true, 'id' => $conn->insert_id]);
     } else {
         http_response_code($conn->errno === 1062 ? 409 : 500);
@@ -59,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $stmt = $conn->prepare("UPDATE rooms SET name = ? WHERE id = ?");
     $stmt->bind_param('si', $name, $id);
     if ($stmt->execute()) {
+        redis_invalidate_occupancy_cache();
         echo json_encode(['success' => true]);
     } else {
         http_response_code($conn->errno === 1062 ? 409 : 500);
@@ -89,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $stmt = $conn->prepare("DELETE FROM rooms WHERE id = ?");
     $stmt->bind_param('i', $id);
     if ($stmt->execute()) {
+        redis_invalidate_occupancy_cache();
         echo json_encode(['success' => true]);
     } else {
         http_response_code(500);

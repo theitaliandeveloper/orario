@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
@@ -223,6 +223,13 @@ document.addEventListener("DOMContentLoaded", async function() {
             ? `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Versione ${sanifiedSchemaVersion} (aggiornata)</span>`
             : `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Versione ${sanifiedSchemaVersion} (non aggiornata)</span>`;
         const schemaVersionLabel = d.schemaVersion === null ? 'N/D' : d.schemaVersion;
+        const redisBadge = {
+            connected: `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Connesso</span>`,
+            unavailable: `<span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Non disponibile</span>`,
+            extension_missing: `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Estensione PHP mancante</span>`,
+            configuration_missing: `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Configurazione mancante</span>`,
+            disabled: `<span class="badge bg-secondary"><i class="bi bi-slash-circle"></i> Disabilitato</span>`
+        }[d.redis.status] || `<span class="badge bg-secondary">Stato sconosciuto</span>`;
 
         envBody.innerHTML = `
             <tr>
@@ -232,6 +239,10 @@ document.addEventListener("DOMContentLoaded", async function() {
             <tr>
                 <td class="fw-semibold"><i class="bi bi-tools"></i> Modalità Manutenzione</td>
                 <td>${maintBadge}</td>
+            </tr>
+            <tr>
+                <td class="fw-semibold"><i class="bi bi-lightning-charge"></i> Redis</td>
+                <td>${redisBadge}</td>
             </tr>
             <tr>
                 <td class="fw-semibold"><i class="bi bi-terminal"></i> Versione di PHP</td>

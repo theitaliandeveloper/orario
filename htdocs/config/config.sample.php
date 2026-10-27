@@ -29,6 +29,23 @@ if (!defined('DB_NAME')) {
     define('DB_NAME', 'school_timetable'); // Nome del database, non modificare se non sai cosa stai facendo.
 }
 
+// Impostazioni Redis
+if (!defined('REDIS_ENABLED')) {
+    define('REDIS_ENABLED', false); // Imposta false per disabilitare la cache Redis.
+}
+if (!defined('REDIS_HOST')) {
+    define('REDIS_HOST', '<REDIS_HOST>'); // Host Redis.
+}
+if (!defined('REDIS_PORT')) {
+    define('REDIS_PORT', 6379); // Porta Redis.
+}
+if (!defined('REDIS_PASSWORD')) {
+    define('REDIS_PASSWORD', ''); // Lascia vuoto se Redis non richiede autenticazione.
+}
+if (!defined('REDIS_TIMEOUT')) {
+    define('REDIS_TIMEOUT', 0.5); // Timeout di connessione in secondi.
+}
+
 // Decommenta per abilitare la pagina di reset delle preferenze alle impostazioni di fabbrica.
 // Usare solo in caso di problemi con le impostazioni attuali
 /*if (!defined('FACTORY_RESET')) {

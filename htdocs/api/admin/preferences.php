@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 require_once __DIR__ . "/auth_check.php";
+require_once __DIR__ . "/../../lib/redis.php";
 require_once __DIR__ . "/../../lib/schema.php";
 
 if ($_SESSION['admin'] !== 'admin' && $_SESSION['auth_type'] !== 'oidc') {
@@ -173,6 +174,7 @@ try {
     }
     $stmt->close();
     $conn->commit();
+    redis_invalidate_occupancy_cache();
     load_application_settings($conn);
     echo json_encode(['success' => true]);
 } catch (Throwable $error) {

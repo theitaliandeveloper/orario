@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
@@ -18,6 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 require_once __DIR__ . "/auth_check.php";
 require_once __DIR__ . "/../../lib/schema.php";
+require_once __DIR__ . "/../../lib/redis.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -65,6 +66,22 @@ $memoryLimit = ini_get('memory_limit');
 $extensions = get_loaded_extensions();
 natcasesort($extensions);
 
+$redisConfigured = defined('REDIS_ENABLED');
+$redisEnabled = $redisConfigured && REDIS_ENABLED;
+$redisStatus = $redisConfigured ? 'disabled' : 'configuration_missing';
+if ($redisEnabled) {
+    if (!class_exists('Redis')) {
+        $redisStatus = 'extension_missing';
+    } else {
+        try {
+            $redis = redis_connection();
+            $redisStatus = $redis && $redis->ping() ? 'connected' : 'unavailable';
+        } catch (Throwable $exception) {
+            $redisStatus = 'unavailable';
+        }
+    }
+}
+
 echo json_encode([
     'classesCount' => $classesCount,
     'subjectsCount' => $subjectsCount,
@@ -84,6 +101,12 @@ echo json_encode([
     'sessionLifetime' => app_setting('SESSION_LIFETIME'),
     'version' => VERSION,
     'maintenance' => app_setting('MAINTENANCE'),
+    'redis' => [
+        'enabled' => $redisEnabled,
+        'status' => $redisStatus,
+        'host' => defined('REDIS_HOST') ? REDIS_HOST : 'N/D',
+        'port' => defined('REDIS_PORT') ? REDIS_PORT : 'N/D'
+    ],
     'extensions' => array_values($extensions)
 ]);
 exit;
