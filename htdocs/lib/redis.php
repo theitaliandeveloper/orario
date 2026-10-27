@@ -28,15 +28,19 @@ function redis_connection(): ?Redis
     }
     $attempted = true;
 
-    if (!REDIS_ENABLED || !class_exists('Redis')) {
+    if (!defined('REDIS_ENABLED') || !REDIS_ENABLED || !class_exists('Redis')) {
         return null;
     }
 
     try {
         $redis = new Redis();
-        $redis->connect(REDIS_HOST, REDIS_PORT, REDIS_TIMEOUT);
-        if (REDIS_PASSWORD !== '') {
-            $redis->auth(REDIS_PASSWORD);
+        $host = defined('REDIS_HOST') ? REDIS_HOST : '127.0.0.1';
+        $port = defined('REDIS_PORT') ? REDIS_PORT : 6379;
+        $timeout = defined('REDIS_TIMEOUT') ? REDIS_TIMEOUT : 0.5;
+        $password = defined('REDIS_PASSWORD') ? REDIS_PASSWORD : '';
+        $redis->connect($host, $port, $timeout);
+        if ($password !== '') {
+            $redis->auth($password);
         }
         return $redis;
     } catch (Throwable $exception) {

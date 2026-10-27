@@ -66,8 +66,10 @@ $memoryLimit = ini_get('memory_limit');
 $extensions = get_loaded_extensions();
 natcasesort($extensions);
 
-$redisStatus = 'disabled';
-if (REDIS_ENABLED) {
+$redisConfigured = defined('REDIS_ENABLED');
+$redisEnabled = $redisConfigured && REDIS_ENABLED;
+$redisStatus = $redisConfigured ? 'disabled' : 'configuration_missing';
+if ($redisEnabled) {
     if (!class_exists('Redis')) {
         $redisStatus = 'extension_missing';
     } else {
@@ -100,10 +102,10 @@ echo json_encode([
     'version' => VERSION,
     'maintenance' => app_setting('MAINTENANCE'),
     'redis' => [
-        'enabled' => REDIS_ENABLED,
+        'enabled' => $redisEnabled,
         'status' => $redisStatus,
-        'host' => REDIS_HOST,
-        'port' => REDIS_PORT
+        'host' => defined('REDIS_HOST') ? REDIS_HOST : 'N/D',
+        'port' => defined('REDIS_PORT') ? REDIS_PORT : 'N/D'
     ],
     'extensions' => array_values($extensions)
 ]);

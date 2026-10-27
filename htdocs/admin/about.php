@@ -227,6 +227,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             connected: `<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Connesso</span>`,
             unavailable: `<span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Non disponibile</span>`,
             extension_missing: `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Estensione PHP mancante</span>`,
+            configuration_missing: `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Configurazione mancante</span>`,
             disabled: `<span class="badge bg-secondary"><i class="bi bi-slash-circle"></i> Disabilitato</span>`
         }[d.redis.status] || `<span class="badge bg-secondary">Stato sconosciuto</span>`;
 
