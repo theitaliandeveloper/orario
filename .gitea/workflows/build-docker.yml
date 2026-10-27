@@ -30,7 +30,7 @@ jobs:
           SHORT_HASH: ${{ github.sha }}
         run: |
           # Build the image with the commit hash tag
-          docker build --no-cache --platform linux/amd64,linux/arm64 --build-arg BUILD_IDENTIFIER=${SHORT_HASH:0:5} -t ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} .
+          docker build --platform linux/amd64,linux/arm64 --build-arg BUILD_IDENTIFIER=${SHORT_HASH:0:5} -t ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} .
 
           # Tag the same image as "latest"
           docker tag ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}-${SHORT_HASH:0:5} ${{ vars.DEFAULT_REGISTRY }}/emmev-code/orario:${BRANCH_NAME}
