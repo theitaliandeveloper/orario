@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Orario Scuola, Copyright (C) 2025-2026 EmmeV.
 
