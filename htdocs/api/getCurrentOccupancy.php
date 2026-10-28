@@ -17,6 +17,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . "/../lib/redis.php";
+require_once __DIR__ . "/../lib/misc.php";
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -125,7 +126,7 @@ if ($currentHour !== null) {
     $rooms = [];
     while ($row = $result->fetch_assoc()) {
         $className = trim((string)$row['class_name']);
-        $teacherName = trim((string)$row['teacher_name']);
+        $teacherName = normalise_string(trim((string)$row['teacher_name']));
         $roomName = trim((string)$row['room_name']);
 
         if ($teacherName !== '') {
