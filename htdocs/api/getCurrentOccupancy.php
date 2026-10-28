@@ -131,8 +131,10 @@ if ($currentHour !== null) {
 
         if ($teacherName !== '') {
             $teachers[$teacherName]['classes'][$className] = true;
+            $teachers[$teacherName]['lessons'][$className] ??= [];
             if ($roomName !== '') {
                 $teachers[$teacherName]['rooms'][$roomName] = true;
+                $teachers[$teacherName]['lessons'][$className][$roomName] = true;
             }
         }
         if ($roomName !== '') {
@@ -142,9 +144,17 @@ if ($currentHour !== null) {
     $stmt->close();
 
     foreach ($teachers as $teacherName => $teacherData) {
+        $lessons = [];
+        foreach ($teacherData['lessons'] ?? [] as $className => $rooms) {
+            $lessons[] = [
+                'class' => $className,
+                'rooms' => occupancy_list($rooms)
+            ];
+        }
         $response['teachers'][$teacherName] = [
             'classes' => occupancy_list($teacherData['classes'] ?? []),
-            'rooms' => occupancy_list($teacherData['rooms'] ?? [])
+            'rooms' => occupancy_list($teacherData['rooms'] ?? []),
+            'lessons' => $lessons
         ];
     }
     foreach ($rooms as $roomName => $classes) {

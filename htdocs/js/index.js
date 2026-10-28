@@ -78,9 +78,15 @@ async function updateCurrentOccupancy() {
                 return;
             }
 
-            const places = [...(teacher.classes || []), ...(teacher.rooms || [])];
+            const lessons = teacher.lessons || [];
+            const places = lessons.map(lesson => {
+                const rooms = lesson.rooms || [];
+                return rooms.length
+                    ? `${lesson.class} (${rooms.join(", ")})`
+                    : lesson.class;
+            });
             element.textContent = places.length
-                ? `Adesso: ${places.join(" • ")}`
+                ? `In ${joinWithAnd(places)}`
                 : "Lezione in corso";
         });
 
