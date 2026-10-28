@@ -17,10 +17,20 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
 require_once __DIR__ . "/../lib/redis.php";
+require_once __DIR__ . "/../lib/misc.php";
 
 header('Content-Type: application/json; charset=utf-8');
 
-$cacheKey = 'homepage:occupancy:v' . redis_occupancy_version() . ':' . date('Y-m-d-H-i');
+$timezoneName = defined('APP_TIMEZONE') ? APP_TIMEZONE : 'Europe/Rome';
+try {
+    $timezone = new DateTimeZone($timezoneName);
+} catch (Throwable $exception) {
+    error_log('Timezone applicativo non valido: ' . $exception->getMessage());
+    $timezone = new DateTimeZone('Europe/Rome');
+}
+$now = new DateTimeImmutable('now', $timezone);
+
+$cacheKey = 'homepage:occupancy:v' . redis_occupancy_version() . ':' . $now->format('Y-m-d-H-i');
 $redis = redis_connection();
 
 if ($redis) {
@@ -53,7 +63,7 @@ function occupancy_list(array $values): array
 }
 
 $preferences = get_timetable_preferences($conn);
-$nowSeconds = ((int)date('G') * 3600) + ((int)date('i') * 60) + (int)date('s');
+$nowSeconds = ((int)$now->format('G') * 3600) + ((int)$now->format('i') * 60) + (int)$now->format('s');
 $currentPeriod = null;
 $currentHour = null;
 
@@ -95,7 +105,7 @@ $response = [
 ];
 
 if ($currentHour !== null) {
-    $day = (int)date('N');
+    $day = (int)$now->format('N');
     $stmt = $conn->prepare(
         "SELECT c.name AS class_name, t.name AS teacher_name, r.name AS room_name
          FROM timetable_slots ts
@@ -116,13 +126,15 @@ if ($currentHour !== null) {
     $rooms = [];
     while ($row = $result->fetch_assoc()) {
         $className = trim((string)$row['class_name']);
-        $teacherName = trim((string)$row['teacher_name']);
+        $teacherName = normalise_string(trim((string)$row['teacher_name']));
         $roomName = trim((string)$row['room_name']);
 
         if ($teacherName !== '') {
             $teachers[$teacherName]['classes'][$className] = true;
+            $teachers[$teacherName]['lessons'][$className] ??= [];
             if ($roomName !== '') {
                 $teachers[$teacherName]['rooms'][$roomName] = true;
+                $teachers[$teacherName]['lessons'][$className][$roomName] = true;
             }
         }
         if ($roomName !== '') {
@@ -132,9 +144,17 @@ if ($currentHour !== null) {
     $stmt->close();
 
     foreach ($teachers as $teacherName => $teacherData) {
+        $lessons = [];
+        foreach ($teacherData['lessons'] ?? [] as $className => $rooms) {
+            $lessons[] = [
+                'class' => $className,
+                'rooms' => occupancy_list($rooms)
+            ];
+        }
         $response['teachers'][$teacherName] = [
             'classes' => occupancy_list($teacherData['classes'] ?? []),
-            'rooms' => occupancy_list($teacherData['rooms'] ?? [])
+            'rooms' => occupancy_list($teacherData['rooms'] ?? []),
+            'lessons' => $lessons
         ];
     }
     foreach ($rooms as $roomName => $classes) {

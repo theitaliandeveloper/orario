@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 // Queste variabili sono per sviluppatori
 if (!defined('VERSION')) {
-    define('VERSION', '3.1.1'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
+    define('VERSION', '3.1.2'); // deve essere "dev" per la versione di sviluppo oppure X.Y.Z per la versione stabile.
 }
 
 if (!defined('DEV_MODE')) {
@@ -30,6 +30,8 @@ if (!DEV_MODE) {
 } else {
     ini_set('error_reporting','E_ALL'); // In development show everything
 }
+
+define('APP_TIMEZONE', 'Europe/Rome');
 
 // Configurazione dell'utente
 require __DIR__ . "/../config/config.php";
