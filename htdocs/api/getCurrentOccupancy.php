@@ -145,10 +145,10 @@ if ($currentHour !== null) {
 
     foreach ($teachers as $teacherName => $teacherData) {
         $lessons = [];
-        foreach ($teacherData['lessons'] ?? [] as $className => $rooms) {
+        foreach ($teacherData['lessons'] ?? [] as $className => $lessonRooms) {
             $lessons[] = [
                 'class' => $className,
-                'rooms' => occupancy_list($rooms)
+                'rooms' => occupancy_list($lessonRooms)
             ];
         }
         $response['teachers'][$teacherName] = [
