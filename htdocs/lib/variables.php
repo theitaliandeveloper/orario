@@ -31,6 +31,8 @@ if (!DEV_MODE) {
     ini_set('error_reporting','E_ALL'); // In development show everything
 }
 
+define('APP_TIMEZONE', 'Europe/Rome');
+
 // Configurazione dell'utente
 require __DIR__ . "/../config/config.php";
 ?>
